@@ -14,8 +14,8 @@ Hi, I'm Rafia Gul! I am a Computer Science student currently specializing in the
 
 | Day        | Topic                   | Deliverables & Screenshots | Status       |
 | :----------| :-----------------------| :--------------------------| :------------|
-| **Day 1**  |AI Personality Portfolio | [Day 1 Folder](./Day-01/)  | ✅ Completed | 
-| **Day 2**  |                         |                            | ⏳ Upcoming  |
+| **Day 1**  |AI Personality Portfolio | [Day 1 Folder](./Day-1/)   | ✅ Completed | 
+| **Day 2**  |Prompt Engineering       | [Day 2 Folder](./Day-2/)   | ✅ Completed  |
 
 ---
 *Follow along as I push updates every single day!*
