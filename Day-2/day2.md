@@ -22,7 +22,7 @@ Today, I designed a minimal, Claude-inspired LinkedIn post concept (1080x1080) u
 
 The visual screenshot of today's prompt design and workflow with Claude is attached below:
 
-![Prompt Engineering Workflow](./screenshot.png)
+![Prompt Engineering Workflow](./day-2.png)
 
 ---
 *Day 2 successfully completed! Learning how to guide the AI step-by-step is already changing how I approach problem-solving.*
