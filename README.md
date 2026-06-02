@@ -10,7 +10,7 @@ Hi, I'm Rafia Gul! I am a Computer Science student currently specializing in the
 * Integrate AI workflows into full-stack web engineering projects.
 * Document my progress daily to build a consistent "Learning in Public" habit.
 
-## 📅 Daily Progress Log
+##  Daily Progress Log
 
 | Day        | Topic                   | Deliverables & Screenshots | Status       |
 | :----------| :-----------------------| :--------------------------| :------------|
