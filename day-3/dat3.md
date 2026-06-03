@@ -35,4 +35,4 @@ As captured below in `image_1df6c5.png`, the extension dynamically tracks real-t
 ![Claude Usage Counter Configuration](./tracker.png)
 
 ---
-(./day-3.png)
+![](./day-3.png)
