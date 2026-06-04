@@ -8,7 +8,7 @@ Today's challenge focused on **Chain-of-Thought (CoT) Prompting**—instructing 
 ##  Visual Career Roadmap
 The complete structured plan, skill gap analysis, and monthly milestones were compiled into an executive infographic.
 
->  **Artifact Reference:** The generated high-fidelity roadmap is saved in this directory as `day-4.jpg`.
+>  **Artifact Reference:** The generated high-fidelity roadmap is saved as ![day4](day-4.png).
 
 ---
 
