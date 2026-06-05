@@ -8,7 +8,7 @@ This project compares two different approaches to generating a 30-day learning r
 
 ##  Roadmap Comparison: Minimal vs. Context-Rich
 
-We compared two distinct prompts to see how adding context changes the AI's response. The complete breakdown based on the visual infographic in `day-5.png` is detailed below.
+We compared two distinct prompts to see how adding context changes the AI's response. The complete breakdown based on the visual infographic in ![](day-5.png) is detailed below.
 
 ### 1. The Prompts Used
 
