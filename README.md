@@ -19,6 +19,7 @@ Hi, I'm Rafia Gul! I am a Computer Science student currently specializing in the
 | **Day 3**  |Role-Based-Promping      | [Day 3 Folder](./Day-3/)   |  Completed |
 | **Day 4**  |AI Career Roadmap        | [Day 4 Folder](./Day-4/)   |  Completed |
 | **Day 5**  |Context Engineering      | [Day 5 Folder](./Day-5/)   |  Completed  |
+| **Day 6**  |AI Resume Optimization    | [Day 6 Folder](./Day-6/)   |  Completed  |
 
 ---
 
