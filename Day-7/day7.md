@@ -39,4 +39,4 @@ AI Model Selection
 Research & Analysis
 
 ---
-![](day7.png)
+![](day-7.png)
