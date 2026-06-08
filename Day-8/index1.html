@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Environmental Health Analyzer</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col selection:bg-teal-500 selection:text-slate-900">
+
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 px-4 lg:px-8 py-4 flex flex-wrap justify-between items-center gap-4">
+        <div class="flex items-center space-x-3">
+            <div class="p-2.5 bg-gradient-to-tr from-teal-500 to-emerald-600 rounded-xl shadow-lg shadow-teal-500/20">
+                <i class="fa-solid fa-earth-asia text-xl text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">EcoShield</h1>
+                <p class="text-xs text-slate-400 font-medium">Personal Environmental Health Analyzer</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-xs font-semibold px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-full text-slate-300 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Live Data: June 2026
+            </span>
+            <button onclick="window.print()" class="text-xs bg-slate-800 border border-slate-700 hover:bg-slate-700 px-4 py-1.5 rounded-lg font-medium transition cursor-pointer">
+                <i class="fa-solid fa-download mr-1.5"></i> Export Report
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 p-4 lg:p-8 max-w-[1600px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <section class="lg:col-span-4 flex flex-col gap-6">
+            
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <h2 class="text-sm font-semibold tracking-wider text-slate-400 uppercase mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-teal-400"></i> Control Deck
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1.5">Selected Location/Focus</label>
+                        <select id="citySelector" onchange="updateDashboard(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:border-teal-500 transition text-slate-200">
+                            <option value="Nowshera">Nowshera (Current Location)</option>
+                            <option value="Peshawar">Peshawar (Regional Hub)</option>
+                            <option value="Islamabad">Islamabad (Capital)</option>
+                            <option value="Rawalpindi">Rawalpindi (Twin City)</option>
+                            <option value="Lahore">Lahore (Metropolitan)</option>
+                            <option value="Karachi">Karachi (Coastal)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1.5">Active Metric Filter</label>
+                        <select id="pollutantSelector" onchange="filterCharts(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:border-teal-500 transition text-slate-200">
+                            <option value="all">Display All Components</option>
+                            <option value="aqi">Air Quality Index Only</option>
+                            <option value="pm25">PM2.5 Micro-particles</option>
+                            <option value="pm10">PM10 Coarse Matter</option>
+                        </select>
+                    </div>
+                    <div id="compareBanner" class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-teal-400 text-sm"></i>
+                        <span>Comparing against 6 cross-regional benchmark stations.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex-1 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-sm font-semibold tracking-wider text-slate-400 uppercase mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-amber-400"></i> Environmental Insights
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl">
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-emerald-400 block mb-1">Top Cleanest In Set</span>
+                            <p class="text-xs text-slate-300 font-medium">1. Nowshera (77 AQI) &bull; 2. Islamabad (104 AQI) &bull; 3. Karachi (109 AQI)</p>
+                        </div>
+                        <div class="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl">
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-rose-400 block mb-1">Highest Pollution Footprint</span>
+                            <p class="text-xs text-slate-300 font-medium">1. Lahore (137 AQI) &bull; 2. Rawalpindi (121 AQI) &bull; 3. Peshawar (106 AQI)</p>
+                        </div>
+                        <div class="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl">
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-amber-400 block mb-1">Identified Data Anomaly</span>
+                            <p class="text-xs text-slate-400 leading-relaxed">Nowshera displays significantly lower particulate metrics than contiguous urban belts due to favorable microclimatic winds near the Kabul River valley basin despite industrial zones nearby.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-slate-800">
+                    <span class="text-[10px] text-slate-500 font-mono block">Data Citations: Satellite-Derived Model Networks, IQAir Earth Hub, KP-EPA Regional Stations & Hydrological Ground Surveys (June 2026).</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="lg:col-span-8 flex flex-col gap-6">
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-md">
+                    <span class="text-xs font-medium text-slate-400 block mb-1">Avg Dataset AQI</span>
+                    <div class="text-2xl font-bold text-white tracking-tight">109</div>
+                    <span class="text-[10px] text-slate-500 font-medium">Unhealthy-Sensitive Base</span>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-md">
+                    <span class="text-xs font-medium text-slate-400 block mb-1">Peak AQI City</span>
+                    <div class="text-2xl font-bold text-rose-400 tracking-tight">Lahore</div>
+                    <span class="text-[10px] text-rose-500/80 font-medium"><i class="fa-solid fa-triangle-exclamation"></i> 137 Index Units</span>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-md">
+                    <span class="text-xs font-medium text-slate-400 block mb-1">Cleanest City</span>
+                    <div class="text-2xl font-bold text-emerald-400 tracking-tight">Nowshera</div>
+                    <span class="text-[10px] text-emerald-500 font-medium"><i class="fa-solid fa-circle-check"></i> 77 Index Units</span>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-md">
+                    <span class="text-xs font-medium text-slate-400 block mb-1">Health Safety Score</span>
+                    <div id="topSafetyScore" class="text-2xl font-bold text-teal-400 tracking-tight">71/100</div>
+                    <span class="text-[10px] text-slate-500 font-medium">Weighted Geo-Metrics</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                
+                <div class="md:col-span-7 bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-xl flex flex-col justify-between">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-semibold tracking-wider text-slate-400 uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-chart-bar text-teal-400"></i> Comparative Cross-Analysis
+                        </h3>
+                        <span class="text-xs font-mono text-slate-500">N=6 Cities</span>
+                    </div>
+                    <div class="h-64 relative w-full flex items-center justify-center">
+                        <canvas id="analyticsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="md:col-span-5 bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 p-5 rounded-2xl shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-sm font-semibold tracking-wider text-slate-400 uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-address-card text-purple-400"></i> Localized Report Card
+                            </h3>
+                            <span id="cardCityLabel" class="text-xs bg-slate-800 border border-slate-700 px-2.5 py-0.5 rounded-full font-bold text-teal-300">Nowshera</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-4 my-4">
+                            <div class="relative flex items-center justify-center">
+                                <div class="w-20 h-20 rounded-full border-4 border-slate-800 flex items-center justify-center">
+                                    <span id="overallScoreNum" class="text-2xl font-black text-white">71</span>
+                                </div>
+                                <div class="absolute -bottom-1 bg-teal-500 text-slate-950 text-[9px] font-black tracking-widest px-2 py-0.5 rounded-full uppercase">OVERALL</div>
+                            </div>
+                            <div class="flex-1 space-y-1.5">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-400">Air Quality Score:</span>
+                                    <span id="airQualityScore" class="font-bold text-emerald-400">76/100 (B)</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-400">Water Quality Score:</span>
+                                    <span id="waterQualityScore" class="font-bold text-amber-400">65/100 (C)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800/80">
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-[10px] font-bold text-slate-500 block uppercase">Hair Risk Index</span>
+                            <span id="hairRiskText" class="text-xs font-semibold text-amber-400 flex items-center gap-1 mt-0.5">
+                                🟡 Moderate Risk
+                            </span>
+                        </div>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <span class="text-[10px] font-bold text-slate-500 block uppercase">Skin Risk Index</span>
+                            <span id="skinRiskText" class="text-xs font-semibold text-amber-400 flex items-center gap-1 mt-0.5">
+                                🟡 Moderate Risk
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dynamicAqiCategoryBox" class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div id="categoryIndicatorDot" class="w-3 h-3 rounded-full bg-amber-400 animate-pulse"></div>
+                    <p class="text-sm text-slate-300">
+                        Current Focus Location Status: <strong id="currentFocusName" class="text-white">Nowshera</strong> is flagged under the <span id="aqiCategoryBadge" class="font-bold px-2 py-0.5 rounded text-xs bg-amber-400 text-slate-950">Moderate</span> threshold.
+                    </p>
+                </div>
+                <div class="hidden sm:flex items-center space-x-2 text-xs font-mono">
+                    <span class="text-slate-400">PM2.5:</span> <span id="pm25Val" class="text-white font-bold">23.1 µg/m³</span>
+                    <span class="text-slate-600">|</span>
+                    <span class="text-slate-400">PM10:</span> <span id="pm10Val" class="text-white font-bold">45.0 µg/m³</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-xl">
+                    <h3 class="text-sm font-semibold tracking-wider text-slate-400 uppercase mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-lungs text-cyan-400"></i> Air Pollutant Physiological Burden
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-900">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-200">Pulmonary System & Lungs</h4>
+                                <p id="lungHealthDesc" class="text-[11px] text-slate-400 mt-0.5">Microscopic PM2.5 bypasses nasal filters, provoking mild alveolar wall stress. Sensitive individuals may experience early airway hyper-responsiveness.</p>
+                            </div>
+                            <span id="lungRisk" class="text-[10px] font-bold px-2 py-0.5 rounded-md uppercase bg-amber-500/20 text-amber-400 shrink-0 ml-2">🟡 Mod</span>
+                        </div>
+                        <div class="flex items-start justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-900">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-200">Sleep Architecture & Hypoxia</h4>
+                                <p id="sleepHealthDesc" class="text-[11px] text-slate-400 mt-0.5">Sub-acute tissue inflammation from micro-particulates minorly disrupts REM cycle stability, escalating nighttime micro-arousals.</p>
+                            </div>
+                            <span id="sleepRisk" class="text-[10px] font-bold px-2 py-0.5 rounded-md uppercase bg-emerald-500/20 text-emerald-400 shrink-0 ml-2">🟢 Low</span>
+                        </div>
+                        <div class="flex items-start justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-900">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-200">VO2 Max & Aerobic Performance</h4>
+                                <p id="exerciseHealthDesc" class="text-[11px] text-slate-400 mt-0.5">Elevated ambient loads marginally compromise peak oxygen uptake capabilities during prolonged high-intensity outdoor conditioning.</p>
+                            </div>
+                            <span id="exerciseRisk" class="text-[10px] font-bold px-2 py-0.5 rounded-md uppercase bg-amber-500/20 text-amber-400 shrink-0 ml-2">🟡 Mod</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-xl">
+                    <h3 class="text-sm font-semibold tracking-wider text-slate-400 uppercase mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-droplet text-blue-400"></i> Hydrochemistry Scalp & Skin Analysis
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-900">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-200">Follicular Health & Hair Fall</h4>
+                                <p id="hairHealthDesc" class="text-[11px] text-slate-400 mt-0.5">Regional groundwater mineralization (High Calcium/Magnesium) crystallizes along hair shafts, accelerating breakage.</p>
+                            </div>
+                            <span id="hairRisk" class="text-[10px] font-bold px-2 py-0.5 rounded-md uppercase bg-amber-500/20 text-amber-400 shrink-0 ml-2">🟡 Mod</span>
+                        </div>
+                        <div class="flex items-start justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-900">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-200">Epidermal Moisture & Acne</h4>
+                                <p id="skinHealthDesc" class="text-[11px] text-slate-400 mt-0.5">Alkaline water residues raise skin pH. This breaks down natural lipid defensive barriers, creating a vector for bacterial acne proliferation.</p>
+                            </div>
+                            <span id="skinRisk" class="text-[10px] font-bold px-2 py-0.5 rounded-md uppercase bg-amber-500/20 text-amber-400 shrink-0 ml-2">🟡 Mod</span>
+                        </div>
+                        <div class="flex items-start justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-900">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-200">Long-term Stratum Corneum Vulnerability</h4>
+                                <p id="longTermHealthDesc" class="text-[11px] text-slate-400 mt-0.5">Chronic washing without buffering softeners risks advancing skin scaling, triggering chronic eczema configurations.</p>
+                            </div>
+                            <span id="longTermRisk" class="text-[10px] font-bold px-2 py-0.5 rounded-md uppercase bg-amber-500/20 text-amber-400 shrink-0 ml-2">🟡 Mod</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <h3 class="text-sm font-semibold tracking-wider text-slate-400 uppercase mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-emerald-400"></i> Targeted Mitigation Directives
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="p-4 bg-slate-950 rounded-xl border border-slate-800/60">
+                        <div class="flex items-center space-x-2 text-teal-400 mb-2">
+                            <i class="fa-solid fa-house-laptop"></i>
+                            <h4 class="text-xs font-bold uppercase tracking-wider">Indoor Management</h4>
+                        </div>
+                        <ul id="indoorRecs" class="text-xs text-slate-400 space-y-1.5 list-disc pl-4 leading-relaxed">
+                            <li>Keep high-efficiency cross-ventilation active during mid-day solar peaks.</li>
+                            <li>Introduce HEPA air filtration modules if tracking localized indoor asthma flare-ups.</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-slate-950 rounded-xl border border-slate-800/60">
+                        <div class="flex items-center space-x-2 text-blue-400 mb-2">
+                            <i class="fa-solid fa-shower"></i>
+                            <h4 class="text-xs font-bold uppercase tracking-wider">Hair & Skin Defense</h4>
+                        </div>
+                        <ul id="skincareRecs" class="text-xs text-slate-400 space-y-1.5 list-disc pl-4 leading-relaxed">
+                            <li>Utilize chelating shampoos once weekly to strip calcium crusting from hair fibers.</li>
+                            <li>Apply slightly acidic, low-pH body washes to preserve your acid mantle.</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-slate-950 rounded-xl border border-slate-800/60">
+                        <div class="flex items-center space-x-2 text-amber-400 mb-2">
+                            <i class="fa-solid fa-faucet-drip"></i>
+                            <h4 class="text-xs font-bold uppercase tracking-wider">Water Treatment</h4>
+                        </div>
+                        <ul id="waterRecs" class="text-xs text-slate-400 space-y-1.5 list-disc pl-4 leading-relaxed">
+                            <li>Integrate a multi-stage ion-exchange filter on domestic utility tap lines.</li>
+                            <li>Run simple carbon block pre-filtering to clear high downstream sediment loads.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Primary regional database engine (Updated June 2026 data points)
+        const environmentalDatabase = {
+            "Nowshera": {
+                aqi: 77, pm25: 23.1, pm10: 45.0, waterQuality: 65, category: "Moderate",
+                lung: { level: "🟡 Mod", desc: "Microscopic PM2.5 bypasses nasal filters, provoking mild alveolar wall stress. Sensitive individuals may feel tight breathing profiles." },
+                sleep: { level: "🟢 Low", desc: "Minimal hypoxemic changes recorded; safe overnight respiratory thresholds for healthy adults." },
+                exercise: { level: "🟡 Mod", desc: "Elevated ambient loads marginally compromise peak oxygen uptake capacity during sustained heavy outdoor cardio." },
+                hair: { level: "🟡 Mod", desc: "Elevated Total Dissolved Solids (TDS) and carbonates induce mineral build-up, giving hair a brittle feel." },
+                skin: { level: "🟡 Mod", desc: "Slightly alkaline source waters strip protective sebum oils, leading to localized skin dryness." },
+                longTerm: { level: "🟡 Mod", desc: "Prolonged reliance without softening protocols risks minor premature scaling across sensitive skin areas." },
+                recs: {
+                    indoor: ["Keep window venting clear during mid-day.", "Deploy simple mechanical particle filters."],
+                    dermo: ["Employ mild organic chelating agents.", "Moisturize within three minutes post-rinse."],
+                    water: ["Rely on simple carbon-block filtration.", "Monitor localized well-water depths regularly."]
+                }
+            },
+            "Peshawar": {
+                aqi: 106, pm25: 34.0, pm10: 40.0, waterQuality: 58, category: "Poor",
+                lung: { level: "🔴 High", desc: "Ambient particulate matter triggers upper airway mucosal inflammation. Coughing or minor wheezing thresholds elevated." },
+                sleep: { level: "🟡 Mod", desc: "Airway resistance minorly increases, creating standard micro-arousals and mild dry throat upon waking." },
+                exercise: { level: "🔴 High", desc: "Reschedule intense field activities indoors to shield pulmonary loops from systemic toxic loads." },
+                hair: { level: "🔴 High", desc: "High heavy-metal runoff metrics degrade structural hair keratin strands over short exposure timelines." },
+                skin: { level: "🔴 High", desc: "Disrupts natural epidermis flora balance, triggering inflammatory acne breakouts or hives." },
+                longTerm: { level: "🔴 High", desc: "Consistent unfiltered exposure accelerates chronic obstructive pulmonary disease (COPD) or eczema markers." },
+                recs: {
+                    indoor: ["Run dedicated HEPA air purifiers.", "Seal baseline frame gaps during rush-hour traffic spikes."],
+                    dermo: ["Switch to filtered distilled water rinses for your face.", "Incorporate heavy barrier repair creams."],
+                    water: ["Mandatory installation of complex reverse osmosis units.", "Boil rigorously to minimize biological load vectors."]
+                }
+            },
+            "Islamabad": {
+                aqi: 104, pm25: 31.0, pm10: 38.0, waterQuality: 82, category: "Poor",
+                lung: { level: "🟡 Mod", desc: "Seasonal pollen concentrations combined with urban particulates irritate upper breathing tubes." },
+                sleep: { level: "🟡 Mod", desc: "Allergenic load burdens throat tissue; prone individuals may snore more often." },
+                exercise: { level: "🟡 Mod", desc: "Limit training sessions during early mornings when atmospheric inversions trap particulates low." },
+                hair: { level: "🟢 Low", desc: "Softer natural mountain runoff properties significantly decrease overall mineral build-up rates." },
+                skin: { level: "🟢 Low", desc: "Balanced water pH helps maintain smooth skin clarity and optimal moisture metrics." },
+                longTerm: { level: "🟡 Mod", desc: "Pollen combined with fine urban smog presents slight respiratory sensitivity adjustments over time." },
+                recs: {
+                    indoor: ["Keep windows closed during high pollen counts.", "Vacuum regularly with HEPA-equipped machines."],
+                    dermo: ["Use lightweight water-based moisturizers.", "Maintain standard hair washing habits."],
+                    water: ["Basic UV purifiers are sufficient for microbial safety.", "Conduct routine storage tank cleanings."]
+                }
+            },
+            "Rawalpindi": {
+                aqi: 121, pm25: 43.5, pm10: 68.0, waterQuality: 52, category: "Poor",
+                lung: { level: "🔴 High", desc: "Heavy vehicular emissions create significant bronchoconstriction risks for elderly cohorts." },
+                sleep: { level: "🟡 Mod", desc: "Smog columns can trigger sleep apnea symptoms and upper respiratory congestion." },
+                exercise: { level: "🔴 High", desc: "Avoid exercising along primary traffic veins to minimize heavy metal particulate inhalation." },
+                hair: { level: "🔴 High", desc: "High calcium hardness combines with urban soot to severely dull and weaken hair roots." },
+                skin: { level: "🔴 High", desc: "Particulates settle deep into pores, causing oxidative stress and premature skin aging." },
+                longTerm: { level: "🔴 High", desc: "Continuous exposure increases risks of long-term cardiovascular stress and chronic skin conditions." },
+                recs: {
+                    indoor: ["Use carbon-HEPA hybrid filtration units.", "Ensure kitchen Exhaust vents function correctly."],
+                    dermo: ["Cleanse thoroughly with salicylic acid washes.", "Apply antioxidant serums to neutralize soot."],
+                    water: ["Utilize dual-stage sediment and ion filters.", "Treat water for high plumbing lime scaling."]
+                }
+            },
+            "Lahore": {
+                aqi: 137, pm25: 51.0, pm10: 92.0, waterQuality: 45, category: "Poor",
+                lung: { level: "🔴 High", desc: "Dense secondary industrial aerosols trigger widespread lung tissue inflammation and shortness of breath." },
+                sleep: { level: "🔴 High", desc: "Hypoxic stress cycles can disturb deep slow-wave sleep phases, leaving you feeling fatigued." },
+                exercise: { level: "🔴 High", desc: "Strictly ban outdoor workouts; opt for climate-controlled indoor spaces instead." },
+                hair: { level: "🔴 High", desc: "Highly alkaline ground wells yield extreme lime scaling that strips away protective hair cuticles." },
+                skin: { level: "🔴 High", desc: "Severe barrier breakdown risks frequent flare-ups of stubborn dermatitis and painful cystic acne." },
+                longTerm: { level: "🔴 High", desc: "Sustained exposure linked to accelerated lung function loss and systemic skin conditions." },
+                recs: {
+                    indoor: ["Operate clean-room air purifiers continuously.", "Build interior green zones using clean-air plants."],
+                    dermo: ["Exclusively use bottled or RO water for facial rinsing.", "Apply thick ceramides to protect the skin barrier."],
+                    water: ["Industrial-grade Reverse Osmosis filtration is required.", "Add water-softening shower heads to your bathrooms."]
+                }
+            },
+            "Karachi": {
+                aqi: 109, pm25: 35.2, pm10: 71.0, waterQuality: 41, category: "Poor",
+                lung: { level: "🟡 Mod", desc: "Saline coastal air mixed with urban emissions creates heavy humidity, weighting the lungs." },
+                sleep: { level: "🟡 Mod", desc: "High ambient moisture levels combined with particulate loads can cause nighttime breathing congestion." },
+                exercise: { level: "🟡 Mod", desc: "Exercise near the coastline where sea breezes help disperse heavy industrial smoke plumes." },
+                hair: { level: "🔴 High", desc: "Salty air and mineral-heavy tap water combine to create sticky, frizzy, and brittle hair structures." },
+                skin: { level: "🔴 High", desc: "High humidity mixes with airborne dust, clogging pores and causing sweat rash or breakouts." },
+                longTerm: { level: "🔴 High", desc: "Continuous salt-smog exposure can cause persistent sinus issues and chronic skin scaling." },
+                recs: {
+                    indoor: ["Use dehumidifiers alongside basic air filters.", "Clean air intake vents frequently to prevent rust and mold."],
+                    dermo: ["Wash with clarifying shampoos to remove salt build-up.", "Use oil-free, non-comedogenic skincare products."],
+                    water: ["Rely on advanced multi-stage desalination systems.", "Test water routinely for industrial pipe contaminants."]
+                }
+            }
+        };
+
+        let activeChart = null;
+
+        // Initialize Core Engine Visuals
+        document.addEventListener("DOMContentLoaded", () => {
+            renderAnalyticsChart();
+            updateDashboard("Nowshera");
+        });
+
+        // Chart.js Matrix Configurations
+        function renderAnalyticsChart() {
+            const ctx = document.getElementById('analyticsChart').getContext('2d');
+            
+            const labels = Object.keys(environmentalDatabase);
+            const aqiData = labels.map(c => environmentalDatabase[c].aqi);
+            const pm25Data = labels.map(c => environmentalDatabase[c].pm25);
+            const waterData = labels.map(c => environmentalDatabase[c].waterQuality);
+
+            activeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'AQI Index Metric',
+                            data: aqiData,
+                            backgroundColor: 'rgba(20, 184, 166, 0.6)',
+                            borderColor: 'rgba(20, 184, 166, 1)',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'PM2.5 Mass Conc.',
+                            data: pm25Data,
+                            backgroundColor: 'rgba(245, 158, 11, 0.6)',
+                            borderColor: 'rgba(245, 158, 11, 1)',
+                            borderWidth: 1.5,
+                            borderRadius: 6,
+                            hidden: false
+                        },
+                        {
+                            label: 'Water Quality Score',
+                            data: waterData,
+                            backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                        y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // Live interactive updating of DOM data sets
+        function updateDashboard(cityName) {
+            const data = environmentalDatabase[cityName];
+            if (!data) return;
+
+            // UI Label Overwrite Loops
+            document.getElementById("cardCityLabel").innerText = cityName;
+            document.getElementById("currentFocusName").innerText = cityName;
+            document.getElementById("pm25Val").innerText = data.pm25 + " µg/m³";
+            document.getElementById("pm10Val").innerText = data.pm10 + " µg/m³";
+
+            // Safety Computations
+            const weightedSafety = Math.round((data.aqi + (100 - data.waterQuality)) / 2);
+            document.getElementById("topSafetyScore").innerText = (100 - weightedSafety) + "/100";
+            document.getElementById("overallScoreNum").innerText = (100 - weightedSafety);
+
+            // Compute Letter Grades
+            let airGrade = data.aqi < 50 ? "A" : data.aqi < 100 ? "B" : data.aqi < 150 ? "C" : "D";
+            let waterGrade = data.waterQuality > 80 ? "A" : data.waterQuality > 60 ? "B" : data.waterQuality > 40 ? "C" : "D";
+
+            document.getElementById("airQualityScore").innerText = data.aqi + " Index (" + airGrade + ")";
+            document.getElementById("waterQualityScore").innerText = data.waterQuality + "/100 (" + waterGrade + ")";
+
+            // Badges & Dynamic Colors
+            const badge = document.getElementById("aqiCategoryBadge");
+            const box = document.getElementById("dynamicAqiCategoryBox");
+            const dot = document.getElementById("categoryIndicatorDot");
+            badge.innerText = data.category;
+
+            if(data.aqi <= 50) {
+                badge.className = "font-bold px-2 py-0.5 rounded text-xs bg-emerald-500 text-slate-950";
+                box.className = "p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-between";
+                dot.className = "w-3 h-3 rounded-full bg-emerald-500 animate-pulse";
+            } else if(data.aqi <= 100) {
+                badge.className = "font-bold px-2 py-0.5 rounded text-xs bg-amber-400 text-slate-950";
+                box.className = "p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-between";
+                dot.className = "w-3 h-3 rounded-full bg-amber-400 animate-pulse";
+            } else {
+                badge.className = "font-bold px-2 py-0.5 rounded text-xs bg-rose-500 text-white";
+                box.className = "p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center justify-between";
+                dot.className = "w-3 h-3 rounded-full bg-rose-500 animate-pulse";
+            }
+
+            // Physiological Exposure Fields Update
+            updateRiskSpan("lungRisk", "lungHealthDesc", data.lung);
+            updateRiskSpan("sleepRisk", "sleepHealthDesc", data.sleep);
+            updateRiskSpan("exerciseRisk", "exerciseHealthDesc", data.exercise);
+            updateRiskSpan("hairRisk", "hairHealthDesc", data.hair);
+            updateRiskSpan("skinRisk", "skinHealthDesc", data.skin);
+            updateRiskSpan("longTermRisk", "longTermHealthDesc", data.longTerm);
+
+            // Report card specific sub-risk boxes
+            document.getElementById("hairRiskText").className = `text-xs font-semibold ${getColorClass(data.hair.level)}`;
+            document.getElementById("hairRiskText").innerHTML = `${getIcon(data.hair.level)} ${data.hair.level} Risk`;
+            
+            document.getElementById("skinRiskText").className = `text-xs font-semibold ${getColorClass(data.skin.level)}`;
+            document.getElementById("skinRiskText").innerHTML = `${getIcon(data.skin.level)} ${data.skin.level} Risk`;
+
+            // Rewrite Action Items Lists Dynamically
+            renderList("indoorRecs", data.recs.indoor);
+            renderList("skincareRecs", data.recs.dermo);
+            renderList("waterRecs", data.recs.water);
+        }
+
+        // Helper string format handlers
+        function updateRiskSpan(riskId, descId, obj) {
+            const span = document.getElementById(riskId);
+            span.innerText = obj.level;
+            span.className = `text-[10px] font-bold px-2 py-0.5 rounded-md uppercase shrink-0 ml-2 ${getBgColorClass(obj.level)}`;
+            document.getElementById(descId).innerText = obj.desc;
+        }
+
+        function getBgColorClass(lvl) {
+            if(lvl.includes("Low")) return "bg-emerald-500/20 text-emerald-400";
+            if(lvl.includes("Mod")) return "bg-amber-500/20 text-amber-400";
+            return "bg-rose-500/20 text-rose-400";
+        }
+
+        function getColorClass(lvl) {
+            if(lvl.includes("Low")) return "text-emerald-400";
+            if(lvl.includes("Mod")) return "text-amber-400";
+            return "text-rose-400";
+        }
+
+        function getIcon(lvl) {
+            if(lvl.includes("Low")) return "🟢";
+            if(lvl.includes("Mod")) return "🟡";
+            return "🔴";
+        }
+
+        function renderList(elementId, itemsArray) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = "";
+            itemsArray.forEach(str => {
+                const li = document.createElement("li");
+                li.innerText = str;
+                el.appendChild(li);
+            });
+        }
+
+        // Dropdown dynamic filter updates for ChartJS instance 
+        function filterCharts(val) {
+            if (!activeChart) return;
+            if (val === "all") {
+                activeChart.setDatasetVisibility(0, true);
+                activeChart.setDatasetVisibility(1, true);
+                activeChart.setDatasetVisibility(2, true);
+            } else if (val === "aqi") {
+                activeChart.setDatasetVisibility(0, true);
+                activeChart.setDatasetVisibility(1, false);
+                activeChart.setDatasetVisibility(2, false);
+            } else if (val === "pm25") {
+                activeChart.setDatasetVisibility(0, false);
+                activeChart.setDatasetVisibility(1, true);
+                activeChart.setDatasetVisibility(2, false);
+            } else if (val === "all") {
+                activeChart.setDatasetVisibility(0, false);
+                activeChart.setDatasetVisibility(1, false);
+                activeChart.setDatasetVisibility(2, true);
+            }
+            activeChart.update();
+        }
+    </script>
+</body>
+</html>
