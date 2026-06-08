@@ -42,4 +42,5 @@ The application automatically centers focus on **Nowshera, Pakistan** and provid
 >  **Surprising Observation:** Despite heavy transit along the Grand Trunk Road corridor, Nowshera benefits from topographically driven wind dispersion along the Kabul River basin, presenting a significantly cleaner particulate profile than contiguous industrial zones.
 
 ---
+![Folder](index1.html)
 ![](day8.jpeg)
