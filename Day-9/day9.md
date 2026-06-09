@@ -1,6 +1,6 @@
 
 
-**Day 9 –  NutriScope v2.0 #60DaysOfAI Challenge**
+## **Day 9 –  NutriScope v2.0 #60DaysOfAI Challenge** ##
 
 NutriScope v2.0 is an AI-powered Nutrition Analytics platform that helps users track calories, macros, micronutrients, meal plans, and health insights through an intuitive SaaS-style interface.
 
@@ -26,4 +26,4 @@ Built using an iterative AI development approach—starting with an MVP and prog
 - Enhanced AI Recommendations
 
 **Part of my #60DaysOfAI journey.** 
-![](day-9.mp4)
+
