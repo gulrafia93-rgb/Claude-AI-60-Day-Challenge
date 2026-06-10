@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Rafia Gul | Cybernetic Portfolio</title>
+    <meta name="description" content="Portfolio of Rafia Gul - Cybersecurity & AI Enthusiast, Developer, and Machine Learning Practitioner from Nowshera, Pakistan." />
+    <meta name="keywords" content="Rafia Gul, Portfolio, Cybersecurity, Machine Learning, Python, Java, SQL, Web Developer, Pakistan" />
+    <meta name="author" content="Rafia Gul" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#38BDF8',
+                            pink: '#F472B6',
+                            yellow: '#FBBF24',
+                            darkBg: '#0B132B', 
+                            lightBg: '#F1F5F9'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Glassmorphism Classes */
+        .glass {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Gradient Text Focus */
+        .gradient-text {
+            background: linear-gradient(90deg, #38BDF8, #F472B6, #FBBF24);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientMove 6s linear infinite;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        /* Reveal on Scroll Core Layouts */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom Scrollbar Architecture */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0F172A;
+        }
+        .light ::-webkit-scrollbar-track {
+            background: #F8FAFC;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #38BDF8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #F472B6;
+        }
+    </style>
+</head>
+
+<body class="bg-brand-darkBg text-slate-100 transition-colors duration-300 dark:bg-brand-darkBg dark:text-slate-100 light:bg-brand-lightBg light:text-slate-900">
+
+    <canvas id="matrixCanvas" class="fixed top-0 left-0 w-full h-full -z-10 opacity-20 pointer-events-none"></canvas>
+
+    <header class="fixed top-0 left-0 w-full z-50 glass bg-brand-darkBg/70 border-b border-slate-800 transition-colors duration-300 dark:bg-brand-darkBg/70 dark:border-slate-800 light:bg-brand-lightBg/70 light:border-slate-200">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+           <a href="#home" class="text-2xl font-extrabold tracking-wider bg-gradient-to-r from-brand-blue to-brand-pink bg-clip-text text-transparent">
+                RG<span class="text-brand-yellow">.</span>
+            </a>
+            
+            <nav class="hidden md:flex items-center space-x-8 font-semibold text-sm">
+                <a href="#home" class="nav-link text-brand-blue transition-all hover:text-brand-blue">Home</a>
+                <a href="#about" class="nav-link text-slate-400 dark:text-slate-400 light:text-slate-600 transition-all hover:text-brand-blue">About</a>
+                <a href="#skills" class="nav-link text-slate-400 dark:text-slate-400 light:text-slate-600 transition-all hover:text-brand-blue">Skills</a>
+                <a href="#projects" class="nav-link text-slate-400 dark:text-slate-400 light:text-slate-600 transition-all hover:text-brand-pink">Projects</a>
+                <a href="#achievements" class="nav-link text-slate-400 dark:text-slate-400 light:text-slate-600 transition-all hover:text-brand-pink">Milestones</a>
+                <a href="#contact" class="nav-link text-slate-400 dark:text-slate-400 light:text-slate-600 transition-all hover:text-brand-pink">Contact</a>
+            </nav>
+
+            <div class="hidden md:flex items-center space-x-4">
+                <button id="themeToggle" class="p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 text-brand-yellow hover:scale-105 transition active:scale-95 dark:bg-slate-900/50 dark:border-slate-700 light:bg-white light:border-slate-300 light:text-brand-purple" aria-label="Toggle Theme Engine">
+                    <i id="themeIcon" class="fas fa-moon text-lg"></i>
+                </button>
+                <a href="#contact" class="px-5 py-2.5 rounded-xl font-bold text-xs tracking-wider uppercase bg-gradient-to-r from-brand-purple to-purple-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transform hover:-translate-y-0.5 transition">
+                    Secure Line
+                </a>
+            </div>
+
+            <div class="flex items-center space-x-4 md:hidden">
+                <button id="themeToggleMobile" class="p-2 text-brand-yellow dark:text-brand-yellow light:text-brand-purple">
+                    <i id="themeIconMobile" class="fas fa-moon text-lg"></i>
+                </button>
+                <button id="mobileMenuBtn" class="text-xl focus:outline-none" aria-label="Open Mobile Drawer">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="mobileMenu" class="fixed inset-0 z-40 bg-brand-darkBg/95 backdrop-blur-xl transform translate-x-full transition-transform duration-300 flex flex-col justify-center items-center space-y-8 text-xl font-bold md:hidden">
+        <button id="closeMenuBtn" class="absolute top-6 right-6 text-2xl" aria-label="Close Drawer Menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <a href="#home" class="mobile-nav-link text-brand-purple">Home</a>
+        <a href="#about" class="mobile-nav-link">About Me</a>
+        <a href="#skills" class="mobile-nav-link">Skills</a>
+        <a href="#projects" class="mobile-nav-link">Projects</a>
+        <a href="#achievements" class="mobile-nav-link">Achievements</a>
+        <a href="#contact" class="mobile-nav-link">Contact</a>
+    </div>
+
+    <section id="home" class="min-h-screen flex items-center justify-center pt-24 relative px-6 overflow-hidden">
+        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+            
+            <div class="lg:col-span-7 space-y-6 text-center lg:text-left order-2 lg:order-1">
+                <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full border border-brand-purple/30 bg-brand-purple/10 text-brand-purple text-xs font-bold tracking-widest uppercase">
+                    <span class="w-2 h-2 rounded-full bg-brand-neon animate-pulse"></span>
+                    <span>System Status: Active</span>
+                </div>
+                
+                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight leading-none">
+                    Hi, I'm <br>
+                    <span class="gradient-text">Rafia Gul</span>
+                </h1>
+                
+                <h2 class="text-xl sm:text-3xl font-bold text-slate-300 dark:text-slate-300 light:text-slate-700 h-12">
+                    I am a <span id="typing" class="text-brand-purple border-r-2 border-brand-purple pr-1"></span>
+                </h2>
+                
+                <p class="text-slate-400 dark:text-slate-400 light:text-slate-600 max-w-xl mx-auto lg:mx-0 text-base sm:text-lg leading-relaxed">
+                    Passionate technology enthusiast from Pakistan with a strong interest in Cybersecurity, Machine Learning, Artificial Intelligence, and modern software development. I build robust and secure systems using clean code methodologies.
+                </p>
+                
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-4">
+                    <a href="#projects" class="px-6 py-3.5 rounded-xl font-bold bg-gradient-to-r from-brand-purple to-purple-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transform hover:-translate-y-0.5 transition duration-200">
+                        Explore Repositories
+                    </a>
+                    <a href="#contact" class="px-6 py-3.5 rounded-xl border border-brand-yellow text-brand-yellow hover:bg-brand-yellow hover:text-slate-900 font-bold transition duration-200">
+                        Secure Line Connection
+                    </a>
+                </div>
+                
+                <div class="flex items-center justify-center lg:justify-start gap-5 pt-4 text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-400 light:text-slate-600">
+                    <a href="mailto:gulrafia93@gmail.com" class="hover:text-brand-purple transition flex items-center space-x-1"><i class="fas fa-envelope text-brand-purple"></i> <span>Email</span></a>
+                    <a href="https://github.com/gulrafia93-rgb" target="_blank" rel="noopener noreferrer" class="hover:text-brand-neon transition flex items-center space-x-1"><i class="fab fa-github text-brand-neon"></i> <span>GitHub</span></a>
+                    <a href="https://www.linkedin.com/in/rafia-gul-4902b63b7" target="_blank" rel="noopener noreferrer" class="hover:text-blue-400 transition flex items-center space-x-1"><i class="fab fa-linkedin-in text-blue-400"></i> <span>LinkedIn</span></a>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 flex justify-center order-1 lg:order-2 mt-6 lg:mt-0">
+                <div class="relative group w-72 h-72 sm:w-96 sm:h-96">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-brand-purple via-brand-yellow to-brand-neon rounded-3xl opacity-40 blur-xl group-hover:opacity-70 transition duration-500"></div>
+                    
+                    <div class="absolute -inset-3 rounded-3xl border border-dashed border-brand-purple/40 animate-[spin_60s_linear_infinite]"></div>
+                    
+                    <div class="relative w-full h-full rounded-3xl overflow-hidden border border-slate-700/50 dark:border-slate-700/50 light:border-slate-300 shadow-2xl bg-slate-900">
+                        <img src="profile.jpg" alt="Rafia Gul - Cybernetic Character Portrait Visualization" class="w-full h-full object-cover object-center transform scale-102 group-hover:scale-105 transition duration-500 ease-out filter brightness-95" />
+                        
+                        <div class="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800/80 text-center font-mono text-xs tracking-widest text-brand-neon uppercase">
+                          INTELLIGENT_STACK // SECURE_CORE_DEPLOYED _
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="py-24 px-6 relative border-t border-slate-900 dark:border-slate-900 light:border-slate-200 reveal">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center max-w-xl mx-auto mb-16">
+                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">About <span class="gradient-text">Me</span></h2>
+                <div class="w-16 h-1 bg-brand-purple mx-auto mt-3 rounded-full"></div>
+            </div>
+            
+            <div class="p-8 md:p-12 rounded-3xl bg-slate-900/50 border border-slate-800 dark:bg-slate-900/50 dark:border-slate-800 light:bg-white light:border-slate-200 shadow-xl space-y-6">
+                <p class="leading-relaxed text-lg text-slate-400 dark:text-slate-400 light:text-slate-600">
+                    I am Rafia Gul, a technology builder and solver currently designing digital ecosystems. My continuous research pathways explore modern cyber threat frameworks, predictive machine learning networks, data intelligence systems, and semantic front-end interface engineering.
+                </p>
+                <p class="leading-relaxed text-lg text-slate-400 dark:text-slate-400 light:text-slate-600">
+                    Based in Nowshera, Pakistan, I structure and run custom computing stacks across variable code platforms. I am committed to producing safe, high-performance computing assets that combine mathematical logic with robust software defense patterns.
+                </p>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 text-center">
+                    <div class="p-4 rounded-xl border border-slate-800/60 bg-slate-900/30 light:bg-slate-50 light:border-slate-200">
+                        <i class="fas fa-shield-halved text-brand-purple text-2xl mb-2"></i>
+                        <h4 class="font-bold text-xs text-slate-400 light:text-slate-500 uppercase tracking-wider">Focus Fields</h4>
+                        <p class="text-sm font-semibold mt-1">Cybersecurity & AI</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-slate-800/60 bg-slate-900/30 light:bg-slate-50 light:border-slate-200">
+                        <i class="fas fa-code text-brand-yellow text-2xl mb-2"></i>
+                        <h4 class="font-bold text-xs text-slate-400 light:text-slate-500 uppercase tracking-wider">Core Stacks</h4>
+                        <p class="text-sm font-semibold mt-1">Python, Java, JS</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-slate-800/60 bg-slate-900/30 light:bg-slate-50 light:border-slate-200">
+                        <i class="fas fa-database text-brand-neon text-2xl mb-2"></i>
+                        <h4 class="font-bold text-xs text-slate-400 light:text-slate-500 uppercase tracking-wider">Data Architecture</h4>
+                        <p class="text-sm font-semibold mt-1">SQL / Power BI</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-slate-800/60 bg-slate-900/30 light:bg-slate-50 light:border-slate-200">
+                        <i class="fas fa-globe text-purple-400 text-2xl mb-2"></i>
+                        <h4 class="font-bold text-xs text-slate-400 light:text-slate-500 uppercase tracking-wider">Location</h4>
+                        <p class="text-sm font-semibold mt-1">Nowshera, PK</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" class="py-24 px-6 bg-slate-900/20 backdrop-blur-sm relative border-t border-slate-900 dark:border-slate-900 light:border-slate-200 reveal">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center max-w-xl mx-auto mb-16">
+                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Skills & Expertise</h2>
+                <div class="w-16 h-1 bg-brand-yellow mx-auto mt-3 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+    <div class="space-y-6">
+        <h3 class="text-xl font-bold text-brand-blue mb-4 flex items-center space-x-2">
+            <i class="fas fa-terminal"></i> <span>Technical Skills Metrics</span>
+        </h3>
+        
+        <div class="space-y-5">
+            <div>
+                <div class="flex justify-between text-sm font-bold mb-1">
+                    <span>Python Engineering & Data Ecosystems</span>
+                    <span>90%</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-3 light:bg-slate-200">
+                    <div class="skill-fill h-3 bg-brand-blue rounded-full transition-all duration-1000 ease-out" style="width: 0%" data-width="90%"></div>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between text-sm font-bold mb-1">
+                    <span>Object-Oriented Programming (Java)</span>
+                    <span>85%</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-3 light:bg-slate-200">
+                    <div class="skill-fill h-3 bg-brand-pink rounded-full transition-all duration-1000 ease-out" style="width: 0%" data-width="85%"></div>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between text-sm font-bold mb-1">
+                    <span>Machine Learning & Neural Architectures</span>
+                    <span>80%</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-3 light:bg-slate-200">
+                    <div class="skill-fill h-3 bg-brand-yellow rounded-full transition-all duration-1000 ease-out" style="width: 0%" data-width="80%"></div>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between text-sm font-bold mb-1">
+                    <span>Relational Data Management (SQL)</span>
+                    <span>75%</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-3 light:bg-slate-200">
+                    <div class="skill-fill h-3 bg-brand-blue rounded-full transition-all duration-1000 ease-out" style="width: 0%" data-width="75%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-brand-yellow mb-4 flex items-center space-x-2">
+                            <i class="fas fa-layer-group"></i> <span>Technologies & Tools</span>
+                        </h3>
+                        <div class="flex flex-wrap gap-2.5">
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold tracking-wide bg-slate-800 text-slate-200 border border-slate-700 shadow-sm dark:bg-slate-800 dark:border-slate-700 light:bg-white light:border-slate-200 light:text-slate-800">Python</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold tracking-wide bg-slate-800 text-slate-200 border border-slate-700 shadow-sm dark:bg-slate-800 dark:border-slate-700 light:bg-white light:border-slate-200 light:text-slate-800">Java</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold tracking-wide bg-slate-800 text-slate-200 border border-slate-700 shadow-sm dark:bg-slate-800 dark:border-slate-700 light:bg-white light:border-slate-200 light:text-slate-800">SQL</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold tracking-wide bg-slate-800 text-slate-200 border border-slate-700 shadow-sm dark:bg-slate-800 dark:border-slate-700 light:bg-white light:border-slate-200 light:text-slate-800">TensorFlow</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold tracking-wide bg-slate-800 text-slate-200 border border-slate-700 shadow-sm dark:bg-slate-800 dark:border-slate-700 light:bg-white light:border-slate-200 light:text-slate-800">Streamlit</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold tracking-wide bg-slate-800 text-slate-200 border border-slate-700 shadow-sm dark:bg-slate-800 dark:border-slate-700 light:bg-white light:border-slate-200 light:text-slate-800">VS Code</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold tracking-wide bg-slate-800 text-slate-200 border border-slate-700 shadow-sm dark:bg-slate-800 dark:border-slate-700 light:bg-white light:border-slate-200 light:text-slate-800">Jupyter</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold tracking-wide bg-slate-800 text-slate-200 border border-slate-700 shadow-sm dark:bg-slate-800 dark:border-slate-700 light:bg-white light:border-slate-200 light:text-slate-800">Power BI</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold tracking-wide bg-slate-800 text-slate-200 border border-slate-700 shadow-sm dark:bg-slate-800 dark:border-slate-700 light:bg-white light:border-slate-200 light:text-slate-800">Eclipse</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold tracking-wide bg-slate-800 text-slate-200 border border-slate-700 shadow-sm dark:bg-slate-800 dark:border-slate-700 light:bg-white light:border-slate-200 light:text-slate-800">HTML5 / CSS3</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold tracking-wide bg-slate-800 text-slate-200 border border-slate-700 shadow-sm dark:bg-slate-800 dark:border-slate-700 light:bg-white light:border-slate-200 light:text-slate-800">JavaScript</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-xl font-bold text-brand-neon mb-4 flex items-center space-x-2">
+                            <i class="fas fa-brain"></i> <span>Soft Skill Operations</span>
+                        </h3>
+                        <div class="flex flex-wrap gap-2.5">
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-brand-purple/10 border border-brand-purple/30 text-brand-purple">Strategic Leadership</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-brand-yellow/10 border border-brand-yellow/30 text-brand-yellow">Clear Communication</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-brand-neon/10 border border-brand-neon/30 text-brand-neon">Complex Problem Solving</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/50 border border-slate-700 text-slate-400 dark:bg-slate-800/50 dark:border-slate-700 light:bg-white light:border-slate-200 light:text-slate-600">Adaptive Teamwork</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<section id="projects" class="py-24 px-6 relative border-t border-slate-900 dark:border-slate-900 light:border-slate-200 reveal">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center max-w-xl mx-auto mb-16">
+            <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Featured Projects</h2>
+            <div class="w-16 h-1 bg-brand-pink mx-auto mt-3 rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <div class="group rounded-2xl bg-slate-900/40 border border-slate-800 flex flex-col justify-between overflow-hidden shadow-xl hover:shadow-pink-500/5 hover:-translate-y-2 hover:border-brand-pink/50 transition-all duration-300 dark:bg-slate-900/40 dark:border-slate-800 light:bg-white light:border-slate-200">
+                <div class="p-6 space-y-4">
+                    <div class="w-12 h-12 rounded-xl bg-brand-pink/10 flex items-center justify-center text-brand-pink">
+                        <i class="fas fa-cookie-bite text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold group-hover:text-brand-pink transition-colors">Dessert Product List</h3>
+                    <p class="text-slate-400 dark:text-slate-400 light:text-slate-600 text-sm leading-relaxed">
+                        Responsive Dessert Product List featuring a dynamic shopping cart system, state-driven order verification popup panels, and optimized responsive workflows.
+                    </p>
+                    <div class="flex flex-wrap gap-1.5 pt-2">
+                        <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 dark:bg-slate-800 light:bg-slate-100 light:border-slate-200">HTML</span>
+                        <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 dark:bg-slate-800 light:bg-slate-100 light:border-slate-200">CSS</span>
+                        <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 dark:bg-slate-800 light:bg-slate-100 light:border-slate-200">JS</span>
+                    </div>
+                </div>
+                <div class="p-6 pt-0 border-t border-slate-800/40 flex justify-between items-center light:border-slate-100">
+                    <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Frontend Engine</span>
+                    <a href="https://github.com/gulrafia93-rgb/codecanvas.git" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-brand-pink hover:text-brand-blue transition flex items-center space-x-1">
+                        <span>Repository</span> <i class="fas fa-external-link-alt text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="group rounded-2xl bg-slate-900/40 border border-slate-800 flex flex-col justify-between overflow-hidden shadow-xl hover:shadow-yellow-500/5 hover:-translate-y-2 hover:border-brand-yellow/50 transition-all duration-300 dark:bg-slate-900/40 dark:border-slate-800 light:bg-white light:border-slate-200">
+                <div class="p-6 space-y-4">
+                    <div class="w-12 h-12 rounded-xl bg-brand-yellow/10 flex items-center justify-center text-brand-yellow">
+                        <i class="fas fa-file-invoice-dollar text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold group-hover:text-brand-yellow transition-colors">Mortgage Calculator</h3>
+                    <p class="text-slate-400 dark:text-slate-400 light:text-slate-600 text-sm leading-relaxed">
+                        A sleek architectural calculator designed to estimate compound housing loans with complex real-time data breakdowns of principal equity and interest factors.
+                    </p>
+                    <div class="flex flex-wrap gap-1.5 pt-2">
+                        <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 dark:bg-slate-800 light:bg-slate-100 light:border-slate-200">HTML5</span>
+                        <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 dark:bg-slate-800 light:bg-slate-100 light:border-slate-200">CSS3</span>
+                        <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 dark:bg-slate-800 light:bg-slate-100 light:border-slate-200">Vanilla JS</span>
+                    </div>
+                </div>
+                <div class="p-6 pt-0 border-t border-slate-800/40 flex justify-between items-center light:border-slate-100">
+                    <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Fintech Module</span>
+                    <span class="text-xs text-slate-500 italic">Core Stack Assets</span>
+                </div>
+            </div>
+
+            <div class="group rounded-2xl bg-slate-900/40 border border-slate-800 flex flex-col justify-between overflow-hidden shadow-xl hover:shadow-blue-500/5 hover:-translate-y-2 hover:border-brand-blue/50 transition-all duration-300 dark:bg-slate-900/40 dark:border-slate-800 light:bg-white light:border-slate-200">
+                <div class="p-6 space-y-4">
+                    <div class="w-12 h-12 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue">
+                        <i class="fas fa-shield-cat text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold group-hover:text-brand-blue transition-colors">Cat vs Dog Classifier</h3>
+                    <p class="text-slate-400 dark:text-slate-400 light:text-slate-600 text-sm leading-relaxed">
+                        An operational end-to-end Computer Vision binary application model utilizing convolutional layers via TensorFlow and structured over Streamlit frameworks.
+                    </p>
+                    <div class="flex flex-wrap gap-1.5 pt-2">
+                        <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 dark:bg-slate-800 light:bg-slate-100 light:border-slate-200">Python</span>
+                        <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 dark:bg-slate-800 light:bg-slate-100 light:border-slate-200">TensorFlow</span>
+                        <span class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 dark:bg-slate-800 light:bg-slate-100 light:border-slate-200">Colab</span>
+                    </div>
+                </div>
+                <div class="p-6 pt-0 border-t border-slate-800/40 flex justify-between items-center light:border-slate-100">
+                    <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Computer Vision</span>
+                    <a href="https://github.com/gulrafia93-rgb/Mechine-Learning-Models.git" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-brand-blue hover:text-brand-pink transition flex items-center space-x-1">
+                        <span>Repository</span> <i class="fas fa-external-link-alt text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+    <section id="achievements" class="py-24 px-6 bg-slate-900/20 backdrop-blur-sm relative border-t border-slate-900 dark:border-slate-900 light:border-slate-200 reveal">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center max-w-xl mx-auto mb-16">
+                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Milestones & Achievements</h2>
+                <div class="w-16 h-1 bg-brand-purple mx-auto mt-3 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="p-8 rounded-2xl bg-slate-900/40 border border-slate-800 dark:bg-slate-900/40 dark:border-slate-800 light:bg-white light:border-slate-200 shadow-xl space-y-6">
+                    <h3 class="text-2xl font-bold text-brand-purple flex items-center space-x-2">
+                        <i class="fas fa-briefcase"></i> <span>Experience Summary</span>
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start space-x-3">
+                            <span class="text-brand-neon pt-1"><i class="fas fa-check-circle"></i></span>
+                            <div>
+                                <h4 class="font-bold text-base">Developer Hub Corporation</h4>
+                                <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Technical Associate Intern</p>
+                                <p class="text-sm text-slate-400 dark:text-slate-400 light:text-slate-600 mt-1">Acquired structured knowledge within active development sprints and production debugging cycles.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <span class="text-brand-neon pt-1"><i class="fas fa-check-circle"></i></span>
+                            <div>
+                                <h4 class="font-bold text-base">Production Engineering Applications</h4>
+                                <p class="text-sm text-slate-400 dark:text-slate-400 light:text-slate-600 mt-1">Successfully deployed structural data tools and built dynamic interfaces using vanilla javascript engines.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="p-8 rounded-2xl bg-slate-900/40 border border-slate-800 dark:bg-slate-900/40 dark:border-slate-800 light:bg-white light:border-slate-200 shadow-xl space-y-6">
+                    <h3 class="text-2xl font-bold text-brand-yellow flex items-center space-x-2">
+                        <i class="fas fa-certificate"></i> <span>Learning Paths & Badges</span>
+                    </h3>
+                    <ul class="space-y-3.5 text-sm font-semibold text-slate-300 dark:text-slate-300 light:text-slate-700">
+                        <li class="flex items-center space-x-3 p-2 rounded-lg bg-slate-900/50 light:bg-slate-50 border border-slate-800/50 light:border-slate-200">
+                            <span class="text-brand-yellow text-lg"><i class="fas fa-award"></i></span>
+                            <span>Microsoft Academic Paths & Cloud Learn Strategies</span>
+                        </li>
+                        <li class="flex items-center space-x-3 p-2 rounded-lg bg-slate-900/50 light:bg-slate-50 border border-slate-800/50 light:border-slate-200">
+                            <span class="text-brand-yellow text-lg"><i class="fas fa-award"></i></span>
+                            <span>Applied AI & Machine Learning Pipeline Development</span>
+                        </li>
+                        <li class="flex items-center space-x-3 p-2 rounded-lg bg-slate-900/50 light:bg-slate-50 border border-slate-800/50 light:border-slate-200">
+                            <span class="text-brand-yellow text-lg"><i class="fas fa-award"></i></span>
+                            <span>Network Infrastructure & Defensive Cyber Vectors</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="py-24 px-6 relative border-t border-slate-900 dark:border-slate-900 light:border-slate-200 reveal">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center max-w-xl mx-auto mb-16">
+                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Get In Touch</h2>
+                <div class="w-16 h-1 bg-brand-yellow mx-auto mt-3 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
+                
+                <div class="md:col-span-5 space-y-6">
+                    <h3 class="text-2xl font-bold">Contact Transmission</h3>
+                    <p class="text-slate-400 dark:text-slate-200 light:text-slate-600 leading-relaxed">
+                        Have an opportunity, problem framework, or project that requires secure architecture or automated execution models? Drop a line over the matrix grid.
+                    </p>
+                    
+                    <div class="space-y-4 pt-2 text-sm font-semibold">
+                        <div class="flex items-center space-x-3.5 p-4 rounded-xl bg-slate-900/40 border border-slate-800 dark:bg-slate-900/40 dark:border-slate-800 light:bg-white light:border-slate-200">
+                            <i class="fas fa-envelope text-brand-purple text-lg w-5 text-center"></i>
+                            <a href="mailto:gulrafia93@gmail.com" class="hover:text-brand-purple transition">gulrafia93@gmail.com</a>
+                        </div>
+                        <div class="flex items-center space-x-3.5 p-4 rounded-xl bg-slate-900/40 border border-slate-800 dark:bg-slate-900/40 dark:border-slate-800 light:bg-white light:border-slate-200">
+                            <i class="fas fa-map-marker-alt text-brand-neon text-lg w-5 text-center"></i>
+                            <span>Nowshera, Pakistan</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:col-span-7">
+                    <form action="https://formspree.io/f/xoqgzkby" method="POST" class="space-y-4 p-6 rounded-2xl bg-slate-900/40 border border-slate-800 dark:bg-slate-900/40 dark:border-slate-800 light:bg-white light:border-slate-200 shadow-xl">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <input type="text" name="name" required placeholder="Identity Name" class="w-full p-4 rounded-xl bg-brand-darkBg border border-slate-800 text-slate-100 focus:outline-none focus:border-brand-blue dark:bg-brand-darkBg dark:border-slate-800 dark:text-slate-100 light:bg-slate-50 light:border-slate-300 light:text-slate-900 transition" />
+                            <input type="email" name="email" required placeholder="Communication Email" class="w-full p-4 rounded-xl bg-brand-darkBg border border-slate-800 text-slate-100 focus:outline-none focus:border-brand-pink dark:bg-brand-darkBg dark:border-slate-800 dark:text-slate-100 light:bg-slate-50 light:border-slate-300 light:text-slate-900 transition" />
+                        </div>
+                        <textarea name="message" rows="5" required placeholder="Data Transmission Payload Message Content..." class="w-full p-4 rounded-xl bg-brand-darkBg border border-slate-800 text-slate-100 focus:outline-none focus:border-brand-pink dark:bg-brand-darkBg dark:border-slate-800 dark:text-slate-100 light:bg-slate-50 light:border-slate-300 light:text-slate-900 transition resize-none"></textarea>
+                        
+                        <button type="submit" class="w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-brand-pink to-purple-600 hover:opacity-95 shadow-lg shadow-purple-500/10 transition transform active:scale-[0.99]">
+                            <i class="fas fa-paper-plane mr-2"></i> Transmit Packet Data
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-8 text-center text-xs text-slate-500 border-t border-slate-800/80 dark:border-slate-800/80 light:border-slate-200">
+        <p>&copy; 2026 Rafia Gul • Designed with Secure Logic & Tailwind CSS Engine</p>
+    </footer>
+
+
+    <script>
+        // 1. TYPING TEXT ROTATION CONTROLLER
+        const words = [
+            "Cybersecurity Enthusiast",
+            "Machine Learning Practitioner",
+            "Full-Stack Web Explorer"
+        ];
+
+        let wordIndex = 0;
+        let charIndex = 0;
+        let deleting = false;
+        const typingElement = document.getElementById("typing");
+
+        function typeEffect() {
+            let currentWord = words[wordIndex];
+
+            if (!deleting) {
+                typingElement.textContent = currentWord.substring(0, charIndex++);
+                if (charIndex > currentWord.length) {
+                    deleting = true;
+                    setTimeout(typeEffect, 1500);
+                    return;
+                }
+            } else {
+                typingElement.textContent = currentWord.substring(0, charIndex--);
+                if (charIndex < 0) {
+                    deleting = false;
+                    wordIndex = (wordIndex + 1) % words.length;
+                }
+            }
+
+            setTimeout(typeEffect, deleting ? 40 : 80);
+        }
+        typeEffect();
+
+
+        // 2. MODERN UNIFIED THEME ENGINE CONTROLLER (LIGHT/DARK)
+        const toggleBtn = document.getElementById("themeToggle");
+        const toggleMobileBtn = document.getElementById("themeToggleMobile");
+        const themeIcon = document.getElementById("themeIcon");
+        const themeIconMobile = document.getElementById("themeIconMobile");
+        const htmlElement = document.documentElement;
+
+        function runThemeChange() {
+            if (htmlElement.classList.contains("dark")) {
+                htmlElement.classList.remove("dark");
+                htmlElement.classList.add("light");
+                localStorage.setItem("portfolioTheme", "light");
+                themeIcon.className = "fas fa-sun text-lg";
+                themeIconMobile.className = "fas fa-sun text-lg";
+            } else {
+                htmlElement.classList.remove("light");
+                htmlElement.classList.add("dark");
+                localStorage.setItem("portfolioTheme", "dark");
+                themeIcon.className = "fas fa-moon text-lg";
+                themeIconMobile.className = "fas fa-moon text-lg";
+            }
+        }
+        toggleBtn.addEventListener("click", runThemeChange);
+        toggleMobileBtn.addEventListener("click", runThemeChange);
+
+
+        // 3. MOBILE MENU SLIDE OVER DRAWER SCRIPT
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const closeMenuBtn = document.getElementById('closeMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+
+        mobileMenuBtn.addEventListener('click', () => { mobileMenu.classList.remove('translate-x-full'); });
+        closeMenuBtn.addEventListener('click', () => { mobileMenu.classList.add('translate-x-full'); });
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => { mobileMenu.classList.add('translate-x-full'); });
+        });
+
+
+        // 4. ANIMATION REVEAL ENGINE ON SCROLL
+        const revealObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("active");
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll(".reveal").forEach(el => { revealObserver.observe(el); });
+
+
+        // 5. PROGRESS METRICS SKILLS FILL MECHANISM
+        const skillObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.width = entry.target.dataset.width;
+                    skillObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll(".skill-fill").forEach(skill => { skillObserver.observe(skill); });
+
+
+        // 6. CRYPTOGRAPHIC MATRIX GRID BACKGROUND SOURCE
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            setupMatrixGrid();
+        });
+
+        const matrixAlphabet = "010101001101SECURECOREAIX9";
+        const fontSize = 14;
+        let columns;
+        let dropPointers;
+
+        function setupMatrixGrid() {
+            columns = Math.floor(width / fontSize);
+            dropPointers = Array(columns).fill(1);
+        }
+        setupMatrixGrid();
+
+        function stepMatrixEngine() {
+            const isDark = htmlElement.classList.contains('dark');
+            ctx.fillStyle = isDark ? 'rgba(15, 23, 42, 0.05)' : 'rgba(248, 250, 252, 0.06)';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < dropPointers.length; i++) {
+                const textCharacter = matrixAlphabet.charAt(Math.floor(Math.random() * matrixAlphabet.length));
+                
+                // Color mapping distribution variation
+                if (Math.random() > 0.98) {
+                    ctx.fillStyle = '#22C55E'; // Neon glow indicator
+                } else if (Math.random() < 0.04) {
+                    ctx.fillStyle = '#FDE047'; // Accent Yellow indicator
+                } else {
+                    ctx.fillStyle = isDark ? '#A855F7' : '#8B5CF6'; // Core brand Purple matrix line
+                }
+
+                ctx.fillText(textCharacter, i * fontSize, dropPointers[i] * fontSize);
+                
+                if (dropPointers[i] * fontSize > height && Math.random() > 0.975) {
+                    dropPointers[i] = 0;
+                }
+                dropPointers[i]++;
+            }
+        }
+        setInterval(stepMatrixEngine, 35);
+
+
+        // 7. ACTIVE NAVIGATION SEGMENT HIGHLIGHTING CONTROLLER
+        const sections = document.querySelectorAll("section");
+        const navLinks = document.querySelectorAll(".nav-link");
+
+        window.addEventListener("scroll", () => {
+            let currentActiveSectionId = "";
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 160;
+                if (scrollY >= sectionTop) {
+                    currentActiveSectionId = section.getAttribute("id");
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove("text-brand-purple");
+                link.classList.add("text-slate-400");
+                if (link.getAttribute("href") === "#" + currentActiveSectionId) {
+                    link.classList.remove("text-slate-400");
+                    link.classList.add("text-brand-purple");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
