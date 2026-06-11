@@ -17,4 +17,4 @@ An automated pipeline approach to resume analysis and screening optimization. Th
 
 
 ---------------------------------------------------------------
-![](day11.png)
+![](day11.jpeg)
