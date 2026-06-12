@@ -29,7 +29,12 @@ Built as part of my #60DaysAIChallenge, this project focuses on combining AI + c
 
 ---
 
- **Screenshots**
+ **5/12 Screenshots**
+ ![](letter-cover.jpeg)
+  ![](recruit-email.jpeg)
+   ![](hiring-manager.jpeg)
+    ![](linkedin.jpeg)
+     ![](referal.jpeg)
 
 ---
  **Purpose**
