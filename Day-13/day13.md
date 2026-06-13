@@ -17,5 +17,5 @@ Today’s challenge focused on extending the capabilities of LLMs using external
 ###  Outcome
 Shifted from static prompting to dynamic, real-world data analysis. This execution proves how AI can act as an automated, precision-based career analyst when paired with real-time external connectors.
 
-![](day-13.mp4)
+![](day13.jpeg)
 ---
