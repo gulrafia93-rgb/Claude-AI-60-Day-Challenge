@@ -41,20 +41,16 @@ This project demonstrates how Claude AI can analyze football datasets to generat
 * Interactive quiz generation
 * Personality profiling techniques
 * AI-powered personalization
-
-## Deliverables
-
-* Football Intelligence Hub outputs
-* Prediction reports
-* Quiz results
-* Personality assessment results
 * Screenshots and documentation
-* ![](1.png)
+
+![](1.png)
 ![](2.jpeg)
 ![](3.jpeg)
 ![](4.jpeg)
 ![](5.jpeg)
 ![](6.jpeg)
+
+----
 
 ## Tools Used
 
