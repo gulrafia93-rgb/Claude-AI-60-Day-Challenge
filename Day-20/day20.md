@@ -32,4 +32,5 @@ This project helped me practice browser camera handling, image processing, puzzl
 Open the HTML file in a modern browser, allow camera access, capture your photo, choose a difficulty level, and start playing.
 
 ## Screenshots
+![](1.png)  ![](2.png)   ![](3.png)     ![](4.jpeg)
 
