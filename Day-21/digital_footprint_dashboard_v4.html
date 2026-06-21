@@ -1,0 +1,461 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif}
+.db-wrap{background:#0d1117;min-height:100vh;padding:20px;color:#e6edf3}
+.db-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #21262d}
+.db-title{font-size:16px;font-weight:600;color:#e6edf3;letter-spacing:0.01em}
+.db-sub{font-size:11px;color:#8b949e;margin-top:2px}
+.badge{font-size:10px;padding:3px 8px;border-radius:9999px;font-weight:600}
+.badge-red{background:#3d1a1a;color:#f85149}
+.badge-orange{background:#2d1d0e;color:#f0883e}
+.badge-green{background:#0d2117;color:#3fb950}
+.badge-blue{background:#0c1d2e;color:#58a6ff}
+.tab-nav{display:flex;gap:4px;margin-bottom:20px;background:#161b22;border-radius:10px;padding:4px;border:1px solid #21262d}
+.tab-btn{flex:1;padding:7px 4px;font-size:11px;font-weight:600;border:none;border-radius:7px;cursor:pointer;background:#21262d;color:#8b949e;transition:all 0.18s;border:1px solid #30363d}
+.tab-btn:hover{background:#2d333b;color:#c9d1d9;border-color:#484f58}
+.tab-btn.active{background:#1f6feb;color:#fff;border-color:#1f6feb}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.card{background:#161b22;border:1px solid #21262d;border-radius:10px;padding:16px;margin-bottom:14px}
+.card-title{font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.metric{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:12px}
+.metric-lbl{font-size:10px;color:#8b949e;margin-bottom:4px}
+.metric-val{font-size:20px;font-weight:700;color:#e6edf3}
+.metric-sub{font-size:10px;color:#8b949e;margin-top:2px}
+.score-wrap{display:flex;align-items:center;gap:16px}
+.ring-wrap{position:relative;width:88px;height:88px;flex-shrink:0}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.ring-num{font-size:20px;font-weight:700;color:#e6edf3}
+.ring-lbl{font-size:9px;color:#8b949e}
+.score-label{font-size:15px;font-weight:600;margin-bottom:4px}
+.score-desc{font-size:11px;color:#8b949e;line-height:1.5}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.bar-lbl{font-size:11px;color:#c9d1d9;width:86px;flex-shrink:0}
+.bar-track{flex:1;height:7px;background:#21262d;border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px}
+.bar-val{font-size:10px;color:#8b949e;width:50px;text-align:right;flex-shrink:0}
+.heat-wrap{overflow-x:auto}
+.htable{width:100%;border-collapse:collapse;font-size:10px}
+.htable th{padding:5px 6px;text-align:left;color:#8b949e;font-weight:500;white-space:nowrap;border-bottom:1px solid #21262d}
+.htable td{padding:4px 5px;border-bottom:1px solid #161b22}
+.hcell{display:inline-block;padding:2px 7px;border-radius:4px;font-weight:600;font-size:9px}
+.hH{background:#3d1a1a;color:#f85149}
+.hM{background:#2d1d0e;color:#f0883e}
+.hL{background:#0d2117;color:#3fb950}
+.hN{background:#21262d;color:#484f58}
+.mtable{width:100%;border-collapse:collapse;font-size:11px}
+.mtable th{font-size:10px;font-weight:500;color:#8b949e;padding:6px 8px;border-bottom:1px solid #21262d;text-align:left}
+.mtable td{padding:7px 8px;border-bottom:1px solid #21262d;color:#c9d1d9;vertical-align:top}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+.twin-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.twin-row{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px;display:flex;gap:10px;align-items:flex-start}
+.twin-lbl{font-size:11px;font-weight:600;color:#c9d1d9;margin-bottom:3px}
+.twin-val{font-size:10px;color:#8b949e;line-height:1.5}
+.twin-icon{font-size:18px;flex-shrink:0}
+.asset-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #21262d}
+.asset-row:last-child{border-bottom:none}
+.asset-name{font-size:12px;font-weight:500;color:#c9d1d9}
+.asset-desc{font-size:10px;color:#8b949e;margin-top:2px}
+.plan-step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #21262d}
+.plan-step:last-child{border-bottom:none}
+.step-num{width:22px;height:22px;border-radius:50%;background:#1f6feb;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-title{font-size:12px;font-weight:600;color:#c9d1d9}
+.step-desc{font-size:10px;color:#8b949e;margin-top:3px;line-height:1.5}
+.wow-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wow-card{background:#0d1117;border:1px solid #21262d;border-left:3px solid #1f6feb;border-radius:0 8px 8px 0;padding:10px}
+.wow-title{font-size:11px;font-weight:600;color:#c9d1d9;margin-bottom:3px}
+.wow-desc{font-size:10px;color:#8b949e;line-height:1.5}
+.verdict-box{background:#1a0e0e;border:1px solid #3d1a1a;border-left:3px solid #f85149;border-radius:0 8px 8px 0;padding:14px;margin-bottom:14px}
+.verdict-title{font-size:13px;font-weight:600;color:#f85149;margin-bottom:6px}
+.verdict-text{font-size:11px;color:#c9d1d9;line-height:1.7}
+.legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#8b949e}
+.legend-swatch{width:10px;height:10px;border-radius:2px}
+</style>
+
+<div class="db-wrap">
+<div class="db-header">
+  <div>
+    <div class="db-title">Digital Footprint & Privacy Dashboard</div>
+    <div class="db-sub">15 services · 8 parent companies · Based on reported apps only</div>
+  </div>
+  <div style="display:flex;gap:6px">
+    <span class="badge badge-orange">Footprint: 78</span>
+    <span class="badge badge-red">Privacy: 31</span>
+  </div>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('overview',this)">Overview</button>
+  <button class="tab-btn" onclick="switchTab('exposure',this)">Exposure</button>
+  <button class="tab-btn" onclick="switchTab('matrix',this)">Data Matrix</button>
+  <button class="tab-btn" onclick="switchTab('twin',this)">Digital Twin</button>
+  <button class="tab-btn" onclick="switchTab('plan',this)">Privacy Plan</button>
+  <button class="tab-btn" onclick="switchTab('verdict',this)">Verdict</button>
+</div>
+
+<div id="tab-overview" class="tab-panel active">
+  <div class="grid2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title">Digital Footprint Score</div>
+      <div class="score-wrap">
+        <div class="ring-wrap"><canvas id="ring1" width="88" height="88"></canvas>
+          <div class="ring-center"><span class="ring-num">78</span><span class="ring-lbl">/100</span></div>
+        </div>
+        <div>
+          <div class="score-label" style="color:#f0883e">Significant</div>
+          <div class="score-desc">15 services across 8 companies create a large traceable daily-life footprint.</div>
+          <span class="badge badge-orange" style="margin-top:8px;display:inline-block">61–80 range</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Privacy Score</div>
+      <div class="score-wrap">
+        <div class="ring-wrap"><canvas id="ring2" width="88" height="88"></canvas>
+          <div class="ring-center"><span class="ring-num">31</span><span class="ring-lbl">/100</span></div>
+        </div>
+        <div>
+          <div class="score-label" style="color:#f85149">Weak</div>
+          <div class="score-desc">Heavy reliance on data-monetizing platforms with limited privacy controls active.</div>
+          <span class="badge badge-red" style="margin-top:8px;display:inline-block">0–30 range</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="grid4" style="margin-bottom:14px">
+    <div class="metric"><div class="metric-lbl">Total services</div><div class="metric-val">15</div><div class="metric-sub">Fact</div></div>
+    <div class="metric"><div class="metric-lbl">Parent companies</div><div class="metric-val">8</div><div class="metric-sub">Fact</div></div>
+    <div class="metric"><div class="metric-lbl">Ecosystem concentration</div><div class="metric-val" style="color:#f0883e">62%</div><div class="metric-sub">Google dominant</div></div>
+    <div class="metric"><div class="metric-lbl">Tracking surface</div><div class="metric-val" style="color:#f85149">High</div><div class="metric-sub">Estimated</div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">Company ecosystem concentration</div>
+    <div id="eco-bars"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Risk radar</div>
+    <div style="position:relative;width:100%;height:300px">
+      <canvas id="radarChart" role="img" aria-label="Risk radar showing 8 dimensions: Behavioral Tracking 90, Social Profiling 85, Location Inference 75, Financial Data 60, Communication Access 80, Content Consumption 85, Purchase History 70, Gaming Behavior 65">Behavioral Tracking 90, Social Profiling 85, Location Inference 75, Financial Data 60, Communication Access 80, Content Consumption 85, Purchase History 70, Gaming Behavior 65.</canvas>
+    </div>
+  </div>
+</div>
+
+<div id="tab-exposure" class="tab-panel">
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">Exposure heatmap — data category by platform</div>
+    <div class="heat-wrap">
+      <table class="htable">
+        <thead><tr><th style="min-width:100px">Platform</th><th>Location</th><th>Behavior</th><th>Finance</th><th>Social</th><th>Content</th><th>Identity</th><th>Comms</th></tr></thead>
+        <tbody id="heat-body"></tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#f85149"></div>High</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#f0883e"></div>Medium</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#3fb950"></div>Low</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#21262d"></div>Minimal</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Company exposure ranking</div>
+    <div id="exp-rank"></div>
+  </div>
+</div>
+
+<div id="tab-matrix" class="tab-panel">
+  <div class="card">
+    <div class="card-title">Data collection matrix</div>
+    <table class="mtable">
+      <thead><tr><th>Data type</th><th>Likely collected by</th><th>Risk</th><th>Status</th></tr></thead>
+      <tbody id="matrix-body"></tbody>
+    </table>
+    <div style="font-size:10px;color:#484f58;margin-top:10px;font-style:italic">Behavioral inferences are Estimates. "Actively collected" reflects published privacy policies.</div>
+  </div>
+</div>
+
+<div id="tab-twin" class="tab-panel">
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">Digital twin profile</div>
+    <div style="font-size:10px;color:#8b949e;margin-bottom:12px">
+      <span class="badge badge-orange" style="margin-right:4px">Estimate</span> inferred from app patterns &nbsp;
+      <span class="badge badge-blue" style="margin-right:4px">Fact</span> from reported services
+    </div>
+    <div class="twin-grid" id="twin-grid"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Most valuable data assets</div>
+    <div id="assets-list"></div>
+  </div>
+</div>
+
+<div id="tab-plan" class="tab-panel">
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">Privacy improvement plan</div>
+    <div id="plan-steps"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Wow insights</div>
+    <div class="wow-grid" id="wow-grid"></div>
+  </div>
+</div>
+
+<div id="tab-verdict" class="tab-panel">
+  <div class="verdict-box">
+    <div class="verdict-title">Final verdict</div>
+    <div class="verdict-text">Your digital footprint is <strong style="color:#f0883e">Significant (78/100)</strong> with a <strong style="color:#f85149">Weak (31/100)</strong> privacy posture. You operate across 8 major companies, with Google alone controlling 5 services. Social, financial, behavioral, and entertainment data are all actively collected and cross-referenced. Google Pay + Search + Photos together form one of the most complete personal profiles a single company can hold.</div>
+  </div>
+  <div class="grid2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title">Biggest risk factors</div>
+      <div id="risks-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Quick wins</div>
+      <div id="wins-list"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Score summary</div>
+    <div class="grid4" style="margin-top:8px">
+      <div class="metric"><div class="metric-lbl">Footprint</div><div class="metric-val" style="color:#f0883e">78</div><div class="metric-sub">Significant</div></div>
+      <div class="metric"><div class="metric-lbl">Privacy</div><div class="metric-val" style="color:#f85149">31</div><div class="metric-sub">Weak</div></div>
+      <div class="metric"><div class="metric-lbl">Ecosystem lock-in</div><div class="metric-val" style="color:#f85149">High</div><div class="metric-sub">Google dominant</div></div>
+      <div class="metric"><div class="metric-lbl">Data broker risk</div><div class="metric-val" style="color:#f0883e">Med</div><div class="metric-sub">Estimated</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function drawRing(id, val, color) {
+  var c = document.getElementById(id);
+  if (!c) return;
+  var ctx = c.getContext('2d');
+  ctx.clearRect(0,0,88,88);
+  ctx.beginPath(); ctx.arc(44,44,34,0,Math.PI*2);
+  ctx.strokeStyle='#21262d'; ctx.lineWidth=8; ctx.stroke();
+  ctx.beginPath(); ctx.arc(44,44,34,-Math.PI/2,-Math.PI/2+Math.PI*2*(val/100));
+  ctx.strokeStyle=color; ctx.lineWidth=8; ctx.lineCap='round'; ctx.stroke();
+}
+
+var ecoBars=[
+  {name:'Google',apps:5,pct:93,color:'#1f6feb'},
+  {name:'Meta',apps:2,pct:37,color:'#8957e5'},
+  {name:'ByteDance',apps:1,pct:28,color:'#f85149'},
+  {name:'Snap',apps:1,pct:22,color:'#f0883e'},
+  {name:'Amazon',apps:1,pct:22,color:'#d29922'},
+  {name:'Spotify',apps:1,pct:18,color:'#3fb950'},
+  {name:'Krafton',apps:1,pct:15,color:'#58a6ff'},
+  {name:'Roblox',apps:1,pct:13,color:'#bc8cff'},
+];
+var ecoDiv=document.getElementById('eco-bars');
+ecoBars.forEach(function(c){
+  var row=document.createElement('div'); row.className='bar-row';
+  row.innerHTML='<span class="bar-lbl">'+c.name+'</span><div class="bar-track"><div class="bar-fill" style="width:'+c.pct+'%;background:'+c.color+'"></div></div><span class="bar-val">'+c.apps+' app'+(c.apps>1?'s':'')+'</span>';
+  ecoDiv.appendChild(row);
+});
+
+var heatData=[
+  {name:'Google Search',loc:'H',beh:'H',fin:'M',soc:'L',con:'H',ide:'H',com:'N'},
+  {name:'YouTube',loc:'M',beh:'H',fin:'L',soc:'M',con:'H',ide:'M',com:'N'},
+  {name:'Instagram',loc:'M',beh:'H',fin:'L',soc:'H',con:'H',ide:'H',com:'M'},
+  {name:'TikTok',loc:'M',beh:'H',fin:'L',soc:'H',con:'H',ide:'M',com:'N'},
+  {name:'Google Pay',loc:'L',beh:'M',fin:'H',soc:'L',con:'L',ide:'H',com:'N'},
+  {name:'WhatsApp',loc:'M',beh:'M',fin:'L',soc:'H',con:'L',ide:'M',com:'H'},
+  {name:'Snapchat',loc:'H',beh:'H',fin:'L',soc:'H',con:'M',ide:'M',com:'M'},
+  {name:'Google Photos',loc:'H',beh:'L',fin:'L',soc:'L',con:'H',ide:'H',com:'N'},
+  {name:'Amazon',loc:'M',beh:'H',fin:'H',soc:'L',con:'M',ide:'H',com:'N'},
+  {name:'Spotify',loc:'L',beh:'H',fin:'L',soc:'M',con:'H',ide:'M',com:'N'},
+  {name:'Discord',loc:'L',beh:'M',fin:'L',soc:'H',con:'M',ide:'M',com:'H'},
+  {name:'Meesho',loc:'M',beh:'M',fin:'M',soc:'L',con:'M',ide:'M',com:'N'},
+  {name:'Roblox',loc:'L',beh:'M',fin:'M',soc:'M',con:'M',ide:'M',com:'N'},
+  {name:'PUBG Mobile',loc:'M',beh:'M',fin:'L',soc:'M',con:'L',ide:'M',com:'N'},
+  {name:'iMessage',loc:'L',beh:'L',fin:'L',soc:'M',con:'L',ide:'L',com:'H'},
+];
+var tbody=document.getElementById('heat-body');
+heatData.forEach(function(r){
+  var tr=document.createElement('tr');
+  var cells=['loc','beh','fin','soc','con','ide','com'].map(function(k){
+    return '<td><span class="hcell h'+r[k]+'">'+r[k]+'</span></td>';
+  }).join('');
+  tr.innerHTML='<td style="font-size:11px;color:#c9d1d9;white-space:nowrap;padding:5px 6px">'+r.name+'</td>'+cells;
+  tbody.appendChild(tr);
+});
+
+var expRank=[
+  {name:'Google',risk:95,color:'#1f6feb',apps:'5 apps'},
+  {name:'Meta',risk:88,color:'#8957e5',apps:'2 apps'},
+  {name:'ByteDance',risk:82,color:'#f85149',apps:'1 app'},
+  {name:'Amazon',risk:75,color:'#d29922',apps:'1 app'},
+  {name:'Snap',risk:70,color:'#f0883e',apps:'1 app'},
+  {name:'Spotify',risk:55,color:'#3fb950',apps:'1 app'},
+  {name:'Krafton',risk:45,color:'#58a6ff',apps:'1 app'},
+  {name:'Roblox',risk:40,color:'#bc8cff',apps:'1 app'},
+];
+var rankDiv=document.getElementById('exp-rank');
+expRank.forEach(function(c,i){
+  var row=document.createElement('div'); row.className='bar-row'; row.style.marginBottom='11px';
+  row.innerHTML='<span class="bar-lbl"><span style="color:#484f58;margin-right:4px">#'+(i+1)+'</span>'+c.name+'</span><div class="bar-track"><div class="bar-fill" style="width:'+c.risk+'%;background:'+c.color+'"></div></div><span class="bar-val">'+c.apps+' · '+c.risk+'</span>';
+  rankDiv.appendChild(row);
+});
+
+var matrixData=[
+  {type:'Behavioral patterns',sub:'Scroll, tap, dwell time',by:'Meta, Google, TikTok, Snap',risk:'Critical',riskCls:'badge-red',sc:'#f85149',st:'Actively collected'},
+  {type:'Location signals',sub:'IP, GPS metadata',by:'Google, Meta, PUBG',risk:'High',riskCls:'badge-red',sc:'#f85149',st:'Actively collected'},
+  {type:'Communication metadata',sub:'Who, when, frequency',by:'WhatsApp, Discord, iMessage',risk:'Medium',riskCls:'badge-orange',sc:'#f0883e',st:'Metadata likely'},
+  {type:'Purchase intent',sub:'Browsing, cart, orders',by:'Amazon, Meesho, Google',risk:'High',riskCls:'badge-red',sc:'#f85149',st:'Actively collected'},
+  {type:'Entertainment profile',sub:'Music, videos, genres',by:'Spotify, YouTube, TikTok',risk:'Medium',riskCls:'badge-orange',sc:'#f0883e',st:'Profiled algorithmically'},
+  {type:'Social graph',sub:'Friends, followers, contacts',by:'Instagram, Snapchat, Discord',risk:'Critical',riskCls:'badge-red',sc:'#f85149',st:'Actively collected'},
+  {type:'Financial transactions',sub:'Payment history, UPI',by:'Google Pay',risk:'High',riskCls:'badge-red',sc:'#f85149',st:'Actively collected'},
+  {type:'Search intent',sub:'Queries, click patterns',by:'Google Search',risk:'Critical',riskCls:'badge-red',sc:'#f85149',st:'Core product data'},
+  {type:'Photo metadata',sub:'EXIF, face data, scenes',by:'Google Photos',risk:'Medium',riskCls:'badge-orange',sc:'#f0883e',st:'AI-analyzed (est.)'},
+  {type:'Gaming behavior',sub:'Play patterns, spending',by:'Roblox, PUBG Mobile',risk:'Low',riskCls:'badge-green',sc:'#3fb950',st:'Session data collected'},
+];
+var mbody=document.getElementById('matrix-body');
+matrixData.forEach(function(r){
+  var tr=document.createElement('tr');
+  tr.innerHTML='<td><div style="font-size:11px;font-weight:600;color:#c9d1d9">'+r.type+'</div><div style="font-size:10px;color:#8b949e">'+r.sub+'</div></td>'
+    +'<td style="font-size:10px;color:#8b949e">'+r.by+'</td>'
+    +'<td><span class="badge '+r.riskCls+'">'+r.risk+'</span></td>'
+    +'<td><span class="dot" style="background:'+r.sc+'"></span><span style="font-size:10px">'+r.st+'</span></td>';
+  mbody.appendChild(tr);
+});
+
+var twinData=[
+  {icon:'📱',label:'Platform type',badge:'Fact',bc:'badge-blue',val:'Mobile-primary user across iOS/Android ecosystem'},
+  {icon:'👤',label:'Age bracket',badge:'Estimate',bc:'badge-orange',val:'Likely 16–28. Roblox, PUBG, TikTok, Snapchat suggest younger demographic.'},
+  {icon:'🛒',label:'Shopping behavior',badge:'Estimate',bc:'badge-orange',val:'Price-conscious online shopper. Amazon + Meesho suggest comparison habits.'},
+  {icon:'🎵',label:'Entertainment profile',badge:'Estimate',bc:'badge-orange',val:'High daily content engagement. Spotify + YouTube + TikTok active simultaneously.'},
+  {icon:'👥',label:'Social connectivity',badge:'Fact',bc:'badge-blue',val:'Active on 4 social platforms: Instagram, Snapchat, Discord, WhatsApp.'},
+  {icon:'💳',label:'Financial footprint',badge:'Estimate',bc:'badge-orange',val:'Digital payment user. Google Pay UPI history is fully traceable by Google.'},
+  {icon:'🖼️',label:'Photo archive',badge:'Estimate',bc:'badge-orange',val:'Large cloud photo library likely containing location-tagged memories.'},
+  {icon:'🎮',label:'Gaming identity',badge:'Fact',bc:'badge-blue',val:'Active on 2 platforms with virtual economies: Roblox & PUBG Mobile.'},
+];
+var twinDiv=document.getElementById('twin-grid');
+twinData.forEach(function(t){
+  var div=document.createElement('div'); div.className='twin-row';
+  div.innerHTML='<div class="twin-icon">'+t.icon+'</div><div><div class="twin-lbl">'+t.label+' <span class="badge '+t.bc+'">'+t.badge+'</span></div><div class="twin-val">'+t.val+'</div></div>';
+  twinDiv.appendChild(div);
+});
+
+var assets=[
+  {name:'Google Search history',desc:'Every query — interests, health, relationships, finance (Fact)',val:'Critical',color:'#f85149'},
+  {name:'Google Pay transaction log',desc:'Full UPI/payment history including merchant, amount, timing (Fact)',val:'Critical',color:'#f85149'},
+  {name:'Instagram behavioral profile',desc:'Inferred moods, interests, social circles from engagement (Estimate)',val:'High',color:'#f0883e'},
+  {name:'Google Photos face & location',desc:'AI-tagged people, places, events across your photo archive (Estimate)',val:'High',color:'#f0883e'},
+  {name:'WhatsApp social graph',desc:'Who you talk to, how often, when — even with E2E encryption (Fact)',val:'High',color:'#f0883e'},
+  {name:'Spotify listening profile',desc:'Inferred moods, cultural identity, language preferences (Estimate)',val:'Medium',color:'#d29922'},
+];
+var assetDiv=document.getElementById('assets-list');
+assets.forEach(function(a){
+  var div=document.createElement('div'); div.className='asset-row';
+  div.innerHTML='<div><div class="asset-name">'+a.name+'</div><div class="asset-desc">'+a.desc+'</div></div><div style="font-size:11px;font-weight:600;color:'+a.color+';margin-left:12px;flex-shrink:0">'+a.val+'</div>';
+  assetDiv.appendChild(div);
+});
+
+var steps=[
+  {title:'Audit Google account data controls',desc:'Visit myaccount.google.com → Data & Privacy. Turn off Web & App Activity auto-saving and disable Location History.'},
+  {title:'Separate your financial identity',desc:'Consider a dedicated UPI app or bank solution instead of Google Pay to reduce Google\'s financial data collection.'},
+  {title:'Limit TikTok data access',desc:'Revoke camera, microphone, and contacts. Set profile to private. ByteDance includes off-platform behavioral profiling.'},
+  {title:'Disable Snapchat Snap Map',desc:'Real-time location sharing is on by default. Set Ghost Mode under Snap Map privacy settings immediately.'},
+  {title:'Consolidate messaging apps',desc:'Running WhatsApp + Discord + iMessage creates triple social graph exposure. Reduce to 1–2 primary channels.'},
+  {title:'Review Google Photos face grouping',desc:'Turn off Face Grouping under Settings to limit biometric indexing of your entire photo archive.'},
+  {title:'Request your data from each company',desc:'Under India\'s DPDP Act you can request export or deletion. Start with Google Takeout and Instagram Data Download.'},
+];
+var planDiv=document.getElementById('plan-steps');
+steps.forEach(function(s,i){
+  var div=document.createElement('div'); div.className='plan-step';
+  div.innerHTML='<div class="step-num">'+(i+1)+'</div><div><div class="step-title">'+s.title+'</div><div class="step-desc">'+s.desc+'</div></div>';
+  planDiv.appendChild(div);
+});
+
+var wows=[
+  {title:'You are Google\'s most complete customer',desc:'5 Google services = search intent + payments + photos + video behavior. One company sees nearly your entire life.'},
+  {title:'Meta holds both sides of your social life',desc:'Instagram shows your public persona; WhatsApp reveals private comms. Meta cross-references both.'},
+  {title:'Meesho + Amazon = budget profile',desc:'Two e-commerce apps let platforms cross-estimate your spending ceiling and price sensitivity (Estimate).'},
+  {title:'TikTok profiles you faster than friends',desc:'ByteDance\'s algorithm can infer personality traits within ~35 min of use per academic research (Estimate).'},
+  {title:'Roblox + PUBG = virtual financial trail',desc:'Both have in-app currencies. Spending patterns build a virtual financial profile separate from real payments.'},
+  {title:'iMessage is your privacy island',desc:'Only app in your stack with strong E2E encryption and no ad monetization — Apple collects minimal iMessage data.'},
+];
+var wowDiv=document.getElementById('wow-grid');
+wows.forEach(function(w){
+  var div=document.createElement('div'); div.className='wow-card';
+  div.innerHTML='<div class="wow-title">'+w.title+'</div><div class="wow-desc">'+w.desc+'</div>';
+  wowDiv.appendChild(div);
+});
+
+var risks=[
+  {txt:'Google ecosystem — 5 apps, full life visibility',color:'#f85149'},
+  {txt:'Google Pay financial transaction history',color:'#f85149'},
+  {txt:'TikTok (ByteDance) behavioral profiling',color:'#f0883e'},
+  {txt:'4 simultaneous social platforms — social graph overexposure',color:'#f0883e'},
+];
+var riskDiv=document.getElementById('risks-list');
+risks.forEach(function(r){
+  var div=document.createElement('div');
+  div.style.cssText='display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #21262d;font-size:11px;color:#c9d1d9';
+  div.innerHTML='<span class="dot" style="background:'+r.color+';flex-shrink:0;margin-top:4px"></span>'+r.txt;
+  riskDiv.appendChild(div);
+});
+
+var wins=[
+  'Turn off Google ad personalization in account settings',
+  'Audit Instagram & TikTok privacy settings today',
+  'Review location access for all apps in phone settings',
+  'Set WhatsApp disappearing messages to 7 days',
+];
+var winDiv=document.getElementById('wins-list');
+wins.forEach(function(w){
+  var div=document.createElement('div');
+  div.style.cssText='display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #21262d;font-size:11px;color:#c9d1d9';
+  div.innerHTML='<span class="dot" style="background:#3fb950;flex-shrink:0;margin-top:4px"></span>'+w;
+  winDiv.appendChild(div);
+});
+
+window.addEventListener('load', function(){
+  drawRing('ring1', 78, '#f0883e');
+  drawRing('ring2', 31, '#f85149');
+
+  var ctx = document.getElementById('radarChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Behavioral\nTracking','Social\nProfiling','Location\nInference','Financial\nData','Communication\nAccess','Content\nConsumption','Purchase\nHistory','Gaming\nBehavior'],
+      datasets:[{
+        label:'Risk level',
+        data:[90,85,75,60,80,85,70,65],
+        backgroundColor:'rgba(248,81,73,0.18)',
+        borderColor:'#f85149',
+        borderWidth:2,
+        pointBackgroundColor:'#f85149',
+        pointBorderColor:'#0d1117',
+        pointRadius:4,
+        pointHoverRadius:6
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{r:{
+        min:0,max:100,
+        grid:{color:'#21262d'},
+        angleLines:{color:'#30363d'},
+        pointLabels:{color:'#8b949e',font:{size:9}},
+        ticks:{display:false,stepSize:25}
+      }},
+      plugins:{legend:{display:false}}
+    }
+  });
+});
+</script>
