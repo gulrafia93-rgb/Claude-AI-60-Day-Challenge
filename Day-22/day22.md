@@ -39,6 +39,8 @@ The goal is to make ICT education more engaging, interactive, and accessible for
 
 The validation report gave a **Conditional GO ✅**, suggesting that the idea has strong potential but should first be validated with real students before full development.
 
+![](day-22.png)
+
 
 ## Tools Used
 
