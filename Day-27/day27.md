@@ -28,5 +28,7 @@ Developed an interactive story-based web application that explains the Prior Aut
 ## Outcome
 
 Built a complete educational web application that teaches the Prior Authorization process using conversational storytelling and interactive user choices.
+![](day-27.png)
+
 
 **Author:** Rafia Gul  
