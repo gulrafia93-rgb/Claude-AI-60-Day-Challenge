@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Media Integrity Analyzer</title>
+<style>
+  :root{
+    --bg-void:#070b13;
+    --bg-panel:#0e1521;
+    --bg-card:#121b29;
+    --bg-card-hover:#16212f;
+    --border:rgba(45,212,191,0.16);
+    --border-strong:rgba(45,212,191,0.38);
+    --teal:#2dd4bf;
+    --teal-dim:#0f9c8f;
+    --violet:#a78bfa;
+    --violet-deep:#7c3aed;
+    --text:#e7edf5;
+    --text-dim:#8b98ad;
+    --text-faint:#54627a;
+    --danger:#fb7185;
+    --good:#34d399;
+    --warn:#fbbf24;
+    --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(45,212,191,0.10), transparent 60%),
+      radial-gradient(ellipse 900px 600px at 100% 10%, rgba(124,58,237,0.12), transparent 55%),
+      var(--bg-void);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.6;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .scanline-overlay{
+    position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.5;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+  }
+
+  button{font-family:inherit;}
+  a{color:var(--teal);}
+
+  /* ---------- TOPBAR ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px; padding:14px 24px;
+    background:rgba(14,21,33,0.88);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+    flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-dot{
+    width:9px; height:9px; border-radius:50%;
+    background:var(--teal); box-shadow:0 0 8px 2px rgba(45,212,191,0.7);
+    animation:pulse 2.2s ease-in-out infinite;
+    flex-shrink:0;
+  }
+  @keyframes pulse{0%,100%{opacity:1; transform:scale(1);}50%{opacity:0.45; transform:scale(0.75);}}
+  .brand-text{
+    font-family:var(--font-mono); font-size:13px; letter-spacing:2.5px;
+    font-weight:600; text-transform:uppercase; color:var(--text);
+  }
+  .brand-text span{color:var(--teal);}
+
+  .stepper{display:flex; align-items:center; gap:0;}
+  .step-item{display:flex; align-items:center; gap:8px; opacity:0.4; transition:opacity 0.3s;}
+  .step-item.active,.step-item.done{opacity:1;}
+  .step-num{
+    font-family:var(--font-mono); font-size:11px; font-weight:700;
+    width:22px; height:22px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--border-strong); color:var(--text-dim);
+    transition:all 0.3s;
+  }
+  .step-item.active .step-num{background:var(--teal); border-color:var(--teal); color:#04120f;}
+  .step-item.done .step-num{background:transparent; border-color:var(--good); color:var(--good);}
+  .step-label{font-family:var(--font-mono); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--text-dim); display:none;}
+  .step-item.active .step-label{color:var(--text);}
+  .step-connector{width:26px; height:1px; background:var(--border-strong); margin:0 6px;}
+  @media(min-width:720px){.step-label{display:inline;}}
+
+  /* ---------- METRICS DOCK ---------- */
+  .metrics-dock{
+    position:sticky; top:57px; z-index:19;
+    display:none;
+    background:rgba(14,21,33,0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+    padding:12px 24px;
+  }
+  .metrics-dock.show{display:block;}
+  .metrics-row{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:18px;
+    max-width:1080px; margin:0 auto;
+  }
+  .metric-chip{min-width:0;}
+  .metric-top{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px;}
+  .metric-label{font-family:var(--font-mono); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .metric-val{font-family:var(--font-mono); font-size:13px; font-weight:700; color:var(--text);}
+  .metric-bar{height:4px; border-radius:2px; background:rgba(255,255,255,0.07); overflow:hidden;}
+  .metric-bar-fill{height:100%; width:0%; border-radius:2px; background:var(--text-faint); transition:width 0.9s cubic-bezier(.2,.8,.2,1), background 0.5s;}
+
+  /* ---------- LAYOUT ---------- */
+  main{position:relative; z-index:1; max-width:820px; margin:0 auto; padding:32px 20px 100px;}
+  .screen{display:none; animation:fadein 0.5s ease;}
+  .screen.active{display:block;}
+  @keyframes fadein{from{opacity:0; transform:translateY(8px);}to{opacity:1; transform:translateY(0);}}
+
+  .eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--teal); margin:0 0 10px;}
+  h1{font-family:var(--font-display); font-size:clamp(28px,5vw,42px); font-weight:800; letter-spacing:-0.5px; margin:0 0 14px; line-height:1.1;}
+  h2{font-family:var(--font-display); font-size:22px; font-weight:800; letter-spacing:-0.3px; margin:0 0 10px;}
+  h3{font-family:var(--font-display); font-size:16px; font-weight:700; margin:0 0 8px;}
+  p{color:var(--text-dim); margin:0 0 14px;}
+
+  /* ---------- HERO / RADAR ---------- */
+  .hero{text-align:center; padding:24px 0 8px;}
+  .radar{
+    width:150px; height:150px; margin:0 auto 28px; position:relative;
+  }
+  .radar-ring{position:absolute; border-radius:50%; border:1px solid var(--border-strong); inset:0;}
+  .radar-ring:nth-child(2){inset:22px; animation:radarpulse 3s ease-out infinite;}
+  .radar-ring:nth-child(3){inset:44px; animation:radarpulse 3s ease-out infinite 1s;}
+  .radar-ring:nth-child(4){inset:66px; animation:radarpulse 3s ease-out infinite 2s;}
+  .radar-core{position:absolute; inset:66px; border-radius:50%; background:radial-gradient(circle, var(--teal), var(--violet-deep)); box-shadow:0 0 30px 6px rgba(45,212,191,0.35);}
+  @keyframes radarpulse{0%{opacity:0.9; transform:scale(0.9);}100%{opacity:0; transform:scale(1.5);}}
+  .radar-sweep{
+    position:absolute; inset:0; border-radius:50%;
+    background:conic-gradient(from 0deg, rgba(45,212,191,0.5), transparent 32%);
+    animation:sweeprotate 3.4s linear infinite;
+    mask:radial-gradient(circle, transparent 0%, black 1%);
+  }
+  @keyframes sweeprotate{to{transform:rotate(360deg);}}
+
+  .cta-row{display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:8px;}
+
+  /* ---------- CARDS ---------- */
+  .card{
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:14px; padding:24px; margin-bottom:20px;
+    transition:border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  }
+  .card.hoverable:hover{border-color:var(--border-strong); transform:translateY(-2px); box-shadow:0 12px 30px -14px rgba(0,0,0,0.6);}
+  .concept-card{border-left:3px solid var(--violet);}
+  .concept-card .eyebrow{color:var(--violet);}
+
+  .divider{height:1px; background:var(--border); margin:20px 0; border:none;}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    font-family:var(--font-mono); font-size:12.5px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase;
+    padding:12px 22px; border-radius:9px; border:1px solid var(--border-strong);
+    background:transparent; color:var(--text); cursor:pointer;
+    transition:all 0.22s ease; display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn:hover{background:rgba(45,212,191,0.08); border-color:var(--teal); transform:translateY(-1px);}
+  .btn:active{transform:translateY(0);}
+  .btn-primary{background:var(--teal); border-color:var(--teal); color:#04120f;}
+  .btn-primary:hover{background:#3ee4cd; box-shadow:0 6px 20px -6px rgba(45,212,191,0.6);}
+  .btn-violet{background:var(--violet-deep); border-color:var(--violet-deep); color:#f4f1ff;}
+  .btn-violet:hover{background:#8d4bf0; box-shadow:0 6px 20px -6px rgba(124,58,237,0.6);}
+  .btn:disabled{opacity:0.35; cursor:not-allowed; transform:none !important; box-shadow:none !important;}
+  .btn-ghost{border-color:var(--border);}
+
+  .choice-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+  .choice-btn{
+    font-family:var(--font-mono); font-size:12px; font-weight:600; letter-spacing:0.5px;
+    padding:10px 18px; border-radius:999px; border:1px solid var(--border-strong);
+    background:var(--bg-panel); color:var(--text-dim); cursor:pointer; transition:all 0.2s;
+  }
+  .choice-btn:hover{border-color:var(--teal); color:var(--text);}
+  .choice-btn.selected{background:var(--teal); border-color:var(--teal); color:#04120f;}
+
+  /* ---------- HEADLINE / TEXT DISPLAY ---------- */
+  .headline-box{
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:12px;
+    padding:22px; margin:16px 0;
+  }
+  .headline-text{font-family:var(--font-display); font-size:clamp(20px,3.4vw,27px); font-weight:800; line-height:1.35; letter-spacing:-0.3px;}
+  .article-text{font-family:var(--font-body); font-size:14.5px; color:var(--text-dim); margin-top:14px; padding-top:14px; border-top:1px dashed var(--border);}
+  .post-text{font-family:var(--font-body); font-size:16.5px; color:var(--text); line-height:1.7;}
+
+  .tok{cursor:pointer; border-radius:4px; padding:1px 2px; transition:background 0.15s, color 0.15s;}
+  .tok:hover{background:rgba(167,139,250,0.18);}
+  .tok.selected{background:rgba(167,139,250,0.35); color:#fff; box-shadow:0 0 0 1px var(--violet) inset;}
+  .tok.locked-hit{background:rgba(45,212,191,0.28); box-shadow:0 0 0 1px var(--teal) inset; color:#fff;}
+  .tok.locked-miss{background:transparent; box-shadow:0 0 0 1px dashed var(--danger); text-decoration:underline; text-decoration-color:var(--danger); text-decoration-style:dashed;}
+  .tok.locked-false{background:rgba(255,255,255,0.05); color:var(--text-faint); text-decoration:line-through;}
+  .tok.locked-neutral{opacity:0.85;}
+
+  .hint{font-family:var(--font-mono); font-size:11px; color:var(--text-faint); letter-spacing:0.5px; margin-top:10px;}
+
+  .step-block{display:none;}
+  .step-block.show{display:block; animation:fadein 0.4s ease;}
+
+  /* ---------- REVEAL PANEL ---------- */
+  .reveal-panel{
+    position:relative; overflow:hidden;
+    background:linear-gradient(180deg, rgba(45,212,191,0.06), transparent 40%), var(--bg-card);
+    border:1px solid var(--border-strong); border-radius:14px; padding:26px; margin-top:18px;
+  }
+  .reveal-panel.sweep::before{
+    content:''; position:absolute; left:0; right:0; top:0; height:3px;
+    background:linear-gradient(90deg, transparent, var(--teal), var(--violet), transparent);
+    box-shadow:0 0 16px 2px rgba(45,212,191,0.6);
+    animation:sweepdown 1s ease-out;
+  }
+  @keyframes sweepdown{from{top:0; opacity:1;}to{top:100%; opacity:0;}}
+
+  .reveal-grid{display:grid; grid-template-columns:150px 1fr; gap:24px; align-items:center;}
+  @media(max-width:560px){.reveal-grid{grid-template-columns:1fr; justify-items:center; text-align:center;}}
+
+  .gauge-wrap{display:flex; flex-direction:column; align-items:center; gap:8px;}
+  .gauge{width:130px; height:130px; border-radius:50%; position:relative; flex-shrink:0;}
+  .gauge-inner{position:absolute; inset:11px; border-radius:50%; background:var(--bg-card); display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .gauge-num{font-family:var(--font-mono); font-size:26px; font-weight:800;}
+  .gauge-suffix{font-family:var(--font-mono); font-size:10px; color:var(--text-faint); letter-spacing:1px; text-transform:uppercase;}
+  .gauge-title{font-family:var(--font-mono); font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--text-dim); text-align:center;}
+
+  .tag-row{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 4px;}
+  .tag{font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.6px; text-transform:uppercase; padding:5px 10px; border-radius:6px; background:rgba(167,139,250,0.14); border:1px solid rgba(167,139,250,0.35); color:var(--violet);}
+
+  .fair-box{
+    margin-top:16px; padding:16px 18px; border-radius:10px;
+    background:rgba(52,211,153,0.07); border:1px solid rgba(52,211,153,0.3);
+  }
+  .fair-box .label{font-family:var(--font-mono); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--good); margin-bottom:6px;}
+  .fair-box .fair-headline{font-family:var(--font-display); font-weight:700; font-size:17px; color:var(--text);}
+
+  .takeaway{
+    margin-top:16px; padding:16px 18px; border-radius:10px;
+    background:rgba(45,212,191,0.07); border-left:3px solid var(--teal);
+  }
+  .takeaway .label{font-family:var(--font-mono); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--teal); margin-bottom:6px;}
+
+  .detect-feedback{font-family:var(--font-mono); font-size:12.5px; color:var(--text-dim); margin-top:4px;}
+  .detect-feedback b{color:var(--text);}
+
+  .kv-row{display:flex; justify-content:space-between; gap:16px; padding:9px 0; border-bottom:1px solid var(--border); font-size:13.5px; flex-wrap:wrap;}
+  .kv-row:last-child{border-bottom:none;}
+  .kv-key{font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-faint); min-width:150px;}
+  .kv-val{color:var(--text); text-align:right; flex:1;}
+
+  /* ---------- DASHBOARD ---------- */
+  .overall-wrap{display:flex; flex-direction:column; align-items:center; text-align:center; padding:10px 0 8px;}
+  .overall-gauge{width:190px; height:190px; border-radius:50%; position:relative; margin-bottom:16px;}
+  .overall-inner{position:absolute; inset:16px; border-radius:50%; background:var(--bg-void); display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .overall-num{font-family:var(--font-mono); font-size:48px; font-weight:800;}
+  .overall-label{font-family:var(--font-mono); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim); margin-top:4px;}
+
+  .redflag-box{
+    background:rgba(251,113,133,0.08); border:1px solid rgba(251,113,133,0.35);
+    border-radius:12px; padding:18px 20px; margin:20px 0;
+  }
+  .redflag-box .label{font-family:var(--font-mono); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--danger); margin-bottom:6px;}
+
+  .habit-list{list-style:none; margin:0; padding:0; display:grid; gap:10px;}
+  .habit-list li{
+    display:flex; gap:12px; align-items:flex-start; background:var(--bg-panel);
+    border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+  }
+  .habit-num{font-family:var(--font-mono); font-weight:800; color:var(--violet); font-size:14px; flex-shrink:0;}
+
+  .learned-list{list-style:none; margin:0; padding:0; display:grid; gap:8px;}
+  .learned-list li{display:flex; gap:10px; align-items:flex-start; font-size:14px; color:var(--text-dim);}
+  .learned-list li::before{content:'▹'; color:var(--teal); font-weight:700; flex-shrink:0;}
+
+  footer{text-align:center; padding:30px 20px 10px; color:var(--text-faint); font-family:var(--font-mono); font-size:11px; letter-spacing:0.5px;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="scanline-overlay"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <div class="brand-text">MEDIA <span>INTEGRITY</span> ANALYZER</div>
+  </div>
+  <div class="stepper" id="stepper">
+    <div class="step-item" data-step="1"><div class="step-num">01</div><div class="step-label">Headline</div></div>
+    <div class="step-connector"></div>
+    <div class="step-item" data-step="2"><div class="step-num">02</div><div class="step-label">Emotion</div></div>
+    <div class="step-connector"></div>
+    <div class="step-item" data-step="3"><div class="step-num">03</div><div class="step-label">Report</div></div>
+  </div>
+</header>
+
+<div class="metrics-dock" id="metricsDock">
+  <div class="metrics-row">
+    <div class="metric-chip">
+      <div class="metric-top"><span class="metric-label">Headline Accuracy</span><span class="metric-val" id="mv-accuracy">--</span></div>
+      <div class="metric-bar"><div class="metric-bar-fill" id="mb-accuracy"></div></div>
+    </div>
+    <div class="metric-chip">
+      <div class="metric-top"><span class="metric-label">Source Reliability</span><span class="metric-val" id="mv-reliability">--</span></div>
+      <div class="metric-bar"><div class="metric-bar-fill" id="mb-reliability"></div></div>
+    </div>
+    <div class="metric-chip">
+      <div class="metric-top"><span class="metric-label">Emo. Manipulation</span><span class="metric-val" id="mv-manipulation">--</span></div>
+      <div class="metric-bar"><div class="metric-bar-fill" id="mb-manipulation"></div></div>
+    </div>
+    <div class="metric-chip">
+      <div class="metric-top"><span class="metric-label">Audience Targeting</span><span class="metric-val" id="mv-targeting">--</span></div>
+      <div class="metric-bar"><div class="metric-bar-fill" id="mb-targeting"></div></div>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <!-- ============ INTRO SCREEN ============ -->
+  <section class="screen active" id="screen-intro">
+    <div class="hero">
+      <div class="radar">
+        <div class="radar-sweep"></div>
+        <div class="radar-ring"></div>
+        <div class="radar-ring"></div>
+        <div class="radar-ring"></div>
+        <div class="radar-core"></div>
+      </div>
+      <p class="eyebrow">A guided lesson in media literacy</p>
+      <h1>Learn to read between the headlines.</h1>
+      <p style="max-width:520px;margin:0 auto 22px;">You won't be quizzed. You'll be shown real-feeling headlines and posts, asked what you notice, and then walked through exactly how they were built to affect you — before you ever click share.</p>
+      <div class="cta-row">
+        <button class="btn btn-primary" onclick="goToChallenge1()">Begin Analysis →</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:32px;">
+      <h3>What you'll practice</h3>
+      <div class="kv-row"><div class="kv-key">Stage 01</div><div class="kv-val">Spot exaggeration and mismatch between headlines and the facts underneath</div></div>
+      <div class="kv-row"><div class="kv-key">Stage 02</div><div class="kv-val">Notice when language is engineered to trigger a specific emotion</div></div>
+      <div class="kv-row"><div class="kv-key">Stage 03</div><div class="kv-val">Walk away with a personal Media Integrity Dashboard and habits to reuse</div></div>
+    </div>
+  </section>
+
+  <!-- ============ CHALLENGE 1 ============ -->
+  <section class="screen" id="screen-c1">
+    <p class="eyebrow">Stage 01 · Headline Detective</p>
+    <h1>Would you click this?</h1>
+
+    <div class="card concept-card">
+      <p class="eyebrow">The concept</p>
+      <h3>Headlines are written to be clicked, not to be accurate.</h3>
+      <p>Publishers earn attention, and attention pays. A headline's job is often to provoke curiosity or alarm in under two seconds — even if the article underneath tells a calmer, more complicated story. Learning to spot the gap between the headline and the facts is the single most useful media literacy skill you can build, because it's the first thing you see, every time, everywhere.</p>
+    </div>
+
+    <div class="card hoverable" id="c1-scenario-card">
+      <div class="headline-box">
+        <div class="headline-text" id="c1-headline"></div>
+        <div class="article-text" id="c1-article"></div>
+      </div>
+
+      <div class="step-block show" id="c1-step-click">
+        <h3 style="margin-top:6px;">Would you click this?</h3>
+        <div class="choice-row" id="c1-click-choices">
+          <button class="choice-btn" data-val="Yes" onclick="selectClickChoice(this,'Yes')">Yes</button>
+          <button class="choice-btn" data-val="Maybe" onclick="selectClickChoice(this,'Maybe')">Maybe</button>
+          <button class="choice-btn" data-val="No" onclick="selectClickChoice(this,'No')">No</button>
+        </div>
+      </div>
+
+      <div class="step-block" id="c1-step-tap">
+        <hr class="divider">
+        <h3>Now tap the words that feel exaggerated or misleading</h3>
+        <p style="margin-bottom:6px;">Tap any part of the headline above that seems designed to provoke rather than inform.</p>
+        <div class="hint">Tip: think about what the headline implies versus what it can actually prove.</div>
+        <div class="cta-row" style="justify-content:flex-start; margin-top:16px;">
+          <button class="btn btn-violet" onclick="submitDetection1()">Reveal Analysis →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal-panel" id="c1-reveal" style="display:none;"></div>
+
+    <div class="cta-row" id="c1-continue-row" style="display:none; justify-content:flex-end; margin-top:8px;">
+      <button class="btn btn-primary" onclick="goToChallenge2()">Continue to Emotion Detector →</button>
+    </div>
+  </section>
+
+  <!-- ============ CHALLENGE 2 ============ -->
+  <section class="screen" id="screen-c2">
+    <p class="eyebrow">Stage 02 · Emotion Detector</p>
+    <h1>How did that make you feel?</h1>
+
+    <div class="card concept-card">
+      <p class="eyebrow">The concept</p>
+      <h3>Strong feelings are often the product, not a side effect.</h3>
+      <p>Fear, outrage, and tearful nostalgia all make you stop scrolling — and stopping is the whole business model. Posts written to spike a specific emotion often reuse the same small toolkit: urgency, secrecy, scarcity, guilt, or tribal anger. Once you can name the technique, it loses most of its pull on you.</p>
+    </div>
+
+    <div class="card hoverable" id="c2-scenario-card">
+      <div class="headline-box">
+        <div class="post-text" id="c2-post"></div>
+      </div>
+
+      <div class="step-block show" id="c2-step-feel">
+        <h3 style="margin-top:6px;">How did this make you feel?</h3>
+        <div class="choice-row" id="c2-feel-choices">
+          <button class="choice-btn" data-val="Angry" onclick="selectFeeling(this,'Angry')">Angry</button>
+          <button class="choice-btn" data-val="Anxious" onclick="selectFeeling(this,'Anxious')">Anxious</button>
+          <button class="choice-btn" data-val="Moved" onclick="selectFeeling(this,'Moved')">Moved</button>
+          <button class="choice-btn" data-val="Urgent" onclick="selectFeeling(this,'Urgent')">I should act now</button>
+          <button class="choice-btn" data-val="Neutral" onclick="selectFeeling(this,'Neutral')">Not much</button>
+        </div>
+      </div>
+
+      <div class="step-block" id="c2-step-tap">
+        <hr class="divider">
+        <h3>Which words influenced that feeling?</h3>
+        <p style="margin-bottom:6px;">Tap the specific words or phrases above that pushed your emotional reaction.</p>
+        <div class="cta-row" style="justify-content:flex-start; margin-top:16px;">
+          <button class="btn btn-violet" onclick="submitDetection2()">Reveal Analysis →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal-panel" id="c2-reveal" style="display:none;"></div>
+
+    <div class="cta-row" id="c2-continue-row" style="display:none; justify-content:flex-end; margin-top:8px;">
+      <button class="btn btn-primary" onclick="goToDashboard()">See My Media Integrity Dashboard →</button>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section class="screen" id="screen-dashboard">
+    <p class="eyebrow">Stage 03 · Report</p>
+    <h1>Your Media Integrity Dashboard</h1>
+
+    <div class="card">
+      <div class="overall-wrap">
+        <div class="overall-gauge" id="overall-gauge">
+          <div class="overall-inner">
+            <div class="overall-num" id="overall-num">--</div>
+            <div class="overall-label">Integrity Score</div>
+          </div>
+        </div>
+        <p style="max-width:440px;" id="overall-blurb"></p>
+      </div>
+    </div>
+
+    <div class="redflag-box">
+      <div class="label">Biggest red flag this session</div>
+      <div id="redflag-text" style="font-size:15px;"></div>
+    </div>
+
+    <div class="card">
+      <h3>What you practiced</h3>
+      <ul class="learned-list" id="learned-list"></ul>
+    </div>
+
+    <div class="card">
+      <h3>Three habits to carry with you</h3>
+      <ul class="habit-list">
+        <li><span class="habit-num">1</span><span>Read past the headline before you react or share — the first line rarely carries the whole story.</span></li>
+        <li><span class="habit-num">2</span><span>Notice the emotion first. If a post makes you feel something strongly and fast, pause before you act on it.</span></li>
+        <li><span class="habit-num">3</span><span>Ask who benefits if you believe this or share it — that answer tells you a lot about why it was written.</span></li>
+      </ul>
+    </div>
+
+    <div class="cta-row" style="margin-top:26px;">
+      <button class="btn btn-primary" onclick="replay()">↺ Replay with New Scenarios</button>
+    </div>
+  </section>
+
+</main>
+
+<footer>MEDIA INTEGRITY ANALYZER · A self-contained media literacy exercise · No data leaves this page</footer>
+
+<script>
+(function(){
+
+  // ---------------- DATA ----------------
+  var HEADLINES = [
+    {
+      id:'h1',
+      headline:"Local Water Supply 'Poisoned,' Officials Refuse to Explain",
+      badIdx:[3,5,6,7],
+      article:"A routine quarterly test found one mineral slightly above an older, more conservative guideline. The water utility published the full results the same afternoon and scheduled a public briefing for the following week.",
+      accuracy:28, reliability:35,
+      explanation:"The word \"poisoned\" implies an active, dangerous contamination, but the article describes a minor, routine reading above an outdated guideline — not a health emergency. \"Refuse to explain\" is also false: the utility released the data and scheduled a briefing the same day. This is a classic pattern of turning a routine regulatory footnote into a crisis headline.",
+      fairHeadline:"Water Test Shows One Mineral Slightly Above Older Guideline; Utility Releases Data, Briefing Set",
+      takeaway:"Words like \"poisoned\" or \"refuse\" imply intent and danger. Check whether the article actually supports that intent — or just a routine number in a report."
+    },
+    {
+      id:'h2',
+      headline:"This One Study Proves Coffee Is Destroying Your Brain",
+      badIdx:[3,6,7,8],
+      article:"A small observational study of 40 participants found a correlation between very high daily caffeine intake and short-term memory test scores. The authors noted the sample size was too small to establish cause and effect, and called for larger follow-up research.",
+      accuracy:22, reliability:45,
+      explanation:"A single small study with 40 participants cannot \"prove\" anything, and the authors themselves say it only shows a correlation, not causation. \"Destroying your brain\" is dramatic language for a modest link the researchers described as preliminary. This is a common tactic: borrowing the authority of \"a study\" while skipping its actual limitations.",
+      fairHeadline:"Small Study Finds Possible Link Between High Caffeine Intake and Memory Test Scores",
+      takeaway:"One small study is a data point, not proof. Look for words like \"correlation,\" \"preliminary,\" or \"small sample\" hiding beneath a confident headline."
+    },
+    {
+      id:'h3',
+      headline:"Tech Giant Secretly Spying on Millions, Leaked Docs Reveal",
+      badIdx:[2,3],
+      article:"Internal documents describe a standard analytics feature that tracks in-app clicks to improve product design. The feature is disclosed in the company's public privacy policy and can be switched off in account settings.",
+      accuracy:40, reliability:50,
+      explanation:"\"Secretly spying\" suggests hidden, unauthorized surveillance, but the documents describe a disclosed, optional analytics feature already explained in the public privacy policy. Calling published, opt-out functionality a \"leak\" and \"secret\" manufactures a scandal out of standard product practice.",
+      fairHeadline:"Leaked Documents Detail How the Company's Disclosed Analytics Feature Works",
+      takeaway:"\"Secret\" and \"leaked\" are powerful words. Ask: was this actually hidden, or just something most people hadn't read yet?"
+    },
+    {
+      id:'h4',
+      headline:"Miracle Fruit Melts Fat Overnight, Doctors Stunned",
+      badIdx:[0,2,3,4,5,6],
+      article:"The fruit is high in dietary fiber, which can support feelings of fullness as part of a balanced diet. No doctors were interviewed for this sponsored article, and no clinical trial is cited.",
+      accuracy:15, reliability:20,
+      explanation:"\"Miracle,\" \"melts fat overnight,\" and \"doctors stunned\" are all classic supplement-marketing language. The article itself admits no doctors were consulted and cites no research — it's describing ordinary fiber content with theatrical framing, in a piece disclosed as sponsored content.",
+      fairHeadline:"Fiber-Rich Fruit May Support Fullness as Part of a Balanced Diet (Sponsored)",
+      takeaway:"\"Miracle,\" \"stunned,\" and \"overnight\" are red-flag words in health content. Real findings are almost always slower and smaller than that."
+    }
+  ];
+
+  var EMOTIONS = [
+    {
+      id:'e1',
+      text:"BREAKING: They don't want you to know this. Share before it's deleted. Our children are NOT safe and the government is doing NOTHING. Wake up.",
+      badIdx:[0,1,2,3,4,5,6,7,15,16,21,22,23,24],
+      audience:"Worried parents and civically-engaged readers primed to distrust institutions",
+      intendedEmotion:"Fear and outrage, with a sense of urgent duty to act immediately",
+      technique:"Secrecy framing (\"they don't want you to know\"), manufactured urgency (\"before it's deleted\"), and an us-vs-them appeal to authority distrust",
+      manipulation:90, targeting:75,
+      neutralRewrite:"A new report raises questions about a child safety policy. Here is what the report says and what officials have said in response.",
+      takeaway:"Phrases like \"they don't want you to know\" and \"share before it's deleted\" are designed to bypass your critical thinking with urgency, not to inform you."
+    },
+    {
+      id:'e2',
+      text:"I cried making this list. If you don't feel something after reading these 10 stories, check your pulse. Like and share to spread the love.",
+      badIdx:[0,1,15,16,17,22,23,24],
+      audience:"General audience drawn to sentimental, shareable content — often older or highly social platform users",
+      intendedEmotion:"Sentimentality and a mild sense of obligation to prove you have feelings by sharing",
+      technique:"Emotional bait paired with a guilt-tinged sharing prompt (\"check your pulse\" implies something is wrong with you if you don't share)",
+      manipulation:60, targeting:55,
+      neutralRewrite:"Here is a list of ten stories some readers have found moving.",
+      takeaway:"Content that questions your character for not sharing it (\"check your pulse\") is using guilt as a distribution strategy."
+    },
+    {
+      id:'e3',
+      text:"You NEED this before it sells out again. Everyone is switching and if you wait, you'll be left behind. Limited stock, don't say we didn't warn you.",
+      badIdx:[0,1,5,6,7,17,18,21,22,23,24,25,26],
+      audience:"Shoppers with a tendency toward fear-of-missing-out or impulse purchases",
+      intendedEmotion:"Anxiety and time pressure that short-circuits comparison shopping",
+      technique:"Manufactured scarcity (\"limited stock,\" \"sells out again\") combined with social-proof pressure (\"everyone is switching\") and a veiled threat (\"left behind\")",
+      manipulation:85, targeting:80,
+      neutralRewrite:"This product is popular right now and stock may be limited.",
+      takeaway:"Real scarcity is rare. Manufactured scarcity — \"almost gone,\" \"everyone else already has it\" — exists to skip the part where you compare options."
+    },
+    {
+      id:'e4',
+      text:"This is why I have NO FAITH left in this country. Absolutely disgusting what they let happen. Comment if you're as furious as I am.",
+      badIdx:[5,6,11,12,21],
+      audience:"Politically engaged readers already frustrated with institutions, looking for validation",
+      intendedEmotion:"Anger and a need for tribal validation from like-minded commenters",
+      technique:"Vague, unnamed blame (\"what they let happen\") combined with a direct prompt for outrage engagement (\"comment if you're as furious as I am\")",
+      manipulation:80, targeting:65,
+      neutralRewrite:"A recent decision has sparked public debate and criticism from several groups.",
+      takeaway:"Posts that name no specific facts but ask you to confirm your anger in the comments are optimized for engagement, not for informing you."
+    }
+  ];
+
+  // ---------------- STATE ----------------
+  var state = {
+    usedH: [], usedE: [],
+    curH: null, curE: null,
+    sel1: {}, click1: null,
+    sel2: {}, feel2: null,
+    metrics: { accuracy:null, reliability:null, manipulation:null, targeting:null }
+  };
+
+  // ---------------- HELPERS ----------------
+  function pick(arr, used){
+    var available = arr.filter(function(x){ return used.indexOf(x.id) === -1; });
+    if(available.length === 0){ used.length = 0; available = arr.slice(); }
+    var choice = available[Math.floor(Math.random() * available.length)];
+    used.push(choice.id);
+    return choice;
+  }
+
+  function scoreColor(val){
+    if(val >= 65) return 'var(--good)';
+    if(val >= 35) return 'var(--warn)';
+    return 'var(--danger)';
+  }
+  function riskColor(val){ // higher = worse
+    if(val <= 35) return 'var(--good)';
+    if(val <= 65) return 'var(--warn)';
+    return 'var(--danger)';
+  }
+
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function setStepper(n){
+    document.querySelectorAll('.step-item').forEach(function(el){
+      var step = parseInt(el.getAttribute('data-step'), 10);
+      el.classList.remove('active','done');
+      if(step < n) el.classList.add('done');
+      if(step === n) el.classList.add('active');
+    });
+  }
+
+  function updateMetricsDock(){
+    var dock = document.getElementById('metricsDock');
+    dock.classList.add('show');
+    var m = state.metrics;
+    setMetric('accuracy', m.accuracy, scoreColor);
+    setMetric('reliability', m.reliability, scoreColor);
+    setMetric('manipulation', m.manipulation, riskColor);
+    setMetric('targeting', m.targeting, riskColor);
+  }
+  function setMetric(key, val, colorFn){
+    var v = document.getElementById('mv-' + key);
+    var b = document.getElementById('mb-' + key);
+    if(val === null || val === undefined){
+      v.textContent = '--'; b.style.width = '0%'; b.style.background = 'var(--text-faint)';
+      return;
+    }
+    v.textContent = val + '%';
+    b.style.width = val + '%';
+    b.style.background = colorFn(val);
+  }
+
+  function renderTokens(container, tokens, badIdx, selectedObj, locked, onToggle){
+    container.innerHTML = '';
+    tokens.forEach(function(word, i){
+      var span = document.createElement('span');
+      span.textContent = word;
+      span.className = 'tok';
+      span.dataset.i = i;
+      if(!locked){
+        if(selectedObj[i]) span.classList.add('selected');
+        span.addEventListener('click', function(){ onToggle(i, span); });
+      } else {
+        var isBad = badIdx.indexOf(i) !== -1;
+        var isSel = !!selectedObj[i];
+        if(isBad && isSel) span.classList.add('locked-hit');
+        else if(isBad && !isSel) span.classList.add('locked-miss');
+        else if(!isBad && isSel) span.classList.add('locked-false');
+        else span.classList.add('locked-neutral');
+      }
+      container.appendChild(span);
+      container.appendChild(document.createTextNode(' '));
+    });
+  }
+
+  function gaugeHTML(value, colorVar, title, big){
+    var pct = Math.max(0, Math.min(100, value));
+    var size = big ? 'overall' : 'gauge';
+    return '' +
+      '<div class="'+ (big ? 'overall-gauge' : 'gauge') +'" style="background:conic-gradient('+colorVar+' 0% '+pct+'%, rgba(255,255,255,0.08) '+pct+'% 100%)">' +
+        '<div class="'+ (big ? 'overall-inner' : 'gauge-inner') +'">' +
+          '<div class="'+ (big ? 'overall-num' : 'gauge-num') +'" style="color:'+colorVar+'">' + pct + '</div>' +
+          (big ? '<div class="overall-label">Integrity Score</div>' : '<div class="gauge-suffix">/ 100</div>') +
+        '</div>' +
+      '</div>' +
+      (title ? '<div class="gauge-title">'+title+'</div>' : '');
+  }
+
+  // ---------------- CHALLENGE 1 ----------------
+  function goToChallenge1(){
+    setStepper(1);
+    resetC1();
+    state.curH = pick(HEADLINES, state.usedH);
+    document.getElementById('c1-headline').textContent = state.curH.headline;
+    document.getElementById('c1-article').textContent = state.curH.article;
+    document.getElementById('c1-reveal').style.display = 'none';
+    document.getElementById('c1-continue-row').style.display = 'none';
+    showScreen('screen-c1');
+  }
+
+  function resetC1(){
+    state.sel1 = {}; state.click1 = null;
+    document.querySelectorAll('#c1-click-choices .choice-btn').forEach(function(b){ b.classList.remove('selected'); });
+    document.getElementById('c1-step-click').classList.add('show');
+    document.getElementById('c1-step-tap').classList.remove('show');
+  }
+
+  window.selectClickChoice = function(btn, val){
+    state.click1 = val;
+    document.querySelectorAll('#c1-click-choices .choice-btn').forEach(function(b){ b.classList.remove('selected'); });
+    btn.classList.add('selected');
+    document.getElementById('c1-step-tap').classList.add('show');
+    renderHeadlineTokens();
+  };
+
+  function renderHeadlineTokens(){
+    var container = document.getElementById('c1-headline');
+    var tokens = state.curH.headline.split(' ');
+    renderTokens(container, tokens, state.curH.badIdx, state.sel1, false, function(i, span){
+      if(state.sel1[i]){ delete state.sel1[i]; span.classList.remove('selected'); }
+      else { state.sel1[i] = true; span.classList.add('selected'); }
+    });
+  }
+
+  window.submitDetection1 = function(){
+    var h = state.curH;
+    var tokens = h.headline.split(' ');
+    renderTokens(document.getElementById('c1-headline'), tokens, h.badIdx, state.sel1, true, null);
+
+    var hits = h.badIdx.filter(function(i){ return state.sel1[i]; }).length;
+    var total = h.badIdx.length;
+
+    state.metrics.accuracy = h.accuracy;
+    state.metrics.reliability = h.reliability;
+    updateMetricsDock();
+
+    var panel = document.getElementById('c1-reveal');
+    panel.innerHTML =
+      '<div class="reveal-grid">' +
+        '<div class="gauge-wrap">' + gaugeHTML(h.accuracy, 'var(--teal)', 'Headline Accuracy') + '</div>' +
+        '<div>' +
+          '<div class="tag-row"><span class="tag">Your click choice: ' + state.click1 + '</span><span class="tag">Detected ' + hits + ' / ' + total + ' red flags</span></div>' +
+          '<p style="margin-top:8px;">' + h.explanation + '</p>' +
+          '<div class="detect-feedback">Highlighted above — <b style="color:var(--teal)">teal</b> = red flags you correctly caught, <b style="color:var(--danger)">dashed red</b> = ones you missed, <b style="color:var(--text-faint)">struck-through</b> = words you flagged that weren&#39;t actually misleading.</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fair-box"><div class="label">A fairer headline</div><div class="fair-headline">' + h.fairHeadline + '</div></div>' +
+      '<div class="takeaway"><div class="label">Key takeaway</div><div>' + h.takeaway + '</div></div>';
+
+    panel.style.display = 'block';
+    panel.classList.remove('sweep'); void panel.offsetWidth; panel.classList.add('sweep');
+
+    document.getElementById('c1-continue-row').style.display = 'flex';
+    document.getElementById('c1-step-tap').querySelector('.btn').disabled = true;
+  };
+
+  // ---------------- CHALLENGE 2 ----------------
+  function goToChallenge2(){
+    setStepper(2);
+    resetC2();
+    state.curE = pick(EMOTIONS, state.usedE);
+    document.getElementById('c2-post').textContent = state.curE.text;
+    document.getElementById('c2-reveal').style.display = 'none';
+    document.getElementById('c2-continue-row').style.display = 'none';
+    showScreen('screen-c2');
+  }
+
+  function resetC2(){
+    state.sel2 = {}; state.feel2 = null;
+    document.querySelectorAll('#c2-feel-choices .choice-btn').forEach(function(b){ b.classList.remove('selected'); });
+    document.getElementById('c2-step-feel').classList.add('show');
+    document.getElementById('c2-step-tap').classList.remove('show');
+    var tapBtn = document.getElementById('c2-step-tap').querySelector('.btn');
+    if(tapBtn) tapBtn.disabled = false;
+    var c1TapBtn = document.getElementById('c1-step-tap').querySelector('.btn');
+    if(c1TapBtn) c1TapBtn.disabled = false;
+  }
+
+  window.selectFeeling = function(btn, val){
+    state.feel2 = val;
+    document.querySelectorAll('#c2-feel-choices .choice-btn').forEach(function(b){ b.classList.remove('selected'); });
+    btn.classList.add('selected');
+    document.getElementById('c2-step-tap').classList.add('show');
+    renderPostTokens();
+  };
+
+  function renderPostTokens(){
+    var container = document.getElementById('c2-post');
+    var tokens = state.curE.text.split(' ');
+    renderTokens(container, tokens, state.curE.badIdx, state.sel2, false, function(i, span){
+      if(state.sel2[i]){ delete state.sel2[i]; span.classList.remove('selected'); }
+      else { state.sel2[i] = true; span.classList.add('selected'); }
+    });
+  }
+
+  window.submitDetection2 = function(){
+    var e = state.curE;
+    var tokens = e.text.split(' ');
+    renderTokens(document.getElementById('c2-post'), tokens, e.badIdx, state.sel2, true, null);
+
+    var hits = e.badIdx.filter(function(i){ return state.sel2[i]; }).length;
+    var total = e.badIdx.length;
+
+    state.metrics.manipulation = e.manipulation;
+    state.metrics.targeting = e.targeting;
+    updateMetricsDock();
+
+    var panel = document.getElementById('c2-reveal');
+    panel.innerHTML =
+      '<div class="reveal-grid">' +
+        '<div class="gauge-wrap">' + gaugeHTML(e.manipulation, 'var(--violet)', 'Emotional Manipulation') + '</div>' +
+        '<div>' +
+          '<div class="tag-row"><span class="tag">You felt: ' + state.feel2 + '</span><span class="tag">Detected ' + hits + ' / ' + total + ' trigger words</span></div>' +
+          '<div class="kv-row"><div class="kv-key">Target audience</div><div class="kv-val">' + e.audience + '</div></div>' +
+          '<div class="kv-row"><div class="kv-key">Intended emotion</div><div class="kv-val">' + e.intendedEmotion + '</div></div>' +
+          '<div class="kv-row"><div class="kv-key">Technique used</div><div class="kv-val">' + e.technique + '</div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fair-box"><div class="label">Neutral rewrite</div><div class="fair-headline">' + e.neutralRewrite + '</div></div>' +
+      '<div class="takeaway"><div class="label">Key takeaway</div><div>' + e.takeaway + '</div></div>';
+
+    panel.style.display = 'block';
+    panel.classList.remove('sweep'); void panel.offsetWidth; panel.classList.add('sweep');
+
+    document.getElementById('c2-continue-row').style.display = 'flex';
+    document.getElementById('c2-step-tap').querySelector('.btn').disabled = true;
+  };
+
+  // ---------------- DASHBOARD ----------------
+  function goToDashboard(){
+    setStepper(3);
+    var m = state.metrics;
+    var overall = Math.round((m.accuracy + m.reliability + (100 - m.manipulation) + (100 - m.targeting)) / 4);
+
+    var overallColor = scoreColor(overall);
+    document.getElementById('overall-gauge').style.background = 'conic-gradient(' + overallColor + ' 0% ' + overall + '%, rgba(255,255,255,0.08) ' + overall + '% 100%)';
+    document.getElementById('overall-num').textContent = overall;
+    document.getElementById('overall-num').style.color = overallColor;
+
+    var blurb = overall >= 65
+      ? "You read past the surface consistently — noticing manufactured urgency and mismatched headlines before reacting."
+      : overall >= 35
+      ? "You caught some manipulation techniques and missed others — a normal starting point, and exactly what this exercise is for."
+      : "Both scenarios today used strong techniques. Missing some is expected; the goal is recognizing the pattern next time.";
+    document.getElementById('overall-blurb').textContent = blurb;
+
+    var concerns = {
+      'Headline exaggeration': 100 - m.accuracy,
+      'Weak source reliability': 100 - m.reliability,
+      'Emotional manipulation': m.manipulation,
+      'Narrow audience targeting': m.targeting
+    };
+    var worstKey = Object.keys(concerns).reduce(function(a,b){ return concerns[a] >= concerns[b] ? a : b; });
+    var redflagDetail = {
+      'Headline exaggeration': 'The headline "' + state.curH.headline + '" scored just ' + state.curH.accuracy + '/100 on accuracy — the gap between what it implied and what the article actually supported was the widest signal of the session.',
+      'Weak source reliability': 'The article behind "' + state.curH.headline + '" scored only ' + state.curH.reliability + '/100 on source reliability — thin sourcing was the clearest warning sign today.',
+      'Emotional manipulation': 'The post you read scored ' + state.curE.manipulation + '/100 on emotional manipulation, using ' + state.curE.technique.toLowerCase() + ' to drive a reaction before you could evaluate the content.',
+      'Narrow audience targeting': 'The post was tightly aimed at "' + state.curE.audience.toLowerCase() + '" — a scored ' + state.curE.targeting + '/100 sign it was built for a specific emotional reaction, not general information.'
+    };
+    document.getElementById('redflag-text').textContent = redflagDetail[worstKey];
+
+    var learned = [
+      'How to compare a headline&#39;s claim against the facts actually reported underneath it.',
+      'Recognizing manufactured urgency, secrecy framing, and scarcity as persuasion tools, not information.',
+      'That "proves," "secretly," "miracle," and "stunned" are common red-flag words in low-quality headlines.',
+      'Pausing on your own emotional reaction as a signal worth investigating, not just a fact you follow.'
+    ];
+    var list = document.getElementById('learned-list');
+    list.innerHTML = '';
+    learned.forEach(function(item){
+      var li = document.createElement('li');
+      li.textContent = item;
+      list.appendChild(li);
+    });
+
+    showScreen('screen-dashboard');
+  }
+
+  // ---------------- REPLAY ----------------
+  window.replay = function(){
+    state.metrics = { accuracy:null, reliability:null, manipulation:null, targeting:null };
+    updateMetricsDock();
+    document.getElementById('metricsDock').classList.remove('show');
+    goToChallenge1();
+  };
+
+  window.goToChallenge1 = goToChallenge1;
+  window.goToChallenge2 = goToChallenge2;
+  window.goToDashboard = goToDashboard;
+
+})();
+</script>
+
+</body>
+</html>
