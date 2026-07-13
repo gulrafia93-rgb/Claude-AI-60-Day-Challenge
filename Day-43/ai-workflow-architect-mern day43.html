@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Workflow Architect — Job-Ready MERN Developer Pipeline</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root[data-theme="dark"]{
+  --bg:#0B0F14; --bg-elev:#121821; --bg-elev-2:#1A222D; --border:#232C38;
+  --text:#E6EDF3; --text-muted:#7E8C9A; --accent:#5EEAD4; --accent-soft:rgba(94,234,212,.12);
+  --accent-2:#F5A524; --success:#4ADE80; --danger:#F87171; --shadow: 0 20px 60px -20px rgba(0,0,0,.6);
+}
+:root[data-theme="light"]{
+  --bg:#F5F7F9; --bg-elev:#FFFFFF; --bg-elev-2:#EEF2F5; --border:#DCE3E9;
+  --text:#10161D; --text-muted:#57646F; --accent:#0C8C7A; --accent-soft:rgba(12,140,122,.10);
+  --accent-2:#B4650E; --success:#178A43; --danger:#C4342B; --shadow: 0 20px 50px -25px rgba(16,22,29,.25);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:'Inter',sans-serif; line-height:1.6;
+  transition:background .3s ease,color .3s ease;
+}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif; margin:0; letter-spacing:-0.01em;}
+code, .mono{font-family:'JetBrains Mono',monospace;}
+a{color:var(--accent);}
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+button{font-family:inherit; cursor:pointer;}
+
+/* ---------- Topbar ---------- */
+.topbar{
+  position:sticky; top:0; z-index:50; background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--border);
+}
+.topbar-inner{display:flex; align-items:center; justify-content:space-between; padding:14px 24px; max-width:1180px; margin:0 auto;}
+.brand{display:flex; align-items:center; gap:10px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px;}
+.brand-dot{width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 12px var(--accent);}
+.topbar-actions{display:flex; gap:8px; align-items:center;}
+.icon-btn{
+  background:var(--bg-elev-2); border:1px solid var(--border); color:var(--text);
+  border-radius:8px; padding:8px 12px; font-size:13px; display:flex; align-items:center; gap:6px;
+  transition:.15s;
+}
+.icon-btn:hover{border-color:var(--accent); color:var(--accent);}
+.overall-progress-chip{
+  display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-muted);
+  background:var(--bg-elev-2); border:1px solid var(--border); padding:6px 12px; border-radius:20px;
+}
+.overall-progress-chip .bar{width:70px; height:5px; background:var(--border); border-radius:4px; overflow:hidden;}
+.overall-progress-chip .fill{height:100%; background:var(--accent); width:0%; transition:width .4s ease;}
+
+/* ---------- Hero ---------- */
+.hero{padding:64px 0 40px; border-bottom:1px solid var(--border); position:relative; overflow:hidden;}
+.hero::before{
+  content:""; position:absolute; top:-120px; right:-120px; width:420px; height:420px; border-radius:50%;
+  background:radial-gradient(circle, var(--accent-soft), transparent 70%); pointer-events:none;
+}
+.hero-eyebrow{
+  font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent); text-transform:uppercase;
+  letter-spacing:.12em; margin-bottom:14px; display:flex; align-items:center; gap:8px;
+}
+.hero-eyebrow::before{content:"▸";}
+.hero h1{font-size:clamp(30px,4.4vw,50px); font-weight:700; max-width:820px; line-height:1.12;}
+.hero p.sub{color:var(--text-muted); font-size:16px; max-width:640px; margin-top:16px;}
+.terminal{
+  margin-top:32px; background:var(--bg-elev); border:1px solid var(--border); border-radius:12px;
+  box-shadow:var(--shadow); max-width:640px; overflow:hidden;
+}
+.terminal-bar{display:flex; gap:6px; padding:10px 14px; border-bottom:1px solid var(--border); background:var(--bg-elev-2);}
+.terminal-bar span{width:10px; height:10px; border-radius:50%; background:var(--border);}
+.terminal-body{padding:18px 20px; font-family:'JetBrains Mono',monospace; font-size:13.5px; min-height:80px;}
+.terminal-body .prompt-line{color:var(--text-muted);}
+.terminal-body .prompt-line b{color:var(--accent);}
+.terminal-output{color:var(--text); white-space:pre-wrap;}
+.cursor{display:inline-block; width:8px; height:15px; background:var(--accent); margin-left:2px; animation:blink 1s step-end infinite; vertical-align:middle;}
+@keyframes blink{50%{opacity:0;}}
+
+.stats-row{display:flex; gap:36px; margin-top:36px; flex-wrap:wrap;}
+.stat b{display:block; font-family:'Space Grotesk',sans-serif; font-size:26px; color:var(--accent);}
+.stat span{font-size:12.5px; color:var(--text-muted);}
+
+/* ---------- Section shell ---------- */
+section.block{padding:56px 0; border-bottom:1px solid var(--border);}
+.block-head{margin-bottom:28px;}
+.block-head .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--accent); text-transform:uppercase; letter-spacing:.1em;}
+.block-head h2{font-size:26px; margin-top:6px;}
+.block-head p{color:var(--text-muted); margin-top:8px; max-width:640px; font-size:14.5px;}
+
+/* ---------- Decision tree ---------- */
+.tree-card{background:var(--bg-elev); border:1px solid var(--border); border-radius:14px; padding:28px; box-shadow:var(--shadow);}
+.tree-q{font-size:17px; font-weight:600; margin-bottom:16px;}
+.tree-options{display:flex; gap:12px; flex-wrap:wrap;}
+.tree-opt{
+  background:var(--bg-elev-2); border:1px solid var(--border); padding:10px 18px; border-radius:9px;
+  font-size:14px; transition:.15s; color:var(--text);
+}
+.tree-opt:hover{border-color:var(--accent); color:var(--accent); transform:translateY(-1px);}
+.tree-path{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:18px;}
+.tree-crumb{font-size:11.5px; font-family:'JetBrains Mono',monospace; background:var(--accent-soft); color:var(--accent); padding:3px 9px; border-radius:6px;}
+.tree-result{
+  background:var(--accent-soft); border:1px solid var(--accent); border-radius:10px; padding:18px 20px; margin-top:6px;
+}
+.tree-result b{color:var(--accent); display:block; margin-bottom:6px; font-family:'Space Grotesk',sans-serif;}
+.tree-restart{margin-top:16px; background:transparent; border:1px solid var(--border); color:var(--text-muted); padding:8px 14px; border-radius:8px; font-size:12.5px;}
+.tree-restart:hover{color:var(--text); border-color:var(--text-muted);}
+
+/* ---------- Pipeline ---------- */
+.pipeline-layout{display:grid; grid-template-columns:230px 1fr; gap:36px; align-items:start;}
+.pipeline-nav{position:sticky; top:74px; display:flex; flex-direction:column; gap:4px;}
+.pnav-item{
+  display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:9px; font-size:12.5px;
+  color:var(--text-muted); border:1px solid transparent; cursor:pointer;
+}
+.pnav-item:hover{background:var(--bg-elev-2);}
+.pnav-item.active{color:var(--accent); border-color:var(--border); background:var(--bg-elev-2);}
+.pnav-ring{width:22px; height:22px; flex:none;}
+.pnav-ring circle{fill:none; stroke-width:3;}
+.pnav-ring .track{stroke:var(--border);}
+.pnav-ring .fill{stroke:var(--accent); stroke-linecap:round; transform:rotate(-90deg); transform-origin:50% 50%; transition:stroke-dashoffset .4s ease;}
+
+.pipeline{position:relative;}
+.spine{position:absolute; left:19px; top:14px; bottom:14px; width:2px; background:var(--border); z-index:0;}
+.stage{position:relative; padding-left:52px; margin-bottom:20px; z-index:1;}
+.stage-node{
+  position:absolute; left:0; top:14px; width:40px; height:40px; border-radius:50%;
+  background:var(--bg-elev); border:2px solid var(--border); display:flex; align-items:center; justify-content:center;
+  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; color:var(--text-muted); z-index:2;
+}
+.stage-node.done{border-color:var(--success); color:var(--success); background:color-mix(in srgb, var(--success) 12%, var(--bg-elev));}
+.stage-card{background:var(--bg-elev); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); overflow:hidden;}
+.stage-head{display:flex; align-items:center; justify-content:space-between; padding:18px 22px; cursor:pointer; gap:14px;}
+.stage-head-left h3{font-size:17px;}
+.stage-head-left .stage-sub{font-size:12.5px; color:var(--text-muted); margin-top:3px;}
+.stage-head-right{display:flex; align-items:center; gap:10px; flex:none;}
+.stage-time-tag{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent-2); background:rgba(245,165,36,.12); padding:3px 9px; border-radius:6px; white-space:nowrap;}
+.star-btn{background:none; border:none; font-size:17px; color:var(--border); line-height:1;}
+.star-btn.active{color:var(--accent-2);}
+.chevron{transition:transform .25s ease; color:var(--text-muted); font-size:13px;}
+.stage-card.open .chevron{transform:rotate(180deg);}
+.stage-body{max-height:0; overflow:hidden; transition:max-height .35s ease;}
+.stage-card.open .stage-body{max-height:6000px;}
+.stage-body-inner{padding:2px 22px 26px;}
+
+.mini-progress{height:5px; background:var(--border); border-radius:4px; overflow:hidden; margin-top:10px; width:140px;}
+.mini-progress .fill{height:100%; background:var(--success); width:0%; transition:width .3s ease;}
+
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:18px;}
+.subhead{font-size:11.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent); font-family:'JetBrains Mono',monospace; margin-bottom:10px;}
+ul.plain{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
+ul.plain li{font-size:13.8px; padding-left:16px; position:relative; color:var(--text);}
+ul.plain li::before{content:"—"; position:absolute; left:0; color:var(--text-muted);}
+.task-list li{display:flex; gap:9px; align-items:flex-start; padding-left:0;}
+.task-list li::before{content:none;}
+.task-list input{margin-top:3px; accent-color:var(--accent);}
+.task-list label{font-size:13.8px;}
+.task-list li.checked label{color:var(--text-muted); text-decoration:line-through;}
+
+.tool-card{background:var(--bg-elev-2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:10px;}
+.tool-card .tool-name{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14.5px;}
+.tool-card .tool-why{font-size:13px; color:var(--text-muted); margin-top:4px;}
+.tool-card .tool-alt{font-size:12px; margin-top:8px; color:var(--accent);}
+.tool-card .tool-alt b{color:var(--text-muted); font-weight:500;}
+
+.prompt-box{
+  background:var(--bg); border:1px solid var(--border); border-radius:9px; padding:12px 14px; margin-bottom:10px;
+  font-family:'JetBrains Mono',monospace; font-size:12.5px; position:relative; color:var(--text);
+}
+.copy-btn{
+  position:absolute; top:8px; right:8px; background:var(--bg-elev-2); border:1px solid var(--border); color:var(--text-muted);
+  font-size:10.5px; padding:3px 8px; border-radius:6px;
+}
+.copy-btn:hover{color:var(--accent); border-color:var(--accent);}
+.copy-btn.copied{color:var(--success); border-color:var(--success);}
+
+.callout{border-radius:10px; padding:14px 16px; font-size:13.3px; margin-top:8px;}
+.callout.mistake{background:rgba(248,113,113,.08); border:1px solid rgba(248,113,113,.35);}
+.callout.mistake b{color:var(--danger);}
+.callout.output{background:rgba(94,234,212,.06); border:1px solid var(--border);}
+.callout.output b{color:var(--accent);}
+.tips-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;}
+.tip-chip{background:var(--accent-soft); color:var(--accent); font-size:12px; padding:6px 12px; border-radius:20px;}
+
+.notes-area{margin-top:18px;}
+textarea.notes{
+  width:100%; min-height:80px; background:var(--bg); border:1px solid var(--border); border-radius:9px;
+  color:var(--text); font-family:'Inter',sans-serif; font-size:13px; padding:10px 12px; resize:vertical;
+}
+.save-hint{font-size:11px; color:var(--text-muted); margin-top:4px;}
+
+/* ---------- Comparison table ---------- */
+.compare-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:12px;}
+table.compare{width:100%; border-collapse:collapse; font-size:13.3px; min-width:760px;}
+table.compare th{text-align:left; background:var(--bg-elev-2); padding:12px 16px; font-family:'Space Grotesk',sans-serif; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-muted);}
+table.compare td{padding:12px 16px; border-top:1px solid var(--border);}
+table.compare tr td:first-child{font-weight:600; color:var(--accent); font-family:'JetBrains Mono',monospace; font-size:12.5px;}
+
+/* ---------- Bookmarks bar ---------- */
+.bookmarks-bar{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;}
+.bookmark-pill{
+  background:var(--bg-elev-2); border:1px solid var(--accent-2); color:var(--accent-2); font-size:12px;
+  padding:6px 12px; border-radius:20px;
+}
+.empty-note{color:var(--text-muted); font-size:13px;}
+
+/* ---------- Conclusion grid ---------- */
+.conclude-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+.conclude-card{background:var(--bg-elev); border:1px solid var(--border); border-radius:14px; padding:22px 24px; box-shadow:var(--shadow);}
+.conclude-card h3{font-size:15.5px; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
+.conclude-card h3::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--accent);}
+.keyword-chip{display:inline-block; background:var(--accent-soft); color:var(--accent); font-size:12px; padding:5px 11px; border-radius:20px; margin:0 6px 6px 0; font-family:'JetBrains Mono',monospace;}
+
+footer{padding:36px 0; text-align:center; color:var(--text-muted); font-size:12.5px;}
+
+@media (max-width:880px){
+  .pipeline-layout{grid-template-columns:1fr;}
+  .pipeline-nav{position:static; flex-direction:row; overflow-x:auto; gap:6px; padding-bottom:6px;}
+  .pnav-item{flex:none;}
+  .grid-2{grid-template-columns:1fr;}
+  .conclude-grid{grid-template-columns:1fr;}
+}
+@media print{
+  .topbar, .icon-btn, .tree-restart, .pipeline-nav, .copy-btn, .star-btn{display:none !important;}
+  .stage-body{max-height:none !important;}
+  section.block{page-break-inside:avoid; padding:20px 0;}
+  body{background:#fff; color:#000;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="brand-dot"></span> AI Workflow Architect</div>
+    <div class="topbar-actions">
+      <div class="overall-progress-chip">
+        <span id="overallLabel">0% complete</span>
+        <div class="bar"><div class="fill" id="overallFill"></div></div>
+      </div>
+      <button class="icon-btn" id="themeToggle">◐ Theme</button>
+      <button class="icon-btn" id="printBtn">⎙ Print guide</button>
+    </div>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow">Software Development · Full-Stack / MERN · Job-Ready Pipeline</div>
+    <h1>From "I know React" to hired — the complete MERN developer build pipeline.</h1>
+    <p class="sub">An end-to-end, AI-assisted workflow that takes you from career planning through frontend, backend, integration, testing, deployment, portfolio, and interviews — with the right tool, prompt, and pitfall for every stage.</p>
+
+    <div class="terminal">
+      <div class="terminal-bar"><span></span><span></span><span></span></div>
+      <div class="terminal-body">
+        <div class="prompt-line"><b>rafia@career</b> ~ % <span id="typedLine"></span><span class="cursor"></span></div>
+        <div class="terminal-output" id="typedOutput"></div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat"><b>8</b><span>pipeline stages</span></div>
+      <div class="stat"><b>30+</b><span>AI tools mapped</span></div>
+      <div class="stat"><b>24</b><span>ready-to-use prompts</span></div>
+      <div class="stat"><b>3–5 mo</b><span>realistic timeline</span></div>
+    </div>
+  </div>
+</div>
+
+<section class="block" id="decision-section">
+  <div class="wrap">
+    <div class="block-head">
+      <div class="eyebrow">Start here</div>
+      <h2>Which stage should you actually start at?</h2>
+      <p>A quick decision tree so you don't waste weeks on a stage you've already outgrown, or skip one you haven't.</p>
+    </div>
+    <div class="tree-card">
+      <div class="tree-path" id="treePath"></div>
+      <div id="treeQuestion"></div>
+      <div class="tree-result" id="treeResult" style="display:none;"></div>
+      <button class="tree-restart" id="treeRestart" style="display:none;">↺ Start over</button>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="pipeline-section">
+  <div class="wrap">
+    <div class="block-head">
+      <div class="eyebrow">The pipeline</div>
+      <h2>Eight stages, planning to placement</h2>
+      <p>Expand a stage for its objectives, tasks, AI tool picks, prompts, best practices, common mistakes, expected outputs, and efficiency tips. Check off tasks and jot notes as you go — everything saves locally in your browser.</p>
+    </div>
+    <div class="pipeline-layout">
+      <nav class="pipeline-nav" id="pipelineNav"></nav>
+      <div class="pipeline">
+        <div class="spine"></div>
+        <div id="pipelineStages"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="compare-section">
+  <div class="wrap">
+    <div class="block-head">
+      <div class="eyebrow">Tool comparison</div>
+      <h2>Core AI stack, side by side</h2>
+      <p>The tools that show up again and again across the pipeline — what each is actually best for, and what to reach for if you don't have access to it.</p>
+    </div>
+    <div class="compare-wrap">
+      <table class="compare">
+        <thead><tr><th>Tool</th><th>Best for</th><th>Primary stage</th><th>Price tier</th><th>Alternative</th></tr></thead>
+        <tbody id="compareBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="bookmarks-section">
+  <div class="wrap">
+    <div class="block-head">
+      <div class="eyebrow">Your bookmarks</div>
+      <h2>Saved stages</h2>
+      <p>Star a stage in the pipeline above to pin it here for quick return trips.</p>
+    </div>
+    <div class="bookmarks-bar" id="bookmarksBar"><span class="empty-note">No bookmarks yet — click the star on any stage.</span></div>
+  </div>
+</section>
+
+<section class="block" id="conclude-section">
+  <div class="wrap">
+    <div class="block-head">
+      <div class="eyebrow">Wrap-up</div>
+      <h2>Summary, stack, and what's next</h2>
+    </div>
+    <div class="conclude-grid">
+      <div class="conclude-card">
+        <h3>Workflow summary</h3>
+        <p style="font-size:13.6px; color:var(--text-muted);">This pipeline moves through Foundation → Frontend → Backend → Full-Stack Integration → Testing → Deployment → Portfolio → Job Applications. Each stage builds the evidence the next one needs: the flagship project scoped in Stage 1 becomes the frontend built in Stage 2, the API in Stage 3, the working app in Stage 4, and the headline case study in Stage 7. Realistic pace is 3–5 months at 15–20 focused hours/week, faster with prior JS experience.</p>
+      </div>
+      <div class="conclude-card">
+        <h3>Recommended AI stack</h3>
+        <ul class="plain">
+          <li>Claude / ChatGPT — reasoning, code review, architecture, writing</li>
+          <li>GitHub Copilot or Cursor — in-editor autocomplete and refactors</li>
+          <li>v0.dev / Claude Artifacts — fast UI scaffolding</li>
+          <li>Postman + AI test generation — API design and verification</li>
+          <li>Vercel + Render/Railway + MongoDB Atlas — deployment stack</li>
+        </ul>
+      </div>
+      <div class="conclude-card">
+        <h3>Learning resources</h3>
+        <ul class="plain">
+          <li>roadmap.sh — Frontend & Backend roadmaps</li>
+          <li>The Odin Project — full MERN-adjacent curriculum</li>
+          <li>MDN Web Docs — JS/DOM reference of record</li>
+          <li>freeCodeCamp — MERN & API project certifications</li>
+          <li>Traversy Media / Academind — project-based video courses</li>
+        </ul>
+      </div>
+      <div class="conclude-card">
+        <h3>Communities</h3>
+        <ul class="plain">
+          <li>r/webdev, r/reactjs, r/node — active troubleshooting</li>
+          <li>Reactiflux & freeCodeCamp Discord servers</li>
+          <li>DEV.to — build-in-public and technical writing</li>
+          <li>Local/Pakistan tech Discords and university dev clubs</li>
+        </ul>
+      </div>
+      <div class="conclude-card">
+        <h3>Search keywords</h3>
+        <div>
+          <span class="keyword-chip">MERN developer remote</span>
+          <span class="keyword-chip">junior full stack developer</span>
+          <span class="keyword-chip">React developer entry level</span>
+          <span class="keyword-chip">Node.js Express developer jobs</span>
+          <span class="keyword-chip">frontend developer remote Pakistan</span>
+          <span class="keyword-chip">full stack internship remote</span>
+        </div>
+      </div>
+      <div class="conclude-card">
+        <h3>Additional AI prompts</h3>
+        <ul class="plain">
+          <li>"Grade my GitHub profile like a hiring manager would in 30 seconds — be specific."</li>
+          <li>"Turn this week's git log into a build-in-public LinkedIn update."</li>
+          <li>"Simulate a system-design-lite interview for a junior MERN role using my flagship project."</li>
+        </ul>
+      </div>
+      <div class="conclude-card">
+        <h3>Future automation opportunities</h3>
+        <ul class="plain">
+          <li>Auto-generate weekly progress reports from git commit history</li>
+          <li>AI code-review bot wired into CI on every pull request</li>
+          <li>JD-to-resume matching script that flags missing keywords</li>
+          <li>Auto-drafted LinkedIn posts triggered by new deploys</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>Built with the AI Workflow Architect · Your progress, notes, and bookmarks are stored only in this browser.</footer>
+
+<script>
+/* ---------------- DATA ---------------- */
+const STAGES = [
+  {
+    id:"foundation", title:"Foundation & Career Roadmap Planning", sub:"Turn a vague goal into a scoped 90-day plan", time:"3–5 days",
+    objectives:[
+      "Define the target role and a 90-day milestone plan",
+      "Audit current skills against real MERN job descriptions",
+      "Set up a public build-in-progress trail (GitHub + LinkedIn)",
+      "Choose one flagship project idea to anchor the whole roadmap"
+    ],
+    tasks:[
+      "Collect 15–20 real MERN job postings and list repeated required skills",
+      "Build a Have / Learning / Missing skill matrix",
+      "Set a weekly time budget and calendar blocks",
+      "Create consistent GitHub + LinkedIn profiles and bio",
+      "Scope one flagship project that solves a real, specific problem"
+    ],
+    tools:[
+      {name:"Claude / ChatGPT", why:"Fast pattern extraction across many job postings at once.", alt:"Perplexity for live search"},
+      {name:"Notion AI", why:"Turns messy notes into a structured skill matrix instantly.", alt:"Google Sheets + Gemini"},
+      {name:"roadmap.sh", why:"Free, community-vetted MERN roadmap to benchmark your plan against.", alt:"freeCodeCamp curriculum"},
+      {name:"Claude (project scoping)", why:"Strong at turning a vague idea into a scoped MVP spec.", alt:"ChatGPT o-series"}
+    ],
+    prompts:[
+      "Analyze these 15 job descriptions [paste] and list the 10 most repeated technical skills, ranked by frequency.",
+      "I know [X, Y] but not [Z]. Turn this into a 90-day learning roadmap with weekly milestones.",
+      "Take this vague app idea: [idea]. Scope it into a v1 MVP with 5 core features max."
+    ],
+    practices:[
+      "Anchor the roadmap to real job postings, not generic course syllabi",
+      "Timebox planning to 3–5 days max — momentum beats a perfect plan",
+      "Pick a flagship project that solves a real, specific problem",
+      "Review and prune the roadmap every 2 weeks"
+    ],
+    mistakes:["Choosing a generic project (todo/weather app) that can't demonstrate real skill","Spending weeks planning instead of writing code","Postponing portfolio and soft-skill prep until 'after coding is done'"],
+    outputs:["90-day roadmap document","Skill gap matrix","Scoped MVP spec","GitHub/LinkedIn shells ready"],
+    tips:["Batch job research in one sitting","Use a public Notion roadmap as accountability","Commit to 3 non-negotiable weekly hours minimum"]
+  },
+  {
+    id:"frontend", title:"Frontend Mastery — React & Modern JS", sub:"Build real fluency, not copy-paste familiarity", time:"3–4 weeks",
+    objectives:[
+      "Solidify JS ES6+ fundamentals (closures, async/await, array methods)",
+      "Build fluency in React hooks, patterns, and state management",
+      "Style efficiently with Tailwind CSS and responsive design",
+      "Ship 2–3 small UI projects showing real range"
+    ],
+    tasks:[
+      "Rebuild 5 classic JS interview problems with ES6+ only",
+      "Build a component library: buttons, modals, forms, cards",
+      "Convert a static design into a fully responsive Tailwind build",
+      "Implement global state with Context API, then with Zustand/Redux",
+      "Add keyboard nav and ARIA basics to every component"
+    ],
+    tools:[
+      {name:"Claude / ChatGPT (code review)", why:"Catches anti-patterns and explains the reasoning, not just the fix.", alt:"CodeRabbit for automated PR review"},
+      {name:"v0.dev / Claude Artifacts", why:"Rapid UI scaffolding from a text prompt to iterate on layout fast.", alt:"Galileo AI"},
+      {name:"GitHub Copilot", why:"In-editor autocomplete speeds up repetitive boilerplate.", alt:"Cursor"},
+      {name:"shadcn/ui, Tailwind UI", why:"Production-grade patterns to learn from, not copy blindly.", alt:"Headless UI"}
+    ],
+    prompts:[
+      "Review this React component for anti-patterns, unnecessary re-renders, and accessibility gaps: [code]",
+      "Generate a responsive pricing page in Tailwind CSS with 3 tiers and a monthly/yearly toggle.",
+      "Explain useMemo vs useCallback with a real example from this component: [code]"
+    ],
+    practices:["Type real code by hand before letting AI autocomplete it","Build one component 3 ways to understand trade-offs","Keep components small and single-purpose","Write a short README explaining state choices per project"],
+    mistakes:["Copy-pasting AI components without understanding hook dependencies","Over-engineering state management for a simple 3-page app","Ignoring mobile breakpoints until the very end"],
+    outputs:["Reusable component library repo","2–3 polished UI projects","Documented state-management notes"],
+    tips:["Sandbox every new hook before using it in a real project","Explain a component out loud on camera to test true understanding"]
+  },
+  {
+    id:"backend", title:"Backend & API Development", sub:"Node, Express, and MongoDB like a production service", time:"3–4 weeks",
+    objectives:["Design and build a RESTful API with proper resource modeling","Implement authentication and role-based authorization","Model data correctly in MongoDB (embedding vs referencing)","Handle errors, validation, and logging like production"],
+    tasks:["Sketch an ER-style schema before writing Mongoose models","Build CRUD endpoints with input validation (Joi/Zod)","Implement JWT auth with refresh tokens and route guards","Add centralized error-handling middleware","Document every endpoint in a Postman/Thunder Client collection"],
+    tools:[
+      {name:"Claude / ChatGPT (schema design)", why:"Strong at reasoning through embed vs reference trade-offs.", alt:"dbdiagram.io + manual reasoning"},
+      {name:"Postman AI", why:"Auto-drafts request bodies and edge cases for testing.", alt:"Thunder Client"},
+      {name:"GitHub Copilot", why:"Speeds up repetitive CRUD boilerplate.", alt:"Cursor"},
+      {name:"Swagger / AI-generated docs", why:"Produces shareable API documentation automatically.", alt:"Postman docs"}
+    ],
+    prompts:["Design a MongoDB schema for a [domain] app with these entities: [list]. Recommend embedding vs referencing for each relationship and explain why.","Generate Joi validation schemas for this Express route body: [code]","Review this Express error-handling middleware for gaps: [code]"],
+    practices:["Version your API from day one (/api/v1/...)","Never trust client input — validate server-side too","Separate routes, controllers, services, and models","Log errors with enough context to debug without redeploying"],
+    mistakes:["Storing plaintext passwords or weak JWT secrets","Over-nesting MongoDB documents, making updates painful","Skipping rate limiting and basic security headers"],
+    outputs:["Documented REST API","Auth system with roles","Postman collection","ER diagram"],
+    tips:["Write API docs before the frontend needs them","Explicitly test auth edge cases: expired tokens, wrong roles"]
+  },
+  {
+    id:"integration", title:"Full-Stack Integration", sub:"Wire the flagship project end to end", time:"2–3 weeks",
+    objectives:["Connect React frontend to Express/MongoDB backend end-to-end","Handle real states: loading, error, empty, optimistic updates","Implement one non-trivial standout feature","Reach a genuinely deployable v1"],
+    tasks:["Set up a shared types/interfaces layer between frontend and backend","Wire the full auth flow: signup, login, protected routes","Add a global error boundary and toast/notification system","Implement the one 'hero' feature that makes the project stand out","Write integration tests for the 3 most critical user flows"],
+    tools:[
+      {name:"Claude (architecture review)", why:"Good at spotting coupling issues across a full-stack codebase.", alt:"ChatGPT with full repo context"},
+      {name:"Postman / Insomnia", why:"Verifies backend contracts before wiring the frontend.", alt:"curl + manual checks"},
+      {name:"TanStack Query", why:"Removes most manual loading/error state boilerplate.", alt:"SWR"},
+      {name:"Sentry (free tier)", why:"Catches real runtime errors after deploy.", alt:"LogRocket"}
+    ],
+    prompts:["Here's my API response shape and my React component. Help me wire them together with proper loading/error/empty states: [code]","Review this full-stack feature end-to-end for security or logic gaps: [frontend code] [backend code]","Suggest one feature that would make this [project type] stand out to a recruiter, given: [existing features]"],
+    practices:["Build the 'boring' flows (auth, CRUD) fully before the flashy feature","Keep a running CHANGELOG.md as you integrate","Test on a throttled network to catch missing loading states","Commit in small, logically-scoped chunks"],
+    mistakes:["Wiring the frontend before the backend contract is stable","Skipping loading/error states because it 'works on my machine'","Letting the flagship feature scope creep past the original MVP"],
+    outputs:["Fully wired MERN app (v1 deployable)","Integration test suite","CHANGELOG"],
+    tips:["Demo the app to a non-technical friend and watch where they get confused"]
+  },
+  {
+    id:"testing", title:"Testing & Debugging", sub:"Catch regressions before production does", time:"1–2 weeks",
+    objectives:["Establish a testing pyramid sized for a solo project","Catch regressions before they reach production","Build real debugging fluency, not AI-dependency","Harden the app against common security issues"],
+    tasks:["Unit test core utilities, reducers, and hooks","Write API integration tests for auth and top-risk endpoints","Add a basic CI workflow that runs tests on every push","Run a manual OWASP top-10 pass against the API","Fix at least 3 real bugs, documenting the root cause"],
+    tools:[
+      {name:"Jest + React Testing Library", why:"The standard, well-documented pairing for MERN frontend tests.", alt:"Vitest"},
+      {name:"Claude / ChatGPT (test generation)", why:"Drafts test scaffolds fast, freeing time for edge cases.", alt:"Copilot inline suggestions"},
+      {name:"GitHub Actions", why:"Free CI that's a real, recruiter-visible signal in the repo.", alt:"CircleCI"},
+      {name:"OWASP ZAP (basic scan)", why:"Free automated pass for common API vulnerabilities.", alt:"Manual checklist review"}
+    ],
+    prompts:["Write Jest + RTL tests for this component, covering loading, error, and success states: [code]","Given this Express route, list realistic edge cases and security issues an attacker might exploit: [code]","I'm getting this error: [error]. Here's the relevant code: [code]. Walk me through likely root causes before giving a fix."],
+    practices:["Ask AI to explain root cause before applying any fix","Prioritize tests for auth and data-mutation paths","Keep CI fast so it's actually used","Reproduce every bug locally before calling it fixed"],
+    mistakes:["Chasing 100% coverage instead of the highest-risk paths","Accepting AI-suggested fixes without understanding why the bug happened","Never testing what happens when the API is down or slow"],
+    outputs:["Test suite with meaningful coverage","Passing CI pipeline","Documented bug-fix log"],
+    tips:["Keep a personal 'bugs I've solved' log — it's great interview material later"]
+  },
+  {
+    id:"deployment", title:"DevOps & Deployment", sub:"Make shipping repeatable, not a one-off event", time:"3–5 days",
+    objectives:["Deploy the full MERN app to production-grade hosting","Set up environment configs across dev/staging/prod","Add monitoring so you know when something breaks","Make deployment repeatable via CI/CD"],
+    tasks:["Deploy frontend (Vercel/Netlify) and backend (Render/Railway) separately","Move all secrets to environment variables, never committed","Set up MongoDB Atlas with proper network access rules","Add uptime monitoring and basic error alerting","Write a one-command or CI-driven deploy process"],
+    tools:[
+      {name:"Vercel / Netlify", why:"Zero-config, free-tier friendly React hosting with instant previews.", alt:"Cloudflare Pages"},
+      {name:"Render / Railway", why:"Simplest free/low-cost Node + MongoDB-friendly hosting for solo devs.", alt:"Fly.io"},
+      {name:"MongoDB Atlas", why:"Managed, free-tier database with built-in backups.", alt:"Self-hosted MongoDB (not recommended solo)"},
+      {name:"Claude / ChatGPT (CI/CD config)", why:"Writes correct YAML faster than trial-and-error.", alt:"Adapt a template manually"}
+    ],
+    prompts:["Write a GitHub Actions workflow that runs tests and deploys this Node app to Render on push to main.","Review this .env setup and deployment config for security issues before I go live: [config]","My deployed API returns CORS errors from my frontend but works locally — what are the likely causes?"],
+    practices:["Never commit .env files; use a documented .env.example","Set up staging before touching production configs","Enable HTTPS and explicit CORS origins, never wildcard in production","Add a simple uptime check"],
+    mistakes:["Hardcoding API URLs instead of environment variables","Leaving default, wide-open MongoDB Atlas network rules","Treating deployment as one-time instead of repeatable"],
+    outputs:["Live production URL","CI/CD pipeline","Monitoring dashboard","Documented deploy process"],
+    tips:["Deploy early and often, even an unfinished v0 — smaller surface area is easier to debug"]
+  },
+  {
+    id:"portfolio", title:"Portfolio & Personal Branding", sub:"Package the work so it passes a 10-second scan", time:"1 week",
+    objectives:["Package finished projects into a scannable portfolio","Build a consistent, credible GitHub and LinkedIn presence","Turn build-in-public progress into real content","Prepare case-study writeups, not just project links"],
+    tasks:["Build a portfolio site with problem/solution framing for 2–3 projects","Write a case study: problem, decisions, trade-offs, result","Clean up GitHub: pinned repos, strong READMEs, consistent history","Post 3–5 build-in-public updates on LinkedIn","Get 2–3 people to review the portfolio and resume"],
+    tools:[
+      {name:"Claude / ChatGPT (case studies)", why:"Turns rough project notes into a compelling structured narrative.", alt:"Notion AI"},
+      {name:"v0.dev / Claude Artifacts", why:"Fast portfolio site scaffolding to customize further.", alt:"Framer / Webflow templates"},
+      {name:"Grammarly", why:"Catches tone and clarity issues in posts and READMEs.", alt:"Hemingway Editor"},
+      {name:"Canva (AI features)", why:"Quick, professional visuals for thumbnails and social posts.", alt:"Figma"}
+    ],
+    prompts:["Turn these rough notes about my project into a case study: problem, approach, key decisions, result: [notes]","Write 3 LinkedIn build-in-public posts based on this week's progress: [notes], in a genuine, non-salesy tone.","Review this README for clarity for a recruiter skimming it in under a minute: [README]"],
+    practices:["Lead every project with the problem it solves, not the stack","Keep the portfolio to your 2–3 best projects","Make every README answer: what, why, how to run, what's next","Be specific about individual contribution on collaborative projects"],
+    mistakes:["Listing tech stacks with no context on the problem solved","Portfolio sites that are slow or not mobile-friendly","Generic 'excited to share' posts with no real substance"],
+    outputs:["Live portfolio site","Polished GitHub profile","1 detailed case study","3–5 LinkedIn posts"],
+    tips:["Ask a non-technical friend to read your case study — if they can't follow the problem, rewrite it"]
+  },
+  {
+    id:"jobsearch", title:"Job Application & Interview Prep", sub:"Apply with evidence, interview with reasoning", time:"2–6 weeks (ongoing)",
+    objectives:["Target and apply to roles matching the real skill profile built","Prepare for technical interviews (practical MERN + light DSA)","Prepare for behavioral and light system-design conversations","Evaluate and negotiate offers with clear criteria"],
+    tasks:["Tailor resume and cover letter per application using Stage 1's JD analysis","Practice 10–15 common MERN/JS interview questions out loud","Run 2–3 mock interviews (peer, mentor, or AI-simulated)","Prepare a 2-minute 'walk me through a project' narrative","Build a simple tracker for applications and interview stages"],
+    tools:[
+      {name:"Claude / ChatGPT (mock interviews)", why:"Simulates technical and behavioral Q&A on demand, unlimited practice.", alt:"Pramp (live peer mock interviews)"},
+      {name:"Claude / ChatGPT (resume tailoring)", why:"Maps your experience language to a specific JD quickly.", alt:"Teal (resume tracking + tailoring)"},
+      {name:"LeetCode (easy/medium)", why:"Covers the practical DSA slice actually asked in most MERN interviews.", alt:"NeetCode roadmap"},
+      {name:"Indeed / LinkedIn Jobs", why:"Primary sources for real, current MERN openings.", alt:"Wellfound for startups"}
+    ],
+    prompts:["Act as a technical interviewer for a MERN developer role. Ask me 5 questions of increasing difficulty about React and Node, one at a time, and give feedback after each answer.","Tailor this resume bullet to this job description, keeping it truthful: resume: [bullet], JD: [text]","Help me structure a 2-minute answer to 'walk me through a project you're proud of' for this project: [notes]"],
+    practices:["Apply with tailored materials to fewer roles rather than mass-applying","Practice explaining trade-offs, not just syntax","Track every application stage so follow-ups never get missed","Ask about team structure and mentorship in interviews"],
+    mistakes:["Memorizing solutions instead of practicing reasoning out loud","Resume bullets listing tech with no measurable impact","Going in without 2–3 thoughtful questions for the interviewer"],
+    outputs:["Tailored application materials","Interview practice log","Application tracker","Refined project narrative"],
+    tips:["Debrief after every interview — treat the job search like an iterative build"]
+  }
+];
+
+const COMPARE_ROWS = [
+  ["Claude / ChatGPT","Reasoning, code review, writing, planning","All stages","Free–$20/mo","Gemini"],
+  ["GitHub Copilot / Cursor","In-editor autocomplete & refactors","Frontend, Backend","$10–20/mo","Codeium (free)"],
+  ["v0.dev / Claude Artifacts","Fast UI scaffolding from text prompts","Frontend, Portfolio","Free tier available","Galileo AI"],
+  ["Postman + AI test gen","API design, requests, edge-case drafts","Backend, Integration","Free tier available","Thunder Client"],
+  ["Vercel / Render / Atlas","Deployment & managed database hosting","Deployment","Free tier available","Netlify / Railway / Fly.io"],
+  ["GitHub Actions","Free CI for tests & deploys","Testing, Deployment","Free for public repos","CircleCI"]
+];
+
+const TREE = {
+  start:{
+    q:"Do you already know JavaScript ES6+ fundamentals well (closures, async/await, array methods)?",
+    options:[
+      {label:"No, I need to build that first", next:"needsJS"},
+      {label:"Yes, I'm solid on JS", next:"builtApp"}
+    ]
+  },
+  needsJS:{
+    result:"Start at Stage 2 — Frontend Mastery. Spend your first 1–2 weeks specifically on JS ES6+ fundamentals before touching React deeply. Delay flagship project scoping until fundamentals feel automatic."
+  },
+  builtApp:{
+    q:"Have you already built and deployed at least one full-stack app end to end?",
+    options:[
+      {label:"No, never shipped one fully", next:"noFullStack"},
+      {label:"Yes, at least one is live", next:"hasPortfolio"}
+    ]
+  },
+  noFullStack:{
+    result:"Work through Stages 1–4 in order. Your priority is completing one full loop — planning, frontend, backend, integration — end to end before optimizing anything. A finished, deployed v1 beats a polished half-built app."
+  },
+  hasPortfolio:{
+    q:"Do you have a live portfolio site and a tailored resume ready to send?",
+    options:[
+      {label:"No, that's missing", next:"needsPortfolio"},
+      {label:"Yes, both are ready", next:"readyToApply"}
+    ]
+  },
+  needsPortfolio:{
+    result:"Jump to Stage 7 — Portfolio & Personal Branding, then move into Stage 8. Your technical foundation sounds solid; the gap is packaging it so recruiters can evaluate it in seconds."
+  },
+  readyToApply:{
+    result:"You're close to job-ready. Focus on Stage 8 — Job Application & Interview Prep. Spend most new effort on tailored applications, mock interviews, and practicing your project narrative out loud."
+  }
+};
+
+/* ---------------- STATE ---------------- */
+const LS_KEYS = {progress:"mernwf_progress", notes:"mernwf_notes", bookmarks:"mernwf_bookmarks", theme:"mernwf_theme", open:"mernwf_open"};
+function loadJSON(key, fallback){ try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; } }
+function saveJSON(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+
+let progress = loadJSON(LS_KEYS.progress, {});   // { stageId: { taskIndex: true } }
+let notes = loadJSON(LS_KEYS.notes, {});          // { stageId: "text" }
+let bookmarks = loadJSON(LS_KEYS.bookmarks, {});  // { stageId: true }
+let openState = loadJSON(LS_KEYS.open, {});       // { stageId: true }
+
+/* ---------------- THEME ---------------- */
+function applyTheme(t){ document.documentElement.setAttribute("data-theme", t); saveJSON(LS_KEYS.theme, t); }
+applyTheme(loadJSON(LS_KEYS.theme, "dark"));
+document.getElementById("themeToggle").addEventListener("click", ()=>{
+  const cur = document.documentElement.getAttribute("data-theme");
+  applyTheme(cur === "dark" ? "light" : "dark");
+});
+document.getElementById("printBtn").addEventListener("click", ()=>{
+  document.querySelectorAll(".stage-card").forEach(c=>c.classList.add("open"));
+  setTimeout(()=>window.print(), 80);
+});
+
+/* ---------------- HERO TERMINAL TYPE ---------------- */
+(function typeHero(){
+  const cmd = "npm run career -- --stack=MERN --goal=job-ready";
+  const output = "> Loading 8-stage pipeline: foundation, frontend, backend, integration, testing, deployment, portfolio, job-search...\n> Ready.";
+  const cmdEl = document.getElementById("typedLine");
+  const outEl = document.getElementById("typedOutput");
+  let i = 0;
+  function typeCmd(){
+    if(i <= cmd.length){ cmdEl.textContent = cmd.slice(0,i); i++; setTimeout(typeCmd, 28); }
+    else{ setTimeout(typeOut, 300); }
+  }
+  let j = 0;
+  function typeOut(){
+    if(j <= output.length){ outEl.textContent = output.slice(0,j); j++; setTimeout(typeOut, 8); }
+  }
+  typeCmd();
+})();
+
+/* ---------------- DECISION TREE ---------------- */
+let treeHistory = [];
+function renderTree(nodeKey){
+  const node = TREE[nodeKey];
+  const pathEl = document.getElementById("treePath");
+  const qEl = document.getElementById("treeQuestion");
+  const resultEl = document.getElementById("treeResult");
+  const restartBtn = document.getElementById("treeRestart");
+
+  pathEl.innerHTML = treeHistory.map(h=>`<span class="tree-crumb">${h}</span>`).join("");
+
+  if(node.result){
+    qEl.style.display = "none";
+    resultEl.style.display = "block";
+    resultEl.innerHTML = `<b>Recommendation</b>${node.result}`;
+    restartBtn.style.display = "inline-block";
+  } else {
+    resultEl.style.display = "none";
+    restartBtn.style.display = "none";
+    qEl.style.display = "block";
+    qEl.innerHTML = `<div class="tree-q">${node.q}</div><div class="tree-options">${
+      node.options.map(o=>`<button class="tree-opt" data-next="${o.next}" data-label="${o.label}">${o.label}</button>`).join("")
+    }</div>`;
+    qEl.querySelectorAll(".tree-opt").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        treeHistory.push(btn.dataset.label);
+        renderTree(btn.dataset.next);
+      });
+    });
+  }
+}
+document.getElementById("treeRestart").addEventListener("click", ()=>{ treeHistory = []; renderTree("start"); });
+renderTree("start");
+
+/* ---------------- PIPELINE RENDER ---------------- */
+const nav = document.getElementById("pipelineNav");
+const stagesWrap = document.getElementById("pipelineStages");
+
+function stageProgress(stageId, taskCount){
+  const p = progress[stageId] || {};
+  const done = Object.values(p).filter(Boolean).length;
+  return taskCount ? Math.round((done/taskCount)*100) : 0;
+}
+
+function updateOverall(){
+  let totalTasks = 0, totalDone = 0;
+  STAGES.forEach(s=>{
+    totalTasks += s.tasks.length;
+    const p = progress[s.id] || {};
+    totalDone += Object.values(p).filter(Boolean).length;
+  });
+  const pct = totalTasks ? Math.round((totalDone/totalTasks)*100) : 0;
+  document.getElementById("overallFill").style.width = pct + "%";
+  document.getElementById("overallLabel").textContent = pct + "% complete";
+}
+
+function renderNav(){
+  nav.innerHTML = STAGES.map((s,idx)=>{
+    const pct = stageProgress(s.id, s.tasks.length);
+    const r = 8, c = 2*Math.PI*r, offset = c - (pct/100)*c;
+    return `<div class="pnav-item" data-target="${s.id}">
+      <svg class="pnav-ring" viewBox="0 0 22 22">
+        <circle class="track" cx="11" cy="11" r="${r}"></circle>
+        <circle class="fill" cx="11" cy="11" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${offset}"></circle>
+      </svg>
+      <span>${idx+1}. ${s.title.split(" — ")[0].split(" & ")[0]}</span>
+    </div>`;
+  }).join("");
+  nav.querySelectorAll(".pnav-item").forEach(item=>{
+    item.addEventListener("click", ()=>{
+      document.getElementById("card-"+item.dataset.target).scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
+}
+
+function renderBookmarks(){
+  const bar = document.getElementById("bookmarksBar");
+  const active = STAGES.filter(s=>bookmarks[s.id]);
+  bar.innerHTML = active.length
+    ? active.map(s=>`<span class="bookmark-pill">★ ${s.title}</span>`).join("")
+    : `<span class="empty-note">No bookmarks yet — click the star on any stage.</span>`;
+}
+
+function toolCard(t){
+  return `<div class="tool-card">
+    <div class="tool-name">${t.name}</div>
+    <div class="tool-why">${t.why}</div>
+    <div class="tool-alt"><b>No access? Try:</b> ${t.alt}</div>
+  </div>`;
+}
+
+function renderStages(){
+  stagesWrap.innerHTML = STAGES.map((s, idx)=>{
+    const pct = stageProgress(s.id, s.tasks.length);
+    const isOpen = !!openState[s.id];
+    const isBookmarked = !!bookmarks[s.id];
+    const noteVal = notes[s.id] || "";
+    return `
+    <div class="stage" id="card-${s.id}">
+      <div class="stage-node ${pct===100 ? 'done' : ''}">${idx+1}</div>
+      <div class="stage-card ${isOpen ? 'open' : ''}" data-stage="${s.id}">
+        <div class="stage-head" data-toggle="${s.id}">
+          <div class="stage-head-left">
+            <h3>${s.title}</h3>
+            <div class="stage-sub">${s.sub}</div>
+            <div class="mini-progress"><div class="fill" style="width:${pct}%"></div></div>
+          </div>
+          <div class="stage-head-right">
+            <span class="stage-time-tag">${s.time}</span>
+            <button class="star-btn ${isBookmarked ? 'active' : ''}" data-star="${s.id}" title="Bookmark this stage">★</button>
+            <span class="chevron">▾</span>
+          </div>
+        </div>
+        <div class="stage-body">
+          <div class="stage-body-inner">
+            <div class="grid-2">
+              <div>
+                <div class="subhead">Objectives</div>
+                <ul class="plain">${s.objectives.map(o=>`<li>${o}</li>`).join("")}</ul>
+              </div>
+              <div>
+                <div class="subhead">Tasks (${stageProgress(s.id,s.tasks.length)}% done)</div>
+                <ul class="plain task-list">${s.tasks.map((t,ti)=>{
+                  const checked = (progress[s.id] && progress[s.id][ti]) ? true : false;
+                  return `<li class="${checked?'checked':''}">
+                    <input type="checkbox" data-stage="${s.id}" data-task="${ti}" ${checked?'checked':''}>
+                    <label>${t}</label>
+                  </li>`;
+                }).join("")}</ul>
+              </div>
+            </div>
+
+            <div style="margin-top:20px;">
+              <div class="subhead">Best AI tools for this stage</div>
+              ${s.tools.map(toolCard).join("")}
+            </div>
+
+            <div style="margin-top:20px;">
+              <div class="subhead">Prompt examples</div>
+              ${s.prompts.map((p,pi)=>`<div class="prompt-box">${p}<button class="copy-btn" data-copy="${s.id}-${pi}">Copy</button></div>`).join("")}
+            </div>
+
+            <div class="grid-2" style="margin-top:20px;">
+              <div>
+                <div class="subhead">Best practices</div>
+                <ul class="plain">${s.practices.map(p=>`<li>${p}</li>`).join("")}</ul>
+              </div>
+              <div>
+                <div class="subhead">Common mistakes</div>
+                <div class="callout mistake"><b>Watch out</b>${s.mistakes.map(m=>`<div style="margin-top:6px;">• ${m}</div>`).join("")}</div>
+              </div>
+            </div>
+
+            <div class="grid-2" style="margin-top:20px;">
+              <div>
+                <div class="subhead">Expected outputs</div>
+                <div class="callout output"><b>By the end of this stage you should have</b>${s.outputs.map(o=>`<div style="margin-top:6px;">• ${o}</div>`).join("")}</div>
+              </div>
+              <div>
+                <div class="subhead">Efficiency tips</div>
+                <div class="tips-row">${s.tips.map(t=>`<span class="tip-chip">${t}</span>`).join("")}</div>
+              </div>
+            </div>
+
+            <div class="notes-area">
+              <div class="subhead">Your notes</div>
+              <textarea class="notes" data-notes="${s.id}" placeholder="Jot progress, blockers, or ideas for this stage...">${noteVal}</textarea>
+              <div class="save-hint">Autosaves locally as you type.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+
+  // wire up events
+  stagesWrap.querySelectorAll("[data-toggle]").forEach(head=>{
+    head.addEventListener("click", (e)=>{
+      const id = head.dataset.toggle;
+      const card = stagesWrap.querySelector(`.stage-card[data-stage="${id}"]`);
+      card.classList.toggle("open");
+      openState[id] = card.classList.contains("open");
+      saveJSON(LS_KEYS.open, openState);
+    });
+  });
+  stagesWrap.querySelectorAll("input[type=checkbox]").forEach(cb=>{
+    cb.addEventListener("click", (e)=>e.stopPropagation());
+    cb.addEventListener("change", ()=>{
+      const stageId = cb.dataset.stage, taskIdx = cb.dataset.task;
+      progress[stageId] = progress[stageId] || {};
+      progress[stageId][taskIdx] = cb.checked;
+      saveJSON(LS_KEYS.progress, progress);
+      renderStages(); renderNav(); updateOverall();
+      // restore open state after re-render
+      const card = stagesWrap.querySelector(`.stage-card[data-stage="${stageId}"]`);
+      if(card && openState[stageId]) card.classList.add("open");
+    });
+  });
+  stagesWrap.querySelectorAll("[data-star]").forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      const id = btn.dataset.star;
+      bookmarks[id] = !bookmarks[id];
+      if(!bookmarks[id]) delete bookmarks[id];
+      saveJSON(LS_KEYS.bookmarks, bookmarks);
+      btn.classList.toggle("active");
+      renderBookmarks();
+    });
+  });
+  stagesWrap.querySelectorAll("[data-copy]").forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      const box = btn.parentElement;
+      const text = box.textContent.replace("Copy","").trim();
+      navigator.clipboard && navigator.clipboard.writeText(text).then(()=>{
+        btn.textContent = "Copied"; btn.classList.add("copied");
+        setTimeout(()=>{ btn.textContent = "Copy"; btn.classList.remove("copied"); }, 1500);
+      });
+    });
+  });
+  stagesWrap.querySelectorAll("textarea.notes").forEach(area=>{
+    area.addEventListener("click", (e)=>e.stopPropagation());
+    let debounce;
+    area.addEventListener("input", ()=>{
+      clearTimeout(debounce);
+      debounce = setTimeout(()=>{
+        notes[area.dataset.notes] = area.value;
+        saveJSON(LS_KEYS.notes, notes);
+      }, 400);
+    });
+  });
+}
+
+function renderCompare(){
+  document.getElementById("compareBody").innerHTML = COMPARE_ROWS.map(r=>
+    `<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`
+  ).join("");
+}
+
+/* ---------------- INIT ---------------- */
+renderNav();
+renderStages();
+renderCompare();
+renderBookmarks();
+updateOverall();
+</script>
+</body>
+</html>
