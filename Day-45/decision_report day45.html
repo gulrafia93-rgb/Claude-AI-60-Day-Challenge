@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decision Report — Frontend vs AI/ML vs Cybersecurity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-main:#F2E4CC;
+    --bg-card:#FFFBF2;
+    --bg-card-alt:#EAD7B4;
+    --text-primary:#3A2415;
+    --text-secondary:#8A6C4C;
+    --accent-caramel:#C17F3E;
+    --accent-cinnamon:#A6512A;
+    --accent-espresso:#5C3B21;
+    --accent-honey:#C4930F;
+    --accent-hazelnut:#7A5230;
+    --border-subtle: rgba(58,36,21,0.12);
+
+    --grad-frontend-1:#DDA868; --grad-frontend-2:#C17F3E;
+    --grad-aiml-1:#8B5E3C; --grad-aiml-2:#4E3018;
+    --grad-cyber-1:#CB7A4E; --grad-cyber-2:#8F3E1E;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    background:
+      radial-gradient(circle at 12% 8%, rgba(196,147,15,0.10), transparent 40%),
+      radial-gradient(circle at 90% 15%, rgba(166,81,42,0.08), transparent 35%),
+      var(--bg-main);
+    color:var(--text-primary);
+    font-family:'Inter', 'Segoe UI', system-ui, sans-serif;
+    scroll-behavior:smooth;
+    padding:40px 16px 20px;
+  }
+
+  .wrap{max-width:720px; margin:0 auto;}
+
+  /* HEADER */
+  header{
+    text-align:center;
+    padding:8px 12px 28px;
+    position:relative;
+  }
+  .steam{
+    position:absolute; top:-18px; left:50%; transform:translateX(-50%);
+    width:60px; height:40px; opacity:0.5;
+  }
+  .steam svg path{
+    stroke:var(--accent-hazelnut);
+    stroke-width:2.5; fill:none; stroke-linecap:round;
+    animation: rise 3.2s ease-in-out infinite;
+  }
+  .steam svg path:nth-child(2){animation-delay:0.5s;}
+  .steam svg path:nth-child(3){animation-delay:1s;}
+  @keyframes rise{
+    0%{opacity:0; transform:translateY(6px);}
+    30%{opacity:0.6;}
+    100%{opacity:0; transform:translateY(-14px);}
+  }
+  h1.title{
+    font-family:'Fraunces', serif;
+    font-weight:800;
+    font-size:32px;
+    letter-spacing:-0.5px;
+    margin-top:14px;
+  }
+  .subtitle{
+    color:var(--text-secondary);
+    font-size:16px;
+    margin-top:8px;
+    font-weight:500;
+  }
+  .date{
+    color:var(--text-secondary);
+    font-size:12px;
+    margin-top:6px;
+  }
+  .divider{
+    height:3px; border-radius:3px; margin:20px auto 0; width:100%;
+    background:linear-gradient(90deg, var(--accent-espresso), var(--accent-hazelnut), var(--accent-honey));
+  }
+
+  /* CARDS */
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--border-subtle);
+    border-radius:16px;
+    padding:26px 28px;
+    margin-bottom:28px;
+    box-shadow:0 4px 20px rgba(58,36,21,0.10);
+    transition: transform 0.2s ease;
+  }
+  .card:hover{transform:translateY(-2px);}
+
+  .section-title{
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin-bottom:16px;
+    display:flex; align-items:center; gap:8px;
+  }
+
+  .card.s1{border-left:4px solid var(--accent-espresso);}
+  .card.s2{border-left:4px solid var(--accent-caramel);}
+  .card.s3{border-left:4px solid var(--accent-hazelnut);}
+  .card.s4{border-left:4px solid var(--accent-espresso);}
+  .card.s5{border-left:4px solid var(--accent-cinnamon);}
+  .card.s6{border-left:4px solid var(--accent-caramel);}
+  .card.s7{
+    border-left:4px solid var(--accent-honey);
+    background:var(--bg-card-alt);
+    padding:32px 30px;
+    box-shadow:0 0 24px rgba(196,147,15,0.18), 0 4px 20px rgba(58,36,21,0.12);
+  }
+  .card.s8{border-left:4px solid var(--accent-honey);}
+
+  .s1 .section-title{color:var(--accent-espresso);}
+  .s2 .section-title{color:var(--accent-caramel);}
+  .s3 .section-title{color:var(--accent-hazelnut);}
+  .s4 .section-title{color:var(--accent-espresso);}
+  .s5 .section-title{color:var(--accent-cinnamon);}
+  .s6 .section-title{color:var(--accent-caramel);}
+  .s7 .section-title{color:var(--accent-honey);}
+  .s8 .section-title{color:var(--accent-honey);}
+
+  p{font-size:15px; line-height:1.7; color:var(--text-primary);}
+  .muted{color:var(--text-secondary); font-size:13px;}
+
+  /* SECTION 2 - option cards */
+  .option-card{
+    background:var(--bg-card-alt);
+    border-radius:12px;
+    padding:18px 20px;
+    margin-bottom:14px;
+  }
+  .option-card:last-child{margin-bottom:0;}
+  .option-name{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:18px;
+    margin-bottom:8px;
+  }
+  .option-card.frontend .option-name{color:var(--accent-caramel);}
+  .option-card.aiml .option-name{color:var(--accent-espresso);}
+  .option-card.cyber .option-name{color:var(--accent-cinnamon);}
+  .opt-row{margin-top:8px;}
+  .opt-label{
+    font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px;
+    color:var(--text-secondary); display:block; margin-bottom:2px;
+  }
+  .opt-value{font-size:14.5px; line-height:1.6;}
+  .best-if{
+    margin-top:12px; font-size:13px; font-weight:600;
+    font-family:'JetBrains Mono', monospace;
+    color:var(--accent-hazelnut);
+  }
+
+  /* SECTION 3 */
+  ul.assumption-list{list-style:none; margin-bottom:14px;}
+  ul.assumption-list li{
+    font-size:14.5px; padding:8px 0 8px 22px; position:relative; line-height:1.6;
+    border-bottom:1px dashed var(--border-subtle);
+  }
+  ul.assumption-list li:last-child{border-bottom:none;}
+  ul.assumption-list li::before{
+    content:"›"; position:absolute; left:0; color:var(--accent-hazelnut); font-weight:700; font-size:18px; top:5px;
+  }
+  .bias-tag{
+    display:inline-block; background:rgba(122,82,48,0.14); color:var(--accent-hazelnut);
+    font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:600;
+    padding:3px 9px; border-radius:20px; margin:3px 4px 3px 0;
+  }
+  .ignoring-box{
+    margin-top:14px; padding:14px 16px; border-radius:10px;
+    background:rgba(166,81,42,0.08); border-left:3px solid var(--accent-cinnamon);
+    font-size:14.5px;
+  }
+
+  /* SECTION 4 - matrix */
+  .matrix-legend{display:flex; gap:16px; margin-bottom:18px; flex-wrap:wrap;}
+  .legend-item{display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--text-secondary);}
+  .dot{width:10px; height:10px; border-radius:50%; display:inline-block;}
+  .dot.frontend{background:var(--accent-caramel);}
+  .dot.aiml{background:var(--accent-espresso);}
+  .dot.cyber{background:var(--accent-cinnamon);}
+
+  .matrix-row{margin-bottom:16px;}
+  .dim-label{
+    font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px;
+    color:var(--text-secondary); margin-bottom:8px;
+  }
+  .bar-track{
+    height:24px; background:rgba(58,36,21,0.06); border-radius:8px; margin-bottom:5px; overflow:hidden;
+    position:relative;
+  }
+  .bar-fill{
+    height:100%; border-radius:8px; display:flex; align-items:center; justify-content:flex-end;
+    padding-right:8px; width:0%; animation: growBar 0.9s ease-out forwards;
+  }
+  .bar-fill span{color:#FFFBF2; font-size:11.5px; font-weight:700; font-family:'JetBrains Mono',monospace;}
+  .bar-fill.frontend{background:linear-gradient(90deg, var(--grad-frontend-1), var(--grad-frontend-2));}
+  .bar-fill.aiml{background:linear-gradient(90deg, var(--grad-aiml-1), var(--grad-aiml-2));}
+  .bar-fill.cyber{background:linear-gradient(90deg, var(--grad-cyber-1), var(--grad-cyber-2));}
+
+  @keyframes growBar{ from{width:0%;} to{width: var(--val);} }
+
+  .totals{
+    margin-top:24px; padding-top:20px; border-top:2px solid var(--border-subtle);
+  }
+  .total-row{display:flex; align-items:center; gap:14px; margin-bottom:12px;}
+  .total-name{width:110px; font-weight:700; font-size:14px; font-family:'Fraunces',serif;}
+  .total-bar-track{flex:1; height:30px; background:rgba(58,36,21,0.06); border-radius:8px; overflow:hidden;}
+  .total-bar-fill{height:100%; display:flex; align-items:center; justify-content:flex-end; padding-right:10px;
+    width:0%; animation:growBar 1.1s ease-out forwards; border-radius:8px;}
+  .total-bar-fill span{color:#FFFBF2; font-weight:800; font-family:'JetBrains Mono',monospace; font-size:13px;}
+  .total-row.winner .total-name{color:var(--accent-honey);}
+  .total-row.winner .total-bar-track{box-shadow:0 0 0 2px var(--accent-honey);}
+
+  /* SECTION 5 - premortem */
+  .premortem-card{margin-bottom:16px; padding:16px 18px; background:var(--bg-card-alt); border-radius:12px;}
+  .premortem-card:last-child{margin-bottom:0;}
+  .premortem-title{font-family:'Fraunces',serif; font-weight:700; font-size:16px; margin-bottom:10px; color:var(--accent-cinnamon);}
+  .premortem-card ol{margin-left:18px; margin-bottom:10px;}
+  .premortem-card li{font-size:14px; line-height:1.6; margin-bottom:4px;}
+  .signal-box{font-size:13.5px; margin-top:8px;}
+  .signal-box b{color:var(--accent-cinnamon);}
+
+  /* SECTION 6 - 7 day plan */
+  .day-row{display:flex; gap:14px; padding:10px 0; border-bottom:1px dashed var(--border-subtle); align-items:flex-start;}
+  .day-row:last-child{border-bottom:none;}
+  .day-badge{
+    flex-shrink:0; width:64px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px;
+    color:var(--accent-caramel); padding-top:2px;
+  }
+  .day-text{font-size:14.5px; line-height:1.6;}
+
+  /* SECTION 7 - verdict */
+  .verdict-winner{
+    font-family:'Fraunces', serif; font-weight:900; font-size:30px; color:var(--accent-honey);
+    margin-bottom:10px;
+  }
+  .hard-truth{font-style:italic; color:var(--text-secondary); margin-top:16px; font-size:14.5px; line-height:1.7;}
+  .flip-box{margin-top:14px; font-size:14px;}
+  .flip-box b{color:var(--accent-cinnamon);}
+
+  /* SECTION 8 - shareable */
+  .share-row{display:flex; gap:14px; flex-wrap:wrap;}
+  .mini-card{
+    flex:1 1 200px; background:var(--bg-card-alt); border-radius:12px; padding:16px;
+    display:flex; flex-direction:column; justify-content:space-between; min-height:170px;
+  }
+  .mini-card h4{
+    font-family:'Fraunces',serif; font-size:14px; font-weight:700; margin-bottom:10px; color:var(--accent-espresso);
+  }
+  .mini-score-row{display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:5px; font-family:'JetBrains Mono',monospace;}
+  .mini-score-row b{color:var(--accent-honey);}
+  .mini-verdict{font-family:'Fraunces',serif; font-weight:800; font-size:18px; color:var(--accent-honey); margin-bottom:6px;}
+  .mini-caption{font-size:12px; line-height:1.5; color:var(--text-primary); margin-bottom:8px;}
+  .mini-cta{font-size:11.5px; font-weight:700; color:var(--accent-caramel); text-transform:uppercase; letter-spacing:0.4px;}
+  .watermark{font-size:10px; color:var(--text-secondary); margin-top:10px; text-align:right; opacity:0.8;}
+
+  footer{text-align:center; color:var(--text-secondary); font-size:12px; margin-top:36px; padding-bottom:10px;}
+
+  @media (max-width:600px){
+    .card{padding:20px 18px;}
+    h1.title{font-size:26px;}
+    .dim-label{margin-bottom:6px;}
+    .share-row{flex-direction:column;}
+    .total-name{width:90px; font-size:12.5px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="steam">
+      <svg viewBox="0 0 60 40"><path d="M18 34 C 14 26, 22 22, 18 14"/><path d="M30 34 C 26 26, 34 22, 30 14"/><path d="M42 34 C 38 26, 46 22, 42 14"/></svg>
+    </div>
+    <h1 class="title">DECISION REPORT</h1>
+    <div class="subtitle">Frontend vs AI/ML vs Cybersecurity — choosing where to specialize long-term</div>
+    <div class="date">July 15, 2026</div>
+    <div class="divider"></div>
+  </header>
+
+  <!-- SECTION 1 -->
+  <div class="card s1">
+    <div class="section-title">01 · The Real Decision</div>
+    <p>This isn't "which skill is best" — it's which one to lead with for the next 1–2 years of deep specialization. The real trade-off is depth vs. breadth: doubling down on what already works (Frontend) vs. betting on what feels most aligned (AI/ML) vs. exploring what's least developed but distinct (Cybersecurity). It's hard because the choice isn't reversible without real cost, and the fear isn't "which is good" — it's "which one I'll regret picking."</p>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="card s2">
+    <div class="section-title">02 · The Case For Each Option</div>
+
+    <div class="option-card frontend">
+      <div class="option-name">Frontend Development</div>
+      <div class="opt-row"><span class="opt-label">Strongest Case</span><span class="opt-value">Already has a proven track record — React, JS ES6+, Tailwind, deployed responsive projects, and an active 100-day challenge building this exact portfolio depth.</span></div>
+      <div class="opt-row"><span class="opt-label">Hidden Upside</span><span class="opt-value">Frontend is the delivery layer for every AI idea already being built — it doesn't compete with AI/ML, it ships it (as seen in the Claude-powered apps already built).</span></div>
+      <div class="opt-row"><span class="opt-label">Biggest Weakness</span><span class="opt-value">Least stretch of the three — market is saturated with junior React developers, and it's the path with the smallest learning curve left to climb.</span></div>
+      <div class="best-if">Best if you value: speed to job-ready, low risk.</div>
+    </div>
+
+    <div class="option-card aiml">
+      <div class="option-name">AI / ML</div>
+      <div class="opt-row"><span class="opt-label">Strongest Case</span><span class="opt-value">Not just interest — real evidence already exists: a deployed Cat vs Dog classifier at 95.62% validation accuracy, shipped as a working Flask API.</span></div>
+      <div class="opt-row"><span class="opt-label">Hidden Upside</span><span class="opt-value">Specializing here directly strengthens ICT LearnX — an AI-powered platform — so the specialization and the startup grow together instead of splitting focus.</span></div>
+      <div class="opt-row"><span class="opt-label">Biggest Weakness</span><span class="opt-value">Longer runway to true job-ready depth — the math and frameworks go deeper, and entry-level roles are more competitive.</span></div>
+      <div class="best-if">Best if you value: long-term differentiation and alignment with a stated identity.</div>
+    </div>
+
+    <div class="option-card cyber">
+      <div class="option-name">Cybersecurity</div>
+      <div class="opt-row"><span class="opt-label">Strongest Case</span><span class="opt-value">A genuine parallel interest already on the radar — SOC analyst and government IT roles offer a distinct, less-crowded lane.</span></div>
+      <div class="opt-row"><span class="opt-label">Hidden Upside</span><span class="opt-value">Being the least developed of the three means even foundational progress (like a Security+ level cert) could read as a fast, visible signal within months.</span></div>
+      <div class="opt-row"><span class="opt-label">Biggest Weakness</span><span class="opt-value">Zero existing portfolio evidence here — starting from scratch while the 1–2 year clock is already running.</span></div>
+      <div class="best-if">Best if you value: novelty and a lane with no internal competition from past work.</div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="card s3">
+    <div class="section-title">03 · Assumption Buster</div>
+    <ul class="assumption-list">
+      <li>That it has to be ONE path only — with the other two fully abandoned, rather than sequenced or combined.</li>
+      <li>That "specializing" for 1–2 years means an irreversible, all-or-nothing bet — reinforced by answering that this decision can't really be undone without heavy cost.</li>
+      <li>That feeling confused means none of the three is right — when it may actually mean several are genuinely good options at once.</li>
+    </ul>
+    <div>
+      <span class="bias-tag">Loss Aversion</span>
+      <span class="bias-tag">Status Quo Bias (in reverse)</span>
+    </div>
+    <p style="margin-top:12px; font-size:14px;">Loss aversion is making the fear of "stuck in the wrong field" feel heavier than any upside from a right choice. And status-quo bias may be running in reverse — Frontend could be getting quietly dismissed <i>because</i> it feels too easy or obvious, even though it's the most evidence-backed option on the table.</p>
+    <div class="ignoring-box">
+      <b>What's being ignored:</b> There's already hard proof of being good at both — a deployed, 95.6%-accuracy ML project <i>and</i> working frontend apps, built at the same time. The real question isn't "which one am I capable of" — that's already answered. It's "which one do I lead with."
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="card s4">
+    <div class="section-title">04 · Decision Matrix</div>
+    <div class="matrix-legend">
+      <div class="legend-item"><span class="dot frontend"></span>Frontend</div>
+      <div class="legend-item"><span class="dot aiml"></span>AI / ML</div>
+      <div class="legend-item"><span class="dot cyber"></span>Cybersecurity</div>
+    </div>
+
+    <div class="matrix-row">
+      <div class="dim-label">Life / Career Upside</div>
+      <div class="bar-track"><div class="bar-fill frontend" style="--val:70%; animation-delay:0.05s;"><span>7</span></div></div>
+      <div class="bar-track"><div class="bar-fill aiml" style="--val:80%; animation-delay:0.15s;"><span>8</span></div></div>
+      <div class="bar-track"><div class="bar-fill cyber" style="--val:60%; animation-delay:0.25s;"><span>6</span></div></div>
+    </div>
+
+    <div class="matrix-row">
+      <div class="dim-label">Financial Safety</div>
+      <div class="bar-track"><div class="bar-fill frontend" style="--val:80%; animation-delay:0.05s;"><span>8</span></div></div>
+      <div class="bar-track"><div class="bar-fill aiml" style="--val:50%; animation-delay:0.15s;"><span>5</span></div></div>
+      <div class="bar-track"><div class="bar-fill cyber" style="--val:50%; animation-delay:0.25s;"><span>5</span></div></div>
+    </div>
+
+    <div class="matrix-row">
+      <div class="dim-label">Growth &amp; Learning</div>
+      <div class="bar-track"><div class="bar-fill frontend" style="--val:50%; animation-delay:0.05s;"><span>5</span></div></div>
+      <div class="bar-track"><div class="bar-fill aiml" style="--val:80%; animation-delay:0.15s;"><span>8</span></div></div>
+      <div class="bar-track"><div class="bar-fill cyber" style="--val:70%; animation-delay:0.25s;"><span>7</span></div></div>
+    </div>
+
+    <div class="matrix-row">
+      <div class="dim-label">Stress Level (10 = low stress)</div>
+      <div class="bar-track"><div class="bar-fill frontend" style="--val:80%; animation-delay:0.05s;"><span>8</span></div></div>
+      <div class="bar-track"><div class="bar-fill aiml" style="--val:50%; animation-delay:0.15s;"><span>5</span></div></div>
+      <div class="bar-track"><div class="bar-fill cyber" style="--val:50%; animation-delay:0.25s;"><span>5</span></div></div>
+    </div>
+
+    <div class="matrix-row">
+      <div class="dim-label">Reversibility (10 = easy to undo)</div>
+      <div class="bar-track"><div class="bar-fill frontend" style="--val:70%; animation-delay:0.05s;"><span>7</span></div></div>
+      <div class="bar-track"><div class="bar-fill aiml" style="--val:60%; animation-delay:0.15s;"><span>6</span></div></div>
+      <div class="bar-track"><div class="bar-fill cyber" style="--val:50%; animation-delay:0.25s;"><span>5</span></div></div>
+    </div>
+
+    <div class="matrix-row">
+      <div class="dim-label">Long-term Alignment</div>
+      <div class="bar-track"><div class="bar-fill frontend" style="--val:60%; animation-delay:0.05s;"><span>6</span></div></div>
+      <div class="bar-track"><div class="bar-fill aiml" style="--val:90%; animation-delay:0.15s;"><span>9</span></div></div>
+      <div class="bar-track"><div class="bar-fill cyber" style="--val:50%; animation-delay:0.25s;"><span>5</span></div></div>
+    </div>
+
+    <div class="matrix-row">
+      <div class="dim-label">Regret Risk (10 = low regret)</div>
+      <div class="bar-track"><div class="bar-fill frontend" style="--val:50%; animation-delay:0.05s;"><span>5</span></div></div>
+      <div class="bar-track"><div class="bar-fill aiml" style="--val:70%; animation-delay:0.15s;"><span>7</span></div></div>
+      <div class="bar-track"><div class="bar-fill cyber" style="--val:50%; animation-delay:0.25s;"><span>5</span></div></div>
+    </div>
+
+    <div class="totals">
+      <div class="total-row">
+        <div class="total-name">Frontend</div>
+        <div class="total-bar-track"><div class="total-bar-fill" style="--val:65.7%; background:linear-gradient(90deg, var(--grad-frontend-1), var(--grad-frontend-2)); animation-delay:0.3s;"><span>46 / 70</span></div></div>
+      </div>
+      <div class="total-row winner">
+        <div class="total-name">AI / ML ★</div>
+        <div class="total-bar-track"><div class="total-bar-fill" style="--val:68.6%; background:linear-gradient(90deg, var(--grad-aiml-1), var(--grad-aiml-2)); animation-delay:0.4s;"><span>48 / 70</span></div></div>
+      </div>
+      <div class="total-row">
+        <div class="total-name">Cybersecurity</div>
+        <div class="total-bar-track"><div class="total-bar-fill" style="--val:54.3%; background:linear-gradient(90deg, var(--grad-cyber-1), var(--grad-cyber-2)); animation-delay:0.5s;"><span>38 / 70</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="card s5">
+    <div class="section-title">05 · Premortem (Top 2 Options)</div>
+
+    <div class="premortem-card">
+      <div class="premortem-title">If Frontend failed after 12 months...</div>
+      <ol>
+        <li>The market got even more saturated with junior React developers, with no differentiation.</li>
+        <li>Building stopped combining frontend with AI features — losing the exact edge that made the portfolio stand out.</li>
+        <li>The work felt under-stretched, and motivation to keep building faded.</li>
+      </ol>
+      <div class="signal-box"><b>Early warning:</b> portfolio projects start looking like any other bootcamp grad's — no AI/API integration, no ICT LearnX progress.</div>
+      <div class="signal-box"><b>Prevention:</b> keep shipping frontend + AI-powered apps together, never let frontend become pure UI work disconnected from the AI edge.</div>
+    </div>
+
+    <div class="premortem-card">
+      <div class="premortem-title">If AI/ML failed after 12 months...</div>
+      <ol>
+        <li>Job-ready depth in math and frameworks wasn't reached — stuck at "one project" level.</li>
+        <li>Entry-level AI/ML roles required more portfolio depth or credentials than could be built in the timeline.</li>
+        <li>ICT LearnX absorbed all the AI focus, leaving no separate proof of personal employability.</li>
+      </ol>
+      <div class="signal-box"><b>Early warning:</b> 6+ months pass with no second deployed ML project beyond the Cat vs Dog baseline.</div>
+      <div class="signal-box"><b>Prevention:</b> set a concrete 90-day milestone — ship one new ML project, or add a measurable AI feature to ICT LearnX — to force forward progress.</div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="card s6">
+    <div class="section-title">06 · 7-Day Test Plan</div>
+    <div class="day-row"><div class="day-badge">DAY 1–2</div><div class="day-text">Research real entry-level job postings for Frontend, AI/ML, and Cybersecurity (Pakistan + remote) and compare requirements against current skills.</div></div>
+    <div class="day-row"><div class="day-badge">DAY 3–4</div><div class="day-text">Run one small experiment: spend a focused day adding a simple AI/ML-powered feature into an existing frontend project, to actually feel what "both together" is like.</div></div>
+    <div class="day-row"><div class="day-badge">DAY 5–6</div><div class="day-text">Have one conversation with someone already working in AI/ML about how long it realistically took them to become job-ready from a similar starting point.</div></div>
+    <div class="day-row"><div class="day-badge">DAY 7</div><div class="day-text">Decision day: pick the path that scored highest on the matrix AND felt most energizing during the Day 3–4 experiment. If the two disagree, that disagreement is the real signal.</div></div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="card s7">
+    <div class="section-title">07 · The Verdict</div>
+    <div class="verdict-winner">AI / ML</div>
+    <p>It wins narrowly (48/70) because it has the highest long-term alignment with the identity already being built, and it compounds with both existing frontend skills and ICT LearnX instead of competing with them.</p>
+    <div class="flip-box"><b>What could flip it:</b> if the Day 3–4 experiment feels draining rather than energizing, or if job-market research shows entry-level AI/ML roles realistically need more time or credentials than available in this window.</div>
+    <p class="hard-truth">The safe-feeling option and the most-aligned option are this close for a reason — both have been done at once, never separately. The real risk here was never "picking wrong." It was mistaking "I don't want to choose" for "I can't decide."</p>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="card s8">
+    <div class="section-title">08 · Shareable Cards</div>
+    <div class="share-row">
+
+      <div class="mini-card">
+        <div>
+          <h4>Matrix Summary</h4>
+          <div class="mini-score-row"><span>Frontend</span><b>46/70</b></div>
+          <div class="mini-score-row"><span>AI / ML</span><b>48/70</b></div>
+          <div class="mini-score-row"><span>Cybersecurity</span><b>38/70</b></div>
+        </div>
+        <div class="watermark">Built with Claude AI</div>
+      </div>
+
+      <div class="mini-card">
+        <div>
+          <h4>The Verdict</h4>
+          <div class="mini-verdict">AI / ML wins</div>
+          <div class="mini-caption">Compounds with everything already being built — instead of competing with it.</div>
+        </div>
+        <div class="watermark">Built with Claude AI</div>
+      </div>
+
+      <div class="mini-card">
+        <div>
+          <h4>LinkedIn Hook</h4>
+          <div class="mini-caption" style="font-weight:700;">"I almost picked the 'safe' skill instead of the one that actually fit my story."</div>
+          <div class="mini-caption">Confused between 3 career paths, I built a decision framework instead of guessing — and the answer was already sitting in my own portfolio.</div>
+          <div class="mini-cta">→ What would your matrix say?</div>
+        </div>
+        <div class="watermark">Built with Claude AI</div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>Built with Claude AI · Decision Strategist Session</footer>
+</div>
+</body>
+</html>
