@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI API Provider Compare & Decide — Claude vs OpenAI vs Gemini vs Cohere</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg: #0b0f17;
+    --bg-alt: #10151f;
+    --panel: #131a27;
+    --panel-2: #1a2333;
+    --border: #253247;
+    --text: #e7edf5;
+    --text-dim: #93a2b8;
+    --text-faint: #5d6b80;
+    --accent: #6ee7c8;
+    --accent-2: #8b7cf6;
+    --accent-3: #f5b95c;
+    --danger: #f5716e;
+    --claude: #d97757;
+    --openai: #74aa9c;
+    --gemini: #4c8df5;
+    --cohere: #b48ef5;
+    --radius: 14px;
+    --mono: 'JetBrains Mono', monospace;
+    --head: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; padding:0; background: radial-gradient(circle at 15% 0%, #131c2c 0%, var(--bg) 55%);
+    color:var(--text); font-family: var(--body); -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3,h4{ font-family: var(--head); margin:0; letter-spacing:-0.01em; }
+  p{ margin:0; }
+  .wrap{ max-width: 1180px; margin:0 auto; padding: 32px 20px 90px; }
+
+  /* Header */
+  header.top{ margin-bottom: 28px; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12px; color:var(--accent); background:rgba(110,231,200,0.08); border:1px solid rgba(110,231,200,0.25); padding:5px 12px; border-radius:999px; margin-bottom:14px; }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); }
+  h1{ font-size: clamp(26px,4vw,38px); font-weight:700; line-height:1.15; margin-bottom:10px; }
+  .sub{ color:var(--text-dim); font-size:15px; max-width: 680px; line-height:1.6; }
+
+  /* Layout */
+  .grid{ display:grid; grid-template-columns: 300px 1fr; gap:22px; align-items:start; }
+  @media (max-width: 880px){ .grid{ grid-template-columns: 1fr; } }
+
+  /* Cards */
+  .card{ background: linear-gradient(180deg, var(--panel), var(--panel-2)); border:1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .card + .card{ margin-top:18px; }
+
+  /* Weight sliders */
+  .weights h3{ font-size:15px; margin-bottom:4px; }
+  .weights .hint{ font-size:12.5px; color:var(--text-faint); margin-bottom:16px; line-height:1.5; }
+  .slider-row{ margin-bottom:18px; }
+  .slider-row:last-child{ margin-bottom:6px; }
+  .slider-label{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+  .slider-label span.name{ font-size:13px; font-weight:600; color:var(--text); }
+  .slider-label span.val{ font-family:var(--mono); font-size:12px; color:var(--accent); background:rgba(110,231,200,0.1); padding:2px 8px; border-radius:6px; }
+  input[type=range]{
+    -webkit-appearance:none; appearance:none; width:100%; height:5px; border-radius:3px;
+    background: var(--border); outline:none; cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+    background: var(--accent); border:3px solid #061014; cursor:pointer; box-shadow:0 0 0 4px rgba(110,231,200,0.15);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:16px; height:16px; border-radius:50%; background: var(--accent); border:3px solid #061014; cursor:pointer;
+  }
+  .reset-btn{
+    width:100%; margin-top:14px; padding:9px 12px; border-radius:9px; border:1px solid var(--border);
+    background:var(--bg-alt); color:var(--text-dim); font-size:12.5px; font-family:var(--body); cursor:pointer;
+    transition: all .15s ease;
+  }
+  .reset-btn:hover{ border-color:var(--accent); color:var(--accent); }
+
+  /* Ranking */
+  .rank-item{
+    display:grid; grid-template-columns: 34px 1fr auto; gap:14px; align-items:center;
+    padding:16px; border-radius:12px; border:1px solid var(--border); background:var(--bg-alt);
+    margin-bottom:12px; transition: transform .25s ease, border-color .25s ease;
+  }
+  .rank-item.top{ border-color: var(--accent); box-shadow:0 0 0 1px rgba(110,231,200,0.15), 0 8px 24px -12px rgba(110,231,200,0.25); }
+  .rank-num{ font-family:var(--head); font-size:20px; font-weight:700; color:var(--text-faint); }
+  .rank-item.top .rank-num{ color:var(--accent); }
+  .rank-main{ min-width:0; }
+  .rank-title-row{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .swatch{ width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+  .rank-name{ font-family:var(--head); font-weight:600; font-size:16px; }
+  .rank-tag{ font-family:var(--mono); font-size:10.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.04em; }
+  .bar-track{ height:7px; border-radius:4px; background:var(--border); overflow:hidden; margin-top:4px; }
+  .bar-fill{ height:100%; border-radius:4px; transition: width .35s cubic-bezier(.2,.8,.2,1); }
+  .rank-score{ text-align:right; }
+  .score-num{ font-family:var(--mono); font-size:20px; font-weight:600; }
+  .score-max{ font-family:var(--mono); font-size:11px; color:var(--text-faint); }
+
+  /* Provider grid detail */
+  .detail-toggle{ font-family:var(--body); font-size:12.5px; color:var(--accent-2); background:none; border:none; cursor:pointer; padding:0; margin-top:8px; text-decoration:underline; text-underline-offset:3px; }
+  .detail-panel{ margin-top:12px; padding-top:12px; border-top:1px dashed var(--border); display:none; }
+  .detail-panel.open{ display:block; }
+  .metric-row{ display:flex; justify-content:space-between; gap:12px; font-size:12.5px; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03); }
+  .metric-row .m-label{ color:var(--text-dim); flex-shrink:0; }
+  .metric-row .m-val{ text-align:right; color:var(--text); }
+  .est-flag{ display:inline-block; font-family:var(--mono); font-size:9.5px; color:var(--accent-3); border:1px solid rgba(245,185,92,0.35); background:rgba(245,185,92,0.08); padding:1px 5px; border-radius:5px; margin-left:6px; vertical-align:middle; }
+
+  /* Sources panel */
+  .sources-list{ display:grid; gap:9px; }
+  .source-item{ display:flex; gap:10px; padding:10px 12px; background:var(--bg-alt); border:1px solid var(--border); border-radius:9px; font-size:12.5px; }
+  .source-item a{ color:var(--accent-2); text-decoration:none; word-break:break-all; }
+  .source-item a:hover{ text-decoration:underline; }
+  .source-tag{ font-family:var(--mono); font-size:10px; color:var(--text-faint); text-transform:uppercase; flex-shrink:0; padding-top:2px; min-width:88px; }
+
+  /* Collapsible research panel */
+  .collapse-header{ display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select:none; }
+  .collapse-header h3{ font-size:15px; }
+  .chev{ transition: transform .2s ease; color:var(--text-faint); font-size:13px; }
+  .chev.open{ transform: rotate(180deg); }
+  .collapse-body{ display:none; margin-top:16px; font-size:13px; color:var(--text-dim); line-height:1.7; }
+  .collapse-body.open{ display:block; }
+  .collapse-body h4{ font-size:13px; color:var(--text); margin:16px 0 6px; }
+  .collapse-body h4:first-child{ margin-top:0; }
+  .collapse-body ul{ margin:6px 0; padding-left:18px; }
+  .collapse-body li{ margin-bottom:6px; }
+
+  .legend{ display:flex; flex-wrap:wrap; gap:14px; margin-top:16px; padding-top:16px; border-top:1px solid var(--border); }
+  .legend-item{ display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-dim); }
+  .legend-dot{ width:9px; height:9px; border-radius:3px; }
+
+  footer.note{ margin-top:26px; font-size:11.5px; color:var(--text-faint); line-height:1.6; text-align:center; }
+
+  .badge-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .mini-badge{ font-family:var(--mono); font-size:10.5px; padding:3px 8px; border-radius:6px; border:1px solid var(--border); color:var(--text-dim); }
+
+  .empty-state{ text-align:center; padding:40px 20px; color:var(--text-faint); font-size:13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow"><span class="dot"></span> COMPARE &amp; DECIDE — AI API PROVIDERS</div>
+    <h1>Claude API vs OpenAI API vs Gemini API vs Cohere</h1>
+    <p class="sub">Built for solo and student developers picking an API for a side project or startup MVP, where cost and free-tier access matter most. Adjust the weights below to match your priorities — the ranking updates live.</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT: weights -->
+    <div>
+      <div class="card weights">
+        <h3>Your priorities</h3>
+        <p class="hint">Drag to weight each criterion 0–100. Weights are normalized automatically, so relative values matter more than absolute ones.</p>
+
+        <div id="sliders"></div>
+
+        <button class="reset-btn" id="resetBtn">Reset to equal weights</button>
+      </div>
+
+      <div class="card">
+        <div class="legend" style="border-top:none; padding-top:0; margin-top:0; flex-direction:column; gap:10px;">
+          <div class="legend-item"><span class="legend-dot" style="background:var(--claude)"></span> Claude API (Anthropic)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--openai)"></span> OpenAI API</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--gemini)"></span> Google Gemini API</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--cohere)"></span> Cohere API</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: ranking -->
+    <div>
+      <div class="card">
+        <h3 style="margin-bottom:14px;">Live ranking</h3>
+        <div id="ranking"></div>
+      </div>
+
+      <!-- Sources panel -->
+      <div class="card">
+        <h3 style="margin-bottom:14px;">Sources used</h3>
+        <div class="sources-list" id="sourcesList"></div>
+      </div>
+
+      <!-- How this was researched -->
+      <div class="card">
+        <div class="collapse-header" id="researchToggle">
+          <h3>How this was researched</h3>
+          <span class="chev" id="researchChev">▾</span>
+        </div>
+        <div class="collapse-body" id="researchBody">
+          <h4>Approach</h4>
+          <p>Every data point below was pulled directly from each provider's own documentation, pricing pages, or rate-limit pages (fetched live). Where an official page did not publish a fixed, citable number — this happened for OpenAI's rate-limit page (blocked bot detection on direct fetch) and Google's exact free-tier RPM/RPD figures (Google's own docs point to a live dashboard rather than a static table) — that value is built from multiple independent third-party trackers instead, and is explicitly flagged <span class="est-flag">EST</span> in the detail view for each provider card. No numbers were invented; estimate flags mean "sourced from secondary aggregators, not a first-party static table," not "guessed."</p>
+
+          <h4>Conflicts encountered &amp; how they were resolved</h4>
+          <ul>
+            <li><strong>OpenAI free tier:</strong> Secondary sources disagree on whether a $5 signup credit still exists in 2026 — some say it was discontinued in mid-2025, others report it still appears "inconsistently" by region/promotion. We treated this as "no reliably guaranteed free credit" for scoring purposes, since a developer can't plan around an inconsistent grant.</li>
+            <li><strong>Gemini free-tier RPM:</strong> Third-party trackers report different numbers for the same models (e.g. Flash at 10 RPM in one source, Gemini 3 Flash at 10 RPM / 1,500 RPD in another) as Google has changed quotas multiple times in the past year (including a reported Dec 2025 quota cut). We used the most recent (mid-2026) figures and flagged the range as an estimate.</li>
+            <li><strong>Cohere pricing page:</strong> Cohere's own /pricing page does not render current Command A / Command R+ per-token rates in static HTML — it shows legacy model pricing only. We cross-verified current Command A pricing ($2.50 / $10.00 per million tokens) across four independent trackers before using it, and flagged it as third-party-confirmed rather than pulled from a first-party pricing table.</li>
+            <li><strong>Latency:</strong> None of the four providers publish standardized, comparable latency benchmarks. Scores here reflect each vendor's own stated speed-tier positioning (e.g. "fastest, most cost-efficient" model in a family) plus one third-party benchmark for Cohere, not a controlled head-to-head test. Treat the latency dimension as directional, not a lab measurement.</li>
+          </ul>
+
+          <h4>What "estimate" means throughout this tool</h4>
+          <p>Anywhere you see <span class="est-flag">EST</span> next to a number, it means that figure could not be confirmed on a first-party static page at the time of writing and instead reflects a synthesis of independently-reported third-party data (rate-limit trackers, pricing calculators, or benchmark sites) current as of mid-2026. Figures without that flag were read directly from the provider's own documentation.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="note">
+    Data current as of July 2026. AI API pricing, free tiers, and rate limits change frequently — always confirm against the provider's live pricing page before committing. This tool reflects a synthesis of research, not financial or technical advice.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+
+  // ---------- DATA MODEL ----------
+  // score: 1 (worst) - 10 (best) for a solo/student dev optimizing for cost & free access
+  const CRITERIA = [
+    { key:'multimodal', label:'Multimodal support', defaultWeight:60 },
+    { key:'privacy',    label:'Data / privacy policy', defaultWeight:60 },
+    { key:'latency',    label:'Latency / speed', defaultWeight:60 },
+    { key:'freetier',   label:'Free tier / free credits', defaultWeight:80 },
+    { key:'ratelimits', label:'Rate limits (free/low tier)', defaultWeight:70 },
+  ];
+
+  const PROVIDERS = [
+    {
+      id:'claude', name:'Claude API', tag:'Anthropic', color:'var(--claude)',
+      scores:{ multimodal:6, privacy:9, latency:8, freetier:2, ratelimits:7 },
+      metrics:[
+        { label:'Multimodal', val:'Vision (images) + PDF/document understanding across Sonnet 5 / Opus 4.8 / Haiku 4.5. No native audio input/output, no image generation.', est:false },
+        { label:'Data / privacy', val:'Commercial API traffic is NOT used to train models by default; opt-in only via the Development Partner Program.', est:false },
+        { label:'Latency', val:'Haiku 4.5 is the dedicated fastest/cheapest model; Opus 4.8 offers optional "fast mode" (~2.5x faster) at 2x price.', est:false },
+        { label:'Free tier', val:'No ongoing free API tier. New orgs start on the paid "Start" usage tier with a $500/month spend cap — a payment method is required from day one.', est:false },
+        { label:'Rate limits', val:'Start tier: 1,000 requests/min; Sonnet 5 gets its own 2,000,000 input-tokens/min & 400,000 output-tokens/min pool (not shared with older Sonnet models).', est:false },
+        { label:'Pricing (for context)', val:'Sonnet 5: $2 / $10 per million input/output tokens (intro price through Aug 31, 2026). Haiku 4.5: $1 / $5. Opus 4.8: $5 / $25.', est:false },
+      ]
+    },
+    {
+      id:'openai', name:'OpenAI API', tag:'OpenAI', color:'var(--openai)',
+      scores:{ multimodal:8, privacy:9, latency:7, freetier:3, ratelimits:4 },
+      metrics:[
+        { label:'Multimodal', val:'All current GPT-5.6 models take text + image input, text output, plus vision built in. Separate specialized models cover image generation, realtime voice, TTS, and transcription.', est:false },
+        { label:'Data / privacy', val:'Business/API inputs & outputs are NOT used to train models by default; opt-in only (e.g. via Playground feedback sharing).', est:false },
+        { label:'Latency', val:'Three-tier model family (Sol / Terra / Luna) trades intelligence for speed & cost; Luna is the cheapest & fastest. Dedicated latency-optimization guide covers streaming & prompt caching.', est:false },
+        { label:'Free tier', val:'No confirmed permanent free API tier as of mid-2026 — a payment method is generally required for meaningful access. Reports of a small legacy signup credit are inconsistent across sources.', est:true },
+        { label:'Rate limits', val:'Official rate-limit page could not be fetched directly (bot-blocked). Third-party trackers consistently report very restrictive limits (~3 requests/min) on the lowest tier.', est:true },
+        { label:'Pricing (for context)', val:'GPT-5.6 Sol: $5 / $30 per million tokens. Terra: $2.50 / $15. Luna: $1 / $6.', est:false },
+      ]
+    },
+    {
+      id:'gemini', name:'Gemini API', tag:'Google', color:'var(--gemini)',
+      scores:{ multimodal:10, privacy:5, latency:8, freetier:10, ratelimits:6 },
+      metrics:[
+        { label:'Multimodal', val:'Broadest of the four: native text, image, video and audio in Gemini 3.5 Flash / 3.1 Pro; dedicated image generation (Nano Banana), video generation (Veo), speech generation, and live audio-to-audio translation.', est:false },
+        { label:'Data / privacy', val:'Free-tier prompts & responses ARE used to improve Google\'s products by default. Paid-tier traffic is NOT used to improve products. This trade-off is stated per-model on the pricing page.', est:false },
+        { label:'Latency', val:'Flash and Flash-Lite models are explicitly positioned for speed & high-volume use; Flash-Lite is described as the most cost/latency-efficient tier.', est:false },
+        { label:'Free tier', val:'Genuine ongoing free tier — Gemini 2.5/3 Flash, Flash-Lite, and embeddings are free of charge for input & output tokens with no credit card required to start.', est:false },
+        { label:'Rate limits', val:'Free tier limits vary by model and have changed several times in the past year; recent third-party trackers report roughly 5–15 requests/min, ~250K tokens/min, and 100–1,500 requests/day depending on model.', est:true },
+        { label:'Pricing (for context, paid tier)', val:'Gemini 2.5 Flash: $0.30 / $2.50 per million tokens. Flash-Lite: $0.10 / $0.40. Gemini 3.1 Pro: $2–4 / $12–18 (context-dependent).', est:false },
+      ]
+    },
+    {
+      id:'cohere', name:'Cohere', tag:'Cohere', color:'var(--cohere)',
+      scores:{ multimodal:3, privacy:5, latency:5, freetier:6, ratelimits:5 },
+      metrics:[
+        { label:'Multimodal', val:'Default Command models are text-only. Image understanding requires the separate Command A Vision or Aya Vision models (not the default Chat endpoint model); no native audio or image/video generation.', est:false },
+        { label:'Data / privacy', val:'By default, trial-key prompts & generations MAY be used to train Cohere\'s models; an opt-out toggle exists in the dashboard. Enterprise/paying customers get stronger contractual data commitments.', est:false },
+        { label:'Latency', val:'Command R7B is the smallest/fastest tier, positioned for high-volume low-latency tasks; Command A is the largest & highest-quality but benchmarked slower (~53 tokens/sec, ~0.41s time-to-first-token per third-party benchmark).', est:true },
+        { label:'Free tier', val:'A free Trial API key is issued automatically on signup, but capped at 1,000 API calls/month total and explicitly not licensed for production/commercial use.', est:false },
+        { label:'Rate limits', val:'Trial key: 20 requests/min on Command models (vs 500 req/min on a paid Production key), with the hard 1,000-calls/month ceiling applying regardless of RPM.', est:false },
+        { label:'Pricing (for context)', val:'Command A: $2.50 / $10.00 per million tokens. Command R7B (cheapest): ~$0.0375 / $0.15 per million tokens.', est:true },
+      ]
+    },
+  ];
+
+  const SOURCES = [
+    { tag:'OpenAI', url:'https://platform.openai.com/docs/models', label:'Models & multimodal capabilities' },
+    { tag:'OpenAI', url:'https://platform.openai.com/docs/guides/latency-optimization', label:'Latency optimization guide' },
+    { tag:'OpenAI', url:'https://openai.com/policies/how-your-data-is-used-to-improve-model-performance/', label:'Data usage / training policy' },
+    { tag:'OpenAI', url:'https://platform.openai.com/docs/guides/rate-limits', label:'Rate limits (page blocked on direct fetch — see note)' },
+    { tag:'Anthropic', url:'https://docs.anthropic.com/', label:'Claude API documentation' },
+    { tag:'Anthropic', url:'https://claude.com/pricing', label:'Claude API pricing (models & per-token rates)' },
+    { tag:'Anthropic', url:'https://docs.anthropic.com/en/api/rate-limits', label:'Rate limits & usage tiers' },
+    { tag:'Anthropic', url:'https://docs.anthropic.com/en/docs/claude-code/data-usage', label:'Data usage / training policy' },
+    { tag:'Google', url:'https://ai.google.dev/gemini-api/docs', label:'Gemini API documentation' },
+    { tag:'Google', url:'https://ai.google.dev/gemini-api/docs/pricing', label:'Pricing, free tier & per-model data-use table' },
+    { tag:'Google', url:'https://ai.google.dev/gemini-api/docs/rate-limits', label:'Rate limits & usage tiers' },
+    { tag:'Google', url:'https://ai.google.dev/gemini-api/docs/data-privacy', label:'Data privacy policy' },
+    { tag:'Cohere', url:'https://docs.cohere.com/', label:'Cohere API documentation' },
+    { tag:'Cohere', url:'https://cohere.com/pricing', label:'Pricing (legacy rates only render statically)' },
+    { tag:'Cohere', url:'https://docs.cohere.com/docs/rate-limits', label:'Trial vs production API keys & rate limits' },
+    { tag:'Cohere', url:'https://cohere.com/privacy', label:'Privacy policy' },
+    { tag:'Cohere', url:'https://docs.cohere.com/docs/models', label:'Model overview (Command, Aya, Vision variants)' },
+  ];
+
+  // ---------- STATE ----------
+  let weights = {};
+  CRITERIA.forEach(c => weights[c.key] = c.defaultWeight);
+  let openDetails = {};
+
+  // ---------- RENDER SLIDERS ----------
+  const slidersEl = document.getElementById('sliders');
+  function renderSliders(){
+    slidersEl.innerHTML = '';
+    CRITERIA.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'slider-row';
+      row.innerHTML = `
+        <div class="slider-label">
+          <span class="name">${c.label}</span>
+          <span class="val" id="val-${c.key}">${weights[c.key]}</span>
+        </div>
+        <input type="range" min="0" max="100" step="1" value="${weights[c.key]}" id="slider-${c.key}">
+      `;
+      slidersEl.appendChild(row);
+    });
+    CRITERIA.forEach(c => {
+      const input = document.getElementById(`slider-${c.key}`);
+      input.addEventListener('input', (e) => {
+        weights[c.key] = parseInt(e.target.value, 10);
+        document.getElementById(`val-${c.key}`).textContent = weights[c.key];
+        renderRanking();
+      });
+    });
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    CRITERIA.forEach(c => weights[c.key] = c.defaultWeight);
+    renderSliders();
+    renderRanking();
+  });
+
+  // ---------- SCORING ----------
+  function computeScore(provider){
+    let totalWeight = CRITERIA.reduce((s,c) => s + weights[c.key], 0);
+    if(totalWeight === 0) return 0;
+    let weighted = 0;
+    CRITERIA.forEach(c => {
+      weighted += (weights[c.key] / totalWeight) * provider.scores[c.key];
+    });
+    return weighted; // out of 10
+  }
+
+  // ---------- RENDER RANKING ----------
+  const rankingEl = document.getElementById('ranking');
+  function renderRanking(){
+    const scored = PROVIDERS.map(p => ({ ...p, finalScore: computeScore(p) }));
+    scored.sort((a,b) => b.finalScore - a.finalScore);
+
+    rankingEl.innerHTML = '';
+    if(scored.every(s => isNaN(s.finalScore))){
+      rankingEl.innerHTML = '<div class="empty-state">Set at least one weight above zero to see a ranking.</div>';
+      return;
+    }
+
+    scored.forEach((p, idx) => {
+      const pct = Math.max(2, (p.finalScore / 10) * 100);
+      const item = document.createElement('div');
+      item.className = 'rank-item' + (idx === 0 ? ' top' : '');
+      item.innerHTML = `
+        <div class="rank-num">${idx+1}</div>
+        <div class="rank-main">
+          <div class="rank-title-row">
+            <span class="swatch" style="background:${p.color}"></span>
+            <span class="rank-name">${p.name}</span>
+            <span class="rank-tag">${p.tag}</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${p.color}"></div></div>
+          <button class="detail-toggle" data-id="${p.id}">${openDetails[p.id] ? 'Hide details' : 'Show sourced data points'}</button>
+          <div class="detail-panel ${openDetails[p.id] ? 'open' : ''}" id="detail-${p.id}">
+            ${p.metrics.map(m => `
+              <div class="metric-row">
+                <span class="m-label">${m.label}${m.est ? '<span class="est-flag">EST</span>' : ''}</span>
+                <span class="m-val">${m.val}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="rank-score">
+          <div class="score-num" style="color:${p.color}">${p.finalScore.toFixed(1)}</div>
+          <div class="score-max">/ 10</div>
+        </div>
+      `;
+      rankingEl.appendChild(item);
+    });
+
+    document.querySelectorAll('.detail-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        openDetails[id] = !openDetails[id];
+        renderRanking();
+      });
+    });
+  }
+
+  // ---------- RENDER SOURCES ----------
+  const sourcesListEl = document.getElementById('sourcesList');
+  function renderSources(){
+    sourcesListEl.innerHTML = SOURCES.map(s => `
+      <div class="source-item">
+        <span class="source-tag">${s.tag}</span>
+        <span>${s.label} — <a href="${s.url}" target="_blank" rel="noopener">${s.url}</a></span>
+      </div>
+    `).join('');
+  }
+
+  // ---------- COLLAPSIBLE RESEARCH PANEL ----------
+  const researchToggle = document.getElementById('researchToggle');
+  const researchBody = document.getElementById('researchBody');
+  const researchChev = document.getElementById('researchChev');
+  researchToggle.addEventListener('click', () => {
+    researchBody.classList.toggle('open');
+    researchChev.classList.toggle('open');
+  });
+
+  // ---------- INIT ----------
+  try {
+    renderSliders();
+    renderRanking();
+    renderSources();
+  } catch(err){
+    document.body.innerHTML = '<div style="padding:40px;color:#f5716e;font-family:monospace;">Something went wrong rendering this tool: ' + err.message + '</div>';
+  }
+
+})();
+</script>
+</body>
+</html>
