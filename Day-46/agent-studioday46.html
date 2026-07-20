@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autonomous Agent Studio — Code Audit Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-0:#070b14; --bg-1:#0b1120; --bg-2:#111a2e; --bg-3:#16213a;
+  --panel: rgba(22,33,58,0.55); --panel-solid:#131d33; --border: rgba(120,150,220,0.14);
+  --border-strong: rgba(120,170,255,0.28);
+  --teal:#2dd4bf; --violet:#a78bfa; --gold:#fbbf6b; --rose:#fb7185; --blue:#60a5fa; --green:#34d399;
+  --text-0:#eef2ff; --text-1:#b7c2de; --text-2:#7a88ac;
+  --danger:#f87171; --warn:#fbbf24; --ok:#34d399;
+  --radius:14px; --radius-sm:9px;
+  --shadow: 0 8px 30px rgba(0,0,0,.35);
+  --font-display:'Space Grotesk',sans-serif; --font-mono:'JetBrains Mono',monospace; --font-cond:'Barlow Condensed',sans-serif;
+}
+[data-theme="light"]{
+  --bg-0:#eef1f8; --bg-1:#e6eaf5; --bg-2:#dde3f2; --bg-3:#ffffff;
+  --panel: rgba(255,255,255,0.65); --panel-solid:#ffffff; --border: rgba(30,40,80,0.12);
+  --border-strong: rgba(30,60,140,0.22);
+  --text-0:#131a2c; --text-1:#3c465e; --text-2:#6a7590;
+  --shadow: 0 8px 24px rgba(30,40,90,.12);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  font-family:var(--font-display); background:
+    radial-gradient(1200px 700px at 8% -10%, rgba(45,212,191,.10), transparent 60%),
+    radial-gradient(1000px 700px at 100% 0%, rgba(167,139,250,.10), transparent 55%),
+    var(--bg-0);
+  color:var(--text-0); overflow:hidden; height:100vh; width:100vw;
+  transition:background .3s ease,color .3s ease;
+}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:var(--border-strong); border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+button{font-family:var(--font-display); cursor:pointer; border:none; background:none; color:inherit;}
+input,select,textarea{font-family:var(--font-mono); color:var(--text-0); background:var(--bg-2); border:1px solid var(--border); border-radius:8px; padding:6px 8px; outline:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--teal);}
+.glass{ background:var(--panel); backdrop-filter:blur(16px) saturate(140%); -webkit-backdrop-filter:blur(16px) saturate(140%); border:1px solid var(--border); box-shadow:var(--shadow); }
+.app{ display:grid; grid-template-columns:264px 1fr 320px; grid-template-rows:56px 1fr 42px; height:100vh; gap:8px; padding:8px; }
+
+/* ===== TOPBAR ===== */
+.topbar{ grid-column:1/4; display:flex; align-items:center; justify-content:space-between; padding:0 16px; border-radius:var(--radius); }
+.brand{ display:flex; align-items:center; gap:10px; }
+.brand-icon{ width:32px;height:32px;border-radius:9px; background:linear-gradient(135deg,var(--teal),var(--violet)); display:flex;align-items:center;justify-content:center; font-weight:700; color:#08111f; box-shadow:0 0 18px rgba(45,212,191,.45);}
+.brand-text b{font-size:15px; letter-spacing:.3px;}
+.brand-text span{display:block; font-size:10.5px; color:var(--text-2); font-family:var(--font-cond); letter-spacing:1px; text-transform:uppercase;}
+.topbar-actions{ display:flex; align-items:center; gap:6px; }
+.tbtn{ display:flex; align-items:center; gap:6px; font-size:12px; padding:7px 11px; border-radius:9px; border:1px solid var(--border); background:var(--bg-2); color:var(--text-1); transition:.15s; }
+.tbtn:hover{ border-color:var(--border-strong); color:var(--text-0); background:var(--bg-3); }
+.tbtn.primary{ background:linear-gradient(135deg,var(--teal),#1fb8a8); color:#04140f; font-weight:600; border:none; }
+.tbtn.primary:hover{ filter:brightness(1.08); }
+.tbtn.danger{ color:var(--danger); }
+.tbtn svg{width:13px;height:13px;}
+.divider-v{width:1px;height:22px;background:var(--border);margin:0 4px;}
+.status-pill{ display:flex; align-items:center; gap:6px; font-size:11px; padding:5px 10px; border-radius:20px; background:var(--bg-2); border:1px solid var(--border); font-family:var(--font-mono); }
+.dot{width:7px;height:7px;border-radius:50%; background:var(--text-2);}
+.dot.running{ background:var(--teal); box-shadow:0 0 8px var(--teal); animation:pulse 1.2s infinite; }
+.dot.paused{ background:var(--gold); box-shadow:0 0 8px var(--gold); }
+.dot.error{ background:var(--danger); box-shadow:0 0 8px var(--danger); }
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+/* ===== LEFT SIDEBAR ===== */
+.sidebar{ border-radius:var(--radius); padding:14px; overflow-y:auto; display:flex; flex-direction:column; gap:16px; }
+.side-title{ font-family:var(--font-cond); font-size:11px; letter-spacing:1.4px; text-transform:uppercase; color:var(--text-2); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;}
+.agent-chip{ display:flex; align-items:center; gap:8px; padding:8px 9px; border-radius:9px; background:var(--bg-2); border:1px solid var(--border); margin-bottom:6px; font-size:12px; cursor:grab; transition:.15s; }
+.agent-chip:hover{ border-color:var(--border-strong); transform:translateX(2px); }
+.agent-chip .adot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.agent-chip .an{flex:1; font-weight:500;}
+.agent-chip .aico{opacity:.5; font-size:10px;}
+.mini-btn{ font-size:10px; padding:2px 7px; border-radius:6px; background:var(--bg-3); border:1px solid var(--border); color:var(--text-2); }
+.mini-btn:hover{ color:var(--teal); border-color:var(--teal); }
+.input-block textarea{ width:100%; height:110px; resize:vertical; font-size:11.5px; line-height:1.5; }
+.control-row{ display:flex; gap:6px; flex-wrap:wrap; }
+.control-btn{ flex:1; min-width:70px; font-size:11px; padding:8px 6px; border-radius:8px; background:var(--bg-2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; gap:5px; }
+.control-btn:hover{border-color:var(--border-strong);}
+.control-btn.go{ background:linear-gradient(135deg,var(--teal),#189684); color:#04140f; font-weight:700; border:none; }
+.control-btn.stop{ color:var(--danger); }
+.field-label{ font-size:10.5px; color:var(--text-2); font-family:var(--font-cond); text-transform:uppercase; letter-spacing:1px; margin:6px 0 4px; }
+.select-full{width:100%; font-size:11.5px;}
+.range-row{display:flex;align-items:center;gap:8px;}
+.range-row input[type=range]{flex:1;}
+.range-row span{font-size:11px; font-family:var(--font-mono); color:var(--teal); width:28px; text-align:right;}
+
+/* ===== CANVAS ===== */
+.canvas-wrap{ position:relative; border-radius:var(--radius); overflow:hidden; }
+#canvas-scroll{ position:absolute; inset:0; overflow:auto; }
+#canvas{ position:relative; width:2600px; height:1700px;
+  background-image: radial-gradient(circle, rgba(140,160,220,.14) 1px, transparent 1px);
+  background-size: 26px 26px; transform-origin: 0 0;
+}
+[data-theme="light"] #canvas{ background-image: radial-gradient(circle, rgba(60,80,140,.14) 1px, transparent 1px); }
+.node{ position:absolute; width:210px; border-radius:12px; padding:12px; cursor:grab; user-select:none;
+  background:var(--panel-solid); border:1px solid var(--border); box-shadow:0 6px 18px rgba(0,0,0,.28); transition:box-shadow .15s, border-color .15s; z-index:5;}
+.node:hover{ border-color:var(--border-strong); }
+.node.selected{ border-color:var(--teal); box-shadow:0 0 0 2px rgba(45,212,191,.35), 0 8px 22px rgba(0,0,0,.35); }
+.node.active-run{ animation:nodeGlow 1s infinite alternate; }
+@keyframes nodeGlow{ from{box-shadow:0 0 0 2px rgba(45,212,191,.15);} to{box-shadow:0 0 0 4px rgba(45,212,191,.55), 0 0 22px rgba(45,212,191,.35);} }
+.node.disabled{ opacity:.4; filter:grayscale(.6); }
+.node-head{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.node-ico{width:26px;height:26px;border-radius:7px; display:flex;align-items:center;justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; color:#0a1220;}
+.node-name{ font-size:12.5px; font-weight:600; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.node-menu-btn{ font-size:13px; color:var(--text-2); padding:2px 4px; border-radius:5px; }
+.node-menu-btn:hover{ background:var(--bg-2); }
+.node-role{ font-size:10px; color:var(--text-2); font-family:var(--font-cond); text-transform:uppercase; letter-spacing:.6px; margin-bottom:8px; }
+.node-status{ display:flex; align-items:center; gap:5px; font-size:10px; font-family:var(--font-mono); padding:3px 7px; border-radius:6px; background:var(--bg-2); width:fit-content; }
+.node-status .sdot{width:6px;height:6px;border-radius:50%;background:var(--text-2);}
+.node-status.ok .sdot{background:var(--green);} .node-status.ok{color:var(--green);}
+.node-status.running .sdot{background:var(--teal); animation:pulse .9s infinite;} .node-status.running{color:var(--teal);}
+.node-status.error .sdot{background:var(--danger);} .node-status.error{color:var(--danger);}
+.node-status.idle{color:var(--text-2);}
+.port{ position:absolute; width:12px; height:12px; border-radius:50%; background:var(--bg-1); border:2px solid var(--teal); z-index:6; cursor:crosshair; }
+.port:hover{ background:var(--teal); box-shadow:0 0 8px var(--teal); }
+.port.in{ left:-6px; top:50%; transform:translateY(-50%); }
+.port.out{ right:-6px; top:50%; transform:translateY(-50%); }
+#edges-svg{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+.edge-path{ fill:none; stroke:url(#edgeGrad); stroke-width:2; opacity:.75; pointer-events:stroke; }
+.edge-path.temp{ stroke:var(--gold); stroke-dasharray:5,4; }
+.edge-hit{ fill:none; stroke:transparent; stroke-width:14; pointer-events:stroke; cursor:pointer; }
+.edge-flow{ stroke-dasharray:5,7; animation:dash 1s linear infinite; }
+@keyframes dash{ to{ stroke-dashoffset:-24; } }
+
+.canvas-toolbar{ position:absolute; bottom:14px; left:14px; display:flex; gap:6px; z-index:20; }
+.ctbtn{ width:32px;height:32px; border-radius:9px; display:flex;align-items:center;justify-content:center; font-size:14px; }
+.minimap{ position:absolute; bottom:14px; right:14px; width:170px; height:110px; border-radius:10px; z-index:20; overflow:hidden; }
+.minimap svg{width:100%;height:100%;}
+.canvas-hint{ position:absolute; top:12px; left:14px; font-size:10.5px; color:var(--text-2); font-family:var(--font-cond); letter-spacing:.5px; z-index:20; background:var(--panel); padding:4px 10px; border-radius:20px; border:1px solid var(--border);}
+
+/* ===== RIGHT SIDEBAR ===== */
+.rsidebar{ border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column; }
+.tabs{ display:flex; border-bottom:1px solid var(--border); flex-shrink:0; }
+.tab{ flex:1; text-align:center; padding:10px 4px; font-size:11px; font-family:var(--font-cond); letter-spacing:.6px; text-transform:uppercase; color:var(--text-2); border-bottom:2px solid transparent; }
+.tab.active{ color:var(--teal); border-color:var(--teal); }
+.tab-content{ flex:1; overflow-y:auto; padding:12px 14px; display:none; }
+.tab-content.active{ display:block; }
+.metric-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;}
+.metric-card{ background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:9px 10px; }
+.metric-card .mv{ font-family:var(--font-mono); font-size:16px; font-weight:600; color:var(--text-0); }
+.metric-card .ml{ font-size:9.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:.5px; margin-top:2px;}
+.metric-card.accent .mv{ color:var(--teal); }
+.chart-block{ margin-bottom:16px; }
+.chart-title{ font-size:10.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:.8px; font-family:var(--font-cond); margin-bottom:6px; }
+.log-item{ font-size:10.5px; padding:6px 8px; border-bottom:1px solid var(--border); font-family:var(--font-mono); line-height:1.4; }
+.log-item .lt{ color:var(--text-2); margin-right:6px; }
+.log-item.type-error{color:var(--danger);} .log-item.type-api{color:var(--blue);} .log-item.type-memory{color:var(--violet);} .log-item.type-workflow{color:var(--gold);} .log-item.type-agent{color:var(--teal);}
+.log-search{ width:100%; margin-bottom:8px; font-size:11px; }
+.mem-item{ background:var(--bg-2); border:1px solid var(--border); border-radius:9px; padding:8px 9px; margin-bottom:7px; font-size:11px; position:relative;}
+.mem-item.pinned{ border-color:var(--gold); }
+.mem-item.locked{ opacity:.7; }
+.mem-tags{ display:flex; gap:5px; margin-bottom:4px;}
+.mem-tag{font-size:9px; padding:1px 6px; border-radius:5px; background:var(--bg-3); color:var(--text-2);}
+.mem-actions{ display:flex; gap:5px; margin-top:6px; }
+.mem-actions button{ font-size:9.5px; padding:2px 6px; border-radius:5px; background:var(--bg-3); border:1px solid var(--border); color:var(--text-2); }
+.mem-actions button:hover{ color:var(--teal); }
+.section-btn-row{ display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+.section-btn-row button{ font-size:10px; padding:5px 8px; border-radius:7px; background:var(--bg-2); border:1px solid var(--border); color:var(--text-1); }
+.section-btn-row button:hover{ border-color:var(--teal); color:var(--teal); }
+
+/* ===== BOTTOM BAR ===== */
+.bottombar{ grid-column:1/4; border-radius:var(--radius); display:flex; align-items:center; justify-content:space-between; padding:0 16px; font-size:10.5px; color:var(--text-2); font-family:var(--font-mono); }
+.bottombar .seg{ display:flex; gap:14px; align-items:center; }
+
+/* ===== MODAL / AGENT PANEL ===== */
+.modal-overlay{ position:fixed; inset:0; background:rgba(4,8,16,.6); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; z-index:100; }
+.modal-overlay.open{ display:flex; }
+.modal{ width:760px; max-width:92vw; max-height:86vh; border-radius:16px; display:flex; flex-direction:column; overflow:hidden; }
+.modal-head{ display:flex; align-items:center; gap:10px; padding:16px 20px; border-bottom:1px solid var(--border); }
+.modal-head .mh-ico{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#0a1220;}
+.modal-head h3{ font-size:15px; flex:1; }
+.modal-head .close-x{ font-size:18px; color:var(--text-2); padding:4px 8px; border-radius:8px; }
+.modal-head .close-x:hover{ background:var(--bg-2); color:var(--text-0); }
+.modal-body{ flex:1; overflow-y:auto; padding:18px 20px; display:flex; flex-direction:column; gap:14px; }
+.modal-tabs{ display:flex; gap:6px; border-bottom:1px solid var(--border); }
+.mtab{ font-size:11px; padding:8px 12px; color:var(--text-2); border-bottom:2px solid transparent; text-transform:uppercase; font-family:var(--font-cond); letter-spacing:.6px;}
+.mtab.active{ color:var(--teal); border-color:var(--teal); }
+.mtab-pane{ display:none; }
+.mtab-pane.active{ display:block; }
+.kv-row{ display:flex; gap:10px; align-items:center; }
+.kv-row .kl{ font-size:11px; color:var(--text-2); width:90px; flex-shrink:0; }
+.output-box{ background:var(--bg-1); border:1px solid var(--border); border-radius:10px; padding:12px; font-size:12px; line-height:1.65; font-family:var(--font-mono); white-space:pre-wrap; max-height:340px; overflow-y:auto; }
+.output-box.plain{ font-family:var(--font-display); }
+.badge{ font-size:9.5px; padding:2px 8px; border-radius:20px; font-family:var(--font-mono); }
+.badge.ok{ background:rgba(52,211,153,.15); color:var(--green); }
+.badge.warn{ background:rgba(251,191,36,.15); color:var(--warn); }
+.badge.err{ background:rgba(248,113,113,.15); color:var(--danger); }
+.modal-foot{ display:flex; gap:8px; padding:14px 20px; border-top:1px solid var(--border); }
+
+/* Toast */
+.toast-wrap{ position:fixed; bottom:60px; right:16px; z-index:200; display:flex; flex-direction:column; gap:8px; }
+.toast{ padding:10px 14px; border-radius:10px; font-size:12px; max-width:320px; animation:toastIn .2s ease; }
+@keyframes toastIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+.toast.info{border-left:3px solid var(--blue);}
+.toast.error{border-left:3px solid var(--danger);}
+.toast.success{border-left:3px solid var(--green);}
+
+/* Context menu */
+.ctx-menu{ position:fixed; z-index:300; background:var(--panel-solid); border:1px solid var(--border-strong); border-radius:10px; padding:5px; box-shadow:var(--shadow); display:none; min-width:170px;}
+.ctx-menu.open{ display:block; }
+.ctx-item{ font-size:12px; padding:8px 10px; border-radius:7px; display:flex; align-items:center; gap:8px; }
+.ctx-item:hover{ background:var(--bg-2); color:var(--teal); }
+.ctx-item.danger:hover{ color:var(--danger); }
+.ctx-sep{ height:1px; background:var(--border); margin:4px 2px; }
+
+/* Diff */
+.diff-add{ color:var(--green); background:rgba(52,211,153,.08); display:block; }
+.diff-del{ color:var(--danger); background:rgba(248,113,113,.08); display:block; text-decoration:line-through; }
+
+.scroll-thin{max-height:220px; overflow-y:auto;}
+.empty-hint{ font-size:11px; color:var(--text-2); text-align:center; padding:16px 6px; }
+.checkbox-row{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-1); }
+
+/* Report */
+#report-body h4{font-size:13px; color:var(--teal); margin:14px 0 6px; font-family:var(--font-cond); letter-spacing:.5px; text-transform:uppercase;}
+#report-body p, #report-body li{font-size:12px; line-height:1.6; color:var(--text-1);}
+#report-body ul{padding-left:18px; margin-bottom:6px;}
+@media print{
+  body *{visibility:hidden;}
+  #report-modal, #report-modal *{visibility:visible;}
+  #report-modal{position:absolute; top:0; left:0; width:100%;}
+  .modal-foot,.modal-head .close-x{display:none;}
+}
+</style>
+</head>
+<body data-theme="dark">
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar glass">
+    <div class="brand">
+      <div class="brand-icon">AS</div>
+      <div class="brand-text"><b>Autonomous Agent Studio</b><span>Code Audit &amp; Refactor Edition</span></div>
+    </div>
+    <div class="topbar-actions">
+      <span class="status-pill"><span class="dot idle" id="status-dot"></span><span id="status-text">Idle</span></span>
+      <div class="divider-v"></div>
+      <button class="tbtn" id="btn-theme" title="Toggle theme">🌗 Theme</button>
+      <button class="tbtn" id="btn-save">💾 Save</button>
+      <button class="tbtn" id="btn-export">⇩ Export JSON</button>
+      <button class="tbtn" id="btn-import">⇧ Import</button>
+      <input type="file" id="file-import" accept=".json" style="display:none;">
+      <button class="tbtn" id="btn-report">📄 Report</button>
+      <button class="tbtn primary" id="btn-sessions">🗂 Sessions</button>
+    </div>
+  </div>
+
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar glass">
+    <div>
+      <div class="side-title">Agents <button class="mini-btn" id="btn-add-agent">+ New</button></div>
+      <div id="agent-list"></div>
+    </div>
+
+    <div>
+      <div class="side-title">Codebase Input</div>
+      <div class="input-block">
+        <textarea id="code-input" placeholder="Paste code / file list / repo summary to audit...">function calcTotal(items){
+  let t = 0;
+  for (var i=0;i<items.length;i++){ t += items[i].price * items[i].qty; }
+  if(items.length == 0){ return null }
+  return t
+}
+
+app.get('/user/:id', (req,res)=>{
+  db.query("SELECT * FROM users WHERE id = " + req.params.id, (err,r)=>{
+    res.send(r)
+  })
+})
+
+class UserService {
+  constructor(){ this.cache = {} }
+  getUser(id){
+    if(this.cache[id]) return this.cache[id]
+    const u = db.find(id)
+    this.cache[id]=u
+    return u
+  }
+}</textarea>
+      </div>
+      <div class="field-label">Target Score</div>
+      <div class="range-row"><input type="range" id="target-score" min="50" max="100" value="90"><span id="target-score-val">90</span></div>
+      <div class="field-label">Max Rounds (Safety Cap)</div>
+      <div class="range-row"><input type="range" id="max-rounds" min="1" max="8" value="4"><span id="max-rounds-val">4</span></div>
+      <div class="checkbox-row" style="margin-top:8px;"><input type="checkbox" id="human-approval"><label for="human-approval">Pause for human approval after each round</label></div>
+    </div>
+
+    <div>
+      <div class="side-title">Execution</div>
+      <div class="control-row">
+        <button class="control-btn go" id="btn-start">▶ Start</button>
+        <button class="control-btn" id="btn-pause">⏸ Pause</button>
+        <button class="control-btn" id="btn-resume">⏵ Resume</button>
+        <button class="control-btn" id="btn-step">⏭ Step</button>
+        <button class="control-btn" id="btn-retry">↻ Retry Agent</button>
+        <button class="control-btn stop" id="btn-stop">■ Stop</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="side-title">Model &amp; Speed</div>
+      <div class="field-label">Execution Model</div>
+      <select class="select-full" id="global-model">
+        <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
+      </select>
+      <div class="field-label">Snap to Grid</div>
+      <div class="checkbox-row"><input type="checkbox" id="snap-grid" checked><label for="snap-grid">Enabled (20px)</label></div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-wrap glass">
+    <div class="canvas-hint">Drag nodes · drag from a node's right port to another's left port to connect · scroll/drag canvas to pan · double-click node to open</div>
+    <div id="canvas-scroll">
+      <div id="canvas">
+        <svg id="edges-svg">
+          <defs>
+            <linearGradient id="edgeGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#2dd4bf"/>
+              <stop offset="100%" stop-color="#a78bfa"/>
+            </linearGradient>
+          </defs>
+          <g id="edges-g"></g>
+        </svg>
+        <div id="nodes-layer"></div>
+      </div>
+    </div>
+    <div class="canvas-toolbar glass">
+      <button class="ctbtn" id="zoom-in" title="Zoom in">＋</button>
+      <button class="ctbtn" id="zoom-out" title="Zoom out">－</button>
+      <button class="ctbtn" id="zoom-reset" title="Reset view">⤢</button>
+      <button class="ctbtn" id="btn-undo" title="Undo">↶</button>
+      <button class="ctbtn" id="btn-redo" title="Redo">↷</button>
+    </div>
+    <div class="minimap glass"><svg id="minimap-svg" viewBox="0 0 2600 1700" preserveAspectRatio="xMidYMid slice"></svg></div>
+  </div>
+
+  <!-- RIGHT SIDEBAR -->
+  <div class="rsidebar glass">
+    <div class="tabs">
+      <div class="tab active" data-tab="dashboard">Live</div>
+      <div class="tab" data-tab="memory">Memory</div>
+      <div class="tab" data-tab="log">Log</div>
+    </div>
+
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="metric-grid">
+        <div class="metric-card accent"><div class="mv" id="m-round">0</div><div class="ml">Round</div></div>
+        <div class="metric-card"><div class="mv" id="m-agent">—</div><div class="ml">Current Agent</div></div>
+        <div class="metric-card"><div class="mv" id="m-timer">00:00</div><div class="ml">Elapsed</div></div>
+        <div class="metric-card"><div class="mv" id="m-retry">0</div><div class="ml">Retries</div></div>
+        <div class="metric-card accent"><div class="mv" id="m-score">—</div><div class="ml">Avg Score</div></div>
+        <div class="metric-card"><div class="mv" id="m-critical">—</div><div class="ml">Critical Issues</div></div>
+        <div class="metric-card"><div class="mv" id="m-tokens">0</div><div class="ml">Tokens Used</div></div>
+        <div class="metric-card"><div class="mv" id="m-cost">$0.0000</div><div class="ml">Est. Cost</div></div>
+        <div class="metric-card"><div class="mv" id="m-latency">0ms</div><div class="ml">Avg Latency</div></div>
+        <div class="metric-card"><div class="mv" id="m-success">—</div><div class="ml">Success Rate</div></div>
+      </div>
+
+      <div class="chart-block"><div class="chart-title">Score History</div><div id="chart-score"></div></div>
+      <div class="chart-block"><div class="chart-title">Weighted Criteria (Radar)</div><div id="chart-radar"></div></div>
+      <div class="chart-block"><div class="chart-title">Agent Utilization</div><div id="chart-util"></div></div>
+      <div class="chart-block"><div class="chart-title">Stop Reason</div><div id="stop-reason-box" class="output-box plain" style="min-height:20px; font-size:11.5px;">Not stopped yet.</div></div>
+    </div>
+
+    <div class="tab-content" id="tab-memory">
+      <div class="section-btn-row">
+        <button id="mem-add">+ Add</button><button id="mem-search-btn">🔍 Search</button>
+        <button id="mem-export">Export</button><button id="mem-import">Import</button>
+        <button id="mem-clear">Clear All</button>
+      </div>
+      <input type="text" id="mem-search" class="log-search" placeholder="Search memory...">
+      <div id="memory-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-log">
+      <input type="text" id="log-search" class="log-search" placeholder="Search activity log...">
+      <div id="log-list"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOMBAR -->
+  <div class="bottombar glass">
+    <div class="seg">
+      <span id="bb-agents">9 agents</span>
+      <span id="bb-edges">0 connections</span>
+      <span id="bb-mem">Memory: 0 items</span>
+    </div>
+    <div class="seg">
+      <span id="bb-zoom">Zoom 100%</span>
+      <span id="bb-clock"></span>
+    </div>
+  </div>
+</div>
+
+<!-- AGENT MODAL -->
+<div class="modal-overlay" id="agent-modal-overlay">
+  <div class="modal glass">
+    <div class="modal-head">
+      <div class="mh-ico" id="am-ico">A</div>
+      <h3 id="am-title">Agent</h3>
+      <span class="badge ok" id="am-status-badge">idle</span>
+      <button class="close-x" id="am-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tabs">
+        <div class="mtab active" data-mtab="config">Config</div>
+        <div class="mtab" data-mtab="io">Input / Output</div>
+        <div class="mtab" data-mtab="reasoning">Reasoning</div>
+        <div class="mtab" data-mtab="diff">Diff</div>
+      </div>
+
+      <div class="mtab-pane active" id="mtab-config">
+        <div class="field-label">Agent Name</div>
+        <input type="text" id="am-name" style="width:100%;">
+        <div class="field-label">Model</div>
+        <select id="am-model" class="select-full"><option value="claude-sonnet-4-6">claude-sonnet-4-6</option></select>
+        <div class="field-label">Temperature: <span id="am-temp-val">0.4</span></div>
+        <input type="range" id="am-temp" min="0" max="1" step="0.05" style="width:100%;">
+        <div class="field-label">System Prompt</div>
+        <textarea id="am-prompt" style="width:100%; height:220px; font-size:11.5px;"></textarea>
+        <div class="checkbox-row" style="margin-top:10px;"><input type="checkbox" id="am-enabled"><label for="am-enabled">Enabled</label></div>
+      </div>
+
+      <div class="mtab-pane" id="mtab-io">
+        <div class="field-label">Runtime</div>
+        <div style="font-family:var(--font-mono); font-size:11.5px;" id="am-runtime">—</div>
+        <div class="field-label">Input</div>
+        <div class="output-box" id="am-input">—</div>
+        <div class="field-label">Output</div>
+        <div class="output-box" id="am-output">—</div>
+      </div>
+
+      <div class="mtab-pane" id="mtab-reasoning">
+        <div class="field-label">Reasoning / Notes</div>
+        <div class="output-box" id="am-reasoning">—</div>
+      </div>
+
+      <div class="mtab-pane" id="mtab-diff">
+        <div class="field-label">Diff vs. previous run</div>
+        <div class="output-box" id="am-diff">No previous run to diff against.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="tbtn primary" id="am-save">💾 Save Prompt</button>
+      <button class="tbtn" id="am-rerun">↻ Re-run Agent</button>
+      <button class="tbtn" id="am-copy">⧉ Copy Output</button>
+      <button class="tbtn danger" id="am-delete">🗑 Delete Node</button>
+    </div>
+  </div>
+</div>
+
+<!-- REPORT MODAL -->
+<div class="modal-overlay" id="report-modal-overlay">
+  <div class="modal glass" id="report-modal" style="width:820px;">
+    <div class="modal-head">
+      <div class="mh-ico" style="background:linear-gradient(135deg,var(--gold),var(--rose));">R</div>
+      <h3>Final Execution Report</h3>
+      <button class="close-x" id="report-close">✕</button>
+    </div>
+    <div class="modal-body" id="report-body"><div class="empty-hint">Run the pipeline to generate a report.</div></div>
+    <div class="modal-foot">
+      <button class="tbtn primary" id="report-md">⇩ Export Markdown</button>
+      <button class="tbtn" id="report-print">🖨 Print / PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- SESSIONS MODAL -->
+<div class="modal-overlay" id="sessions-modal-overlay">
+  <div class="modal glass" style="width:520px;">
+    <div class="modal-head"><div class="mh-ico" style="background:linear-gradient(135deg,var(--violet),var(--blue));">S</div><h3>Sessions</h3><button class="close-x" id="sessions-close">✕</button></div>
+    <div class="modal-body">
+      <div class="section-btn-row"><button id="sess-new">+ New Session</button><button id="sess-duplicate">⧉ Duplicate Current</button></div>
+      <div id="sessions-list"></div>
+    </div>
+  </div>
+</div>
+
+<div class="ctx-menu" id="ctx-menu"></div>
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================= STATE ============================= */
+const AGENT_COLORS = { planner:'#60a5fa', architect:'#a78bfa', security:'#fb7185', performance:'#fbbf6b', style:'#34d399', executor:'#2dd4bf', evaluator:'#f472b6', critic:'#fb923c', improver:'#4ade80' };
+
+function defaultAgents(){
+  return [
+    { id:'planner', name:'Planner', role:'core', type:'planner', x:40, y:60, enabled:true, model:'claude-sonnet-4-6', temperature:0.3,
+      systemPrompt:`You are the Planner agent in a code quality audit pipeline. Given a codebase snippet, produce a concise structured AUDIT PLAN: list the key areas to examine (architecture, security, performance, style/maintainability), what risks to look for, and the order of operations. Respond ONLY with valid JSON: {"plan_summary":"...","focus_areas":["..."],"risks_to_check":["..."],"priority_order":["architect","security","performance","style"]}` },
+    { id:'architect', name:'Architect', role:'audit', type:'architect', x:320, y:-40, enabled:true, model:'claude-sonnet-4-6', temperature:0.4,
+      systemPrompt:`You are the Architect audit agent. Review the given code for architecture and maintainability issues: poor separation of concerns, tight coupling, missing abstractions, inconsistent patterns, error handling gaps. Respond ONLY with valid JSON: {"findings":[{"issue":"...","severity":"critical|major|minor","location":"...","recommendation":"..."}],"summary":"..."}` },
+    { id:'security', name:'Security Auditor', role:'audit', type:'security', x:320, y:100, enabled:true, model:'claude-sonnet-4-6', temperature:0.3,
+      systemPrompt:`You are the Security Auditor agent. Review the given code strictly for security vulnerabilities: SQL/NoSQL injection, XSS, unsafe eval, missing input validation, secrets in code, auth/authorization flaws, insecure dependencies. Respond ONLY with valid JSON: {"findings":[{"issue":"...","severity":"critical|major|minor","location":"...","recommendation":"..."}],"summary":"..."}` },
+    { id:'performance', name:'Performance Auditor', role:'audit', type:'performance', x:320, y:240, enabled:true, model:'claude-sonnet-4-6', temperature:0.4,
+      systemPrompt:`You are the Performance Auditor agent. Review the given code for performance issues: unnecessary loops/allocations, N+1 queries, blocking calls, missing caching/memoization, inefficient data structures. Respond ONLY with valid JSON: {"findings":[{"issue":"...","severity":"critical|major|minor","location":"...","recommendation":"..."}],"summary":"..."}` },
+    { id:'style', name:'Style Reviewer', role:'audit', type:'style', x:320, y:380, enabled:true, model:'claude-sonnet-4-6', temperature:0.4,
+      systemPrompt:`You are the Style Reviewer agent. Review the given code for style/consistency/readability: naming, formatting, missing semicolons/strict equality, dead code, magic numbers, lack of comments where needed. Respond ONLY with valid JSON: {"findings":[{"issue":"...","severity":"critical|major|minor","location":"...","recommendation":"..."}],"summary":"..."}` },
+    { id:'executor', name:'Executor', role:'core', type:'executor', x:620, y:160, enabled:true, model:'claude-sonnet-4-6', temperature:0.3,
+      systemPrompt:`You are the Executor agent. You receive the audit plan and the raw findings JSON from four specialist auditors (architect, security, performance, style). Consolidate and de-duplicate them into ONE unified findings list, sorted by severity (critical first). Respond ONLY with valid JSON: {"consolidated_findings":[{"issue":"...","severity":"critical|major|minor","category":"architecture|security|performance|style","location":"...","recommendation":"..."}],"critical_count":0,"major_count":0,"minor_count":0,"executive_summary":"..."}` },
+    { id:'evaluator', name:'Evaluator', role:'core', type:'evaluator', x:900, y:160, enabled:true, model:'claude-sonnet-4-6', temperature:0.2,
+      systemPrompt:`You are the Evaluator agent. Score the consolidated findings/current code state on a weighted multi-criteria rubric. Weights: security 35%, performance 25%, maintainability 25%, style 15%. Respond ONLY with valid JSON: {"overall_score":0,"criteria":{"security":0,"performance":0,"maintainability":0,"style":0},"strengths":["..."],"weaknesses":["..."],"suggestions":["..."],"confidence":0,"missing_information":["..."],"risk":"low|medium|high","improvement_priority":["..."],"critical_issue_count":0}` },
+    { id:'critic', name:'Critic', role:'core', type:'critic', x:1180, y:160, enabled:true, model:'claude-sonnet-4-6', temperature:0.5,
+      systemPrompt:`You are the Critic agent. Critically review the Evaluator's scoring and the findings — challenge anything too lenient or too harsh, and rank what MUST be fixed this round vs what can wait. Respond ONLY with valid JSON: {"critique":"...","must_fix_this_round":["..."],"can_wait":["..."],"disagreements_with_evaluator":["..."]}` },
+    { id:'improver', name:'Improver / Fixer', role:'core', type:'improver', x:1460, y:160, enabled:true, model:'claude-sonnet-4-6', temperature:0.35,
+      systemPrompt:`You are the Improver/Fixer agent. Given the current code and the Critic's must-fix list, rewrite the code to resolve those issues while preserving behavior. Respond ONLY with valid JSON: {"improved_code":"...","changes_made":["..."],"issues_resolved":["..."],"issues_remaining":["..."]}` }
+  ];
+}
+function defaultEdges(){
+  return [
+    {from:'planner',to:'architect'},{from:'planner',to:'security'},{from:'planner',to:'performance'},{from:'planner',to:'style'},
+    {from:'architect',to:'executor'},{from:'security',to:'executor'},{from:'performance',to:'executor'},{from:'style',to:'executor'},
+    {from:'executor',to:'evaluator'},{from:'evaluator',to:'critic'},{from:'critic',to:'improver'},{from:'improver',to:'evaluator'}
+  ];
+}
+
+let state = {
+  agents: defaultAgents(),
+  edges: defaultEdges(),
+  memory: [], // {id, text, pinned, locked, tag, ts}
+  log: [],
+  runs: {}, // agentId -> {input, output, reasoning, status, runtime, ts, prevOutput}
+  execution: { status:'idle', round:0, currentAgent:null, retryCount:0, tokenUsage:0, cost:0, latencies:[], scores:[], criteria:[], stopReason:null, startTime:null, elapsed:0, calls:0, fails:0 },
+  view: { zoom:1, panX:0, panY:0 },
+  selectedNode: null,
+  currentCode: null,
+  sessionName: 'Session 1',
+};
+
+let controlFlags = { pause:false, stop:false, stepMode:false, stepResolve:null, pauseResolve:null, awaitingApproval:false, approvalResolve:null };
+let dragCtx = null, connectCtx = null, panCtx = null, undoStack = [], redoStack = [];
+let timerInterval = null;
+
+/* ============================= UTIL ============================= */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+function uid(p){ return p+'_'+Math.random().toString(36).slice(2,9); }
+function nowStr(){ const d=new Date(); return d.toLocaleTimeString(); }
+function esc(s){ return (s+'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+function log(type,message){
+  state.log.unshift({time:nowStr(), type, message});
+  if(state.log.length>400) state.log.pop();
+  renderLog();
+}
+function toast(msg,type='info'){
+  const wrap=$('#toast-wrap');
+  const el=document.createElement('div');
+  el.className='toast glass '+type;
+  el.textContent=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 3600);
+}
+function saveSnapshot(){
+  undoStack.push(JSON.stringify(state.agents.map(a=>({id:a.id,x:a.x,y:a.y}))));
+  if(undoStack.length>50) undoStack.shift();
+  redoStack=[];
+}
+function agentById(id){ return state.agents.find(a=>a.id===id); }
+
+/* ============================= AUTOSAVE / STORAGE ============================= */
+function autosave(){
+  try{
+    localStorage.setItem('aas_session_'+state.sessionName, JSON.stringify({agents:state.agents,edges:state.edges,memory:state.memory,sessionName:state.sessionName,savedAt:Date.now()}));
+    let list = JSON.parse(localStorage.getItem('aas_sessions')||'[]');
+    if(!list.includes(state.sessionName)){ list.push(state.sessionName); localStorage.setItem('aas_sessions', JSON.stringify(list)); }
+  }catch(e){ console.warn('autosave failed', e); }
+}
+function loadSession(name){
+  try{
+    const raw = localStorage.getItem('aas_session_'+name);
+    if(!raw){ toast('Session not found','error'); return; }
+    const data = JSON.parse(raw);
+    state.agents = data.agents; state.edges = data.edges; state.memory = data.memory||[]; state.sessionName = data.sessionName||name;
+    renderAgentList(); renderNodes(); renderEdges(); renderMemory(); renderMinimap();
+    toast('Loaded session: '+name,'success');
+  }catch(e){ toast('Failed to load session','error'); }
+}
+function listSessions(){ try{ return JSON.parse(localStorage.getItem('aas_sessions')||'[]'); }catch(e){ return []; } }
+
+/* ============================= ANTHROPIC API ============================= */
+function extractJSON(text){
+  try{ return JSON.parse(text); }catch(e){}
+  const clean = text.replace(/```json|```/g,'').trim();
+  try{ return JSON.parse(clean); }catch(e){}
+  const start = clean.indexOf('{'); const end = clean.lastIndexOf('}');
+  if(start!==-1 && end!==-1 && end>start){
+    try{ return JSON.parse(clean.slice(start,end+1)); }catch(e){}
+  }
+  return null;
+}
+
+async function callAgentAPI(agent, userContent, retries){
+  retries = retries===undefined?2:retries;
+  const startT = performance.now();
+  state.execution.calls++;
+  for(let attempt=0; attempt<=retries; attempt++){
+    try{
+      log('api', `Calling ${agent.name} (attempt ${attempt+1})`);
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          model:'claude-sonnet-4-6',
+          max_tokens: 4000,
+          system: agent.systemPrompt,
+          messages:[{role:'user', content:userContent}],
+          temperature: agent.temperature
+        })
+      });
+      if(res.status===429){
+        log('error', `429 rate limit on ${agent.name}, backing off...`);
+        await sleep(1200*(attempt+1));
+        continue;
+      }
+      if(!res.ok){
+        const errText = await res.text().catch(()=> '');
+        throw new Error('HTTP '+res.status+' '+errText.slice(0,200));
+      }
+      const data = await res.json();
+      const textBlocks = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+      const usage = data.usage || {};
+      const tokens = (usage.input_tokens||0)+(usage.output_tokens||0);
+      state.execution.tokenUsage += tokens;
+      state.execution.cost += tokens*0.000003;
+      const latency = Math.round(performance.now()-startT);
+      state.execution.latencies.push(latency);
+      return { raw:textBlocks, parsed: extractJSON(textBlocks), latency, tokens };
+    }catch(e){
+      state.execution.fails++;
+      log('error', `${agent.name} error: ${e.message}`);
+      if(attempt===retries){ throw e; }
+      await sleep(700*(attempt+1));
+    }
+  }
+}
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+/* ============================= EXECUTION ENGINE ============================= */
+async function waitWhilePaused(){
+  while(controlFlags.pause && !controlFlags.stop){
+    if(controlFlags.stepMode){
+      await new Promise(res=>{ controlFlags.stepResolve = res; });
+      controlFlags.stepMode=false;
+      return;
+    }
+    await sleep(200);
+  }
+}
+async function waitForApproval(){
+  controlFlags.awaitingApproval = true;
+  setStatus('paused','Awaiting human approval');
+  toast('Round complete — click Resume to continue (human approval mode)','info');
+  await new Promise(res=>{ controlFlags.approvalResolve = res; });
+  controlFlags.awaitingApproval = false;
+}
+
+function setStatus(kind, text){
+  const dot=$('#status-dot'); dot.className='dot '+kind;
+  $('#status-text').textContent=text;
+}
+function setNodeStatus(id, status){
+  const node = document.getElementById('node-'+id);
+  if(!node) return;
+  const badge = node.querySelector('.node-status');
+  badge.className = 'node-status '+status;
+  badge.querySelector('span.slabel') && (badge.querySelector('span.slabel').textContent=status);
+  node.classList.toggle('active-run', status==='running');
+}
+
+async function runAgentNode(agentId, inputPayload, inputLabel){
+  await waitWhilePaused();
+  if(controlFlags.stop) throw new Error('__STOPPED__');
+  const agent = agentById(agentId);
+  if(!agent || !agent.enabled){ log('agent', `Skipping disabled agent ${agentId}`); return null; }
+  state.execution.currentAgent = agentId;
+  $('#m-agent').textContent = agent.name;
+  setNodeStatus(agentId,'running');
+  document.querySelectorAll('.node').forEach(n=>n.classList.remove('active-run'));
+  document.getElementById('node-'+agentId)?.classList.add('active-run');
+  renderDashboard();
+
+  const prevRun = state.runs[agentId];
+  const userContent = typeof inputPayload === 'string' ? inputPayload : JSON.stringify(inputPayload, null, 2);
+  const t0 = performance.now();
+  let result;
+  try{
+    result = await callAgentAPI(agent, userContent);
+  }catch(e){
+    setNodeStatus(agentId,'error');
+    state.runs[agentId] = { input:userContent, output:'ERROR: '+e.message, reasoning:'Call failed after retries.', status:'error', runtime:Math.round(performance.now()-t0), ts:Date.now(), prevOutput: prevRun?prevRun.output:null };
+    log('error', `${agent.name} failed permanently.`);
+    renderDashboard(); renderAgentList();
+    throw e;
+  }
+  const runtime = Math.round(performance.now()-t0);
+  const outputText = result.parsed ? JSON.stringify(result.parsed, null, 2) : result.raw;
+  state.runs[agentId] = { input:userContent, output:outputText, reasoning: result.parsed ? (result.parsed.summary||result.parsed.plan_summary||result.parsed.critique||result.parsed.executive_summary||'Structured JSON produced.') : 'Model returned unstructured text; JSON parse failed, showing raw output.', status:'ok', runtime, ts:Date.now(), prevOutput: prevRun?prevRun.output:null, parsed: result.parsed };
+  setNodeStatus(agentId,'ok');
+  log('agent', `${agent.name} completed in ${runtime}ms`);
+  addMemoryEntry(agent.name+' — round '+state.execution.round, (result.parsed? (result.parsed.summary||result.parsed.executive_summary||agent.name+' produced structured output.') : 'Unstructured output.'), false, false, agent.type);
+  renderDashboard(); renderAgentList();
+  return state.runs[agentId];
+}
+
+function evaluatePlateau(){
+  const s = state.execution.scores;
+  if(s.length<2) return false;
+  const last = s[s.length-1], prev = s[s.length-2];
+  return Math.abs(last-prev) < 1.5;
+}
+
+async function runPipeline(){
+  if(state.execution.status==='running'){ toast('Already running','error'); return; }
+  controlFlags = { pause:false, stop:false, stepMode:false, stepResolve:null, pauseResolve:null, awaitingApproval:false, approvalResolve:null };
+  state.execution = { status:'running', round:0, currentAgent:null, retryCount:0, tokenUsage:0, cost:0, latencies:[], scores:[], criteria:[], stopReason:null, startTime:Date.now(), elapsed:0, calls:0, fails:0 };
+  state.currentCode = $('#code-input').value;
+  startTimer();
+  setStatus('running','Running');
+  log('workflow','=== Pipeline started ===');
+  $('#stop-reason-box').textContent='Running...';
+
+  const maxRounds = parseInt($('#max-rounds').value,10);
+  const targetScore = parseInt($('#target-score').value,10);
+  const humanApproval = $('#human-approval').checked;
+
+  try{
+    // PLANNER (once)
+    const planRun = await runAgentNode('planner', {task:'Create an audit plan for this codebase.', code: state.currentCode});
+    let planOutput = planRun ? planRun.output : '{}';
+
+    // ROUND LOOP: audit agents -> executor -> evaluator -> critic -> improver
+    for(let round=1; round<=maxRounds; round++){
+      if(controlFlags.stop) break;
+      state.execution.round = round;
+      $('#m-round').textContent = round;
+      log('workflow', `--- Round ${round} started ---`);
+
+      const auditInputs = { plan: planOutput, code: state.currentCode };
+      const architectRun = await runAgentNode('architect', auditInputs);
+      const securityRun = await runAgentNode('security', auditInputs);
+      const performanceRun = await runAgentNode('performance', auditInputs);
+      const styleRun = await runAgentNode('style', auditInputs);
+
+      const executorInput = {
+        plan: planOutput,
+        architect_findings: architectRun?architectRun.output:'{}',
+        security_findings: securityRun?securityRun.output:'{}',
+        performance_findings: performanceRun?performanceRun.output:'{}',
+        style_findings: styleRun?styleRun.output:'{}'
+      };
+      const executorRun = await runAgentNode('executor', executorInput);
+      let executorOutput = executorRun ? executorRun.output : '{}';
+
+      const evaluatorRun = await runAgentNode('evaluator', { consolidated: executorOutput, code: state.currentCode });
+      const evalParsed = evaluatorRun && evaluatorRun.parsed;
+      const score = evalParsed ? (evalParsed.overall_score||0) : 0;
+      const critCount = evalParsed ? (evalParsed.critical_issue_count!==undefined? evalParsed.critical_issue_count : 0) : 0;
+      state.execution.scores.push(score);
+      state.execution.criteria.push(evalParsed ? evalParsed.criteria : null);
+      $('#m-score').textContent = score;
+      $('#m-critical').textContent = critCount;
+      renderCharts();
+
+      const criticRun = await runAgentNode('critic', { evaluation: evaluatorRun?evaluatorRun.output:'{}', findings: executorOutput });
+      const improverRun = await runAgentNode('improver', { critique: criticRun?criticRun.output:'{}', code: state.currentCode });
+      if(improverRun && improverRun.parsed && improverRun.parsed.improved_code){
+        state.currentCode = improverRun.parsed.improved_code;
+      }
+
+      // STOPPING CONDITION CHECK — order: plateau, target score, human approval, custom rule, emergency cap
+      let stopReason = null;
+      if(evaluatePlateau() && round>1) stopReason = 'Plateau reached — score improvement < 1.5 pts between rounds.';
+      else if(critCount===0 && score>=targetScore) stopReason = `Target met — critical issues = 0 and score ${score} ≥ target ${targetScore}.`;
+      else if(critCount===0 && round>=2) stopReason = 'Critical issues resolved (count = 0) — custom success rule satisfied.';
+
+      if(humanApproval && !stopReason && round<maxRounds){
+        await waitForApproval();
+        if(controlFlags.stop) break;
+      }
+
+      if(stopReason){
+        state.execution.stopReason = stopReason;
+        log('workflow', 'STOP: '+stopReason);
+        $('#stop-reason-box').textContent = stopReason;
+        break;
+      }
+      if(round===maxRounds){
+        state.execution.stopReason = 'Emergency safety cap reached — max rounds ('+maxRounds+') hit.';
+        $('#stop-reason-box').textContent = state.execution.stopReason;
+        log('workflow', 'STOP: safety cap');
+      }
+      await waitWhilePaused();
+    }
+    if(controlFlags.stop){
+      state.execution.stopReason = 'Stopped manually by user.';
+      $('#stop-reason-box').textContent = state.execution.stopReason;
+      log('workflow','Pipeline stopped by user.');
+    }
+    setStatus('idle','Completed');
+    state.execution.status='completed';
+    toast('Pipeline finished','success');
+    generateReport();
+  }catch(e){
+    if(e.message==='__STOPPED__'){
+      setStatus('idle','Stopped');
+      state.execution.status='stopped';
+      log('workflow','Execution halted.');
+    } else {
+      setStatus('error','Error');
+      state.execution.status='error';
+      log('error', 'Pipeline error: '+e.message);
+      toast('Pipeline error: '+e.message,'error');
+    }
+  }
+  stopTimer();
+  renderDashboard();
+}
+
+function startTimer(){
+  clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{
+    if(!state.execution.startTime) return;
+    const secs = Math.floor((Date.now()-state.execution.startTime)/1000);
+    const m = String(Math.floor(secs/60)).padStart(2,'0'), s=String(secs%60).padStart(2,'0');
+    $('#m-timer').textContent = m+':'+s;
+  }, 500);
+}
+function stopTimer(){ clearInterval(timerInterval); }
+
+/* ============================= RENDER: DASHBOARD ============================= */
+function renderDashboard(){
+  $('#m-retry').textContent = state.execution.retryCount;
+  $('#m-tokens').textContent = state.execution.tokenUsage.toLocaleString();
+  $('#m-cost').textContent = '$'+state.execution.cost.toFixed(4);
+  const lat = state.execution.latencies;
+  $('#m-latency').textContent = lat.length? Math.round(lat.reduce((a,b)=>a+b,0)/lat.length)+'ms':'0ms';
+  const successRate = state.execution.calls ? Math.round(((state.execution.calls-state.execution.fails)/state.execution.calls)*100) : 100;
+  $('#m-success').textContent = successRate+'%';
+  renderCharts();
+}
+
+function renderCharts(){
+  renderScoreChart();
+  renderRadarChart();
+  renderUtilChart();
+}
+function renderScoreChart(){
+  const s = state.execution.scores;
+  const w=270,h=90,pad=8;
+  let svg = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
+  svg += `<line x1="0" y1="${h-pad}" x2="${w}" y2="${h-pad}" stroke="var(--border)" stroke-width="1"/>`;
+  if(s.length){
+    const max=100;
+    const pts = s.map((v,i)=>{
+      const x = pad + i*((w-2*pad)/Math.max(s.length-1,1));
+      const y = h-pad-((v/max)*(h-2*pad));
+      return x+','+y;
+    }).join(' ');
+    svg += `<polyline points="${pts}" fill="none" stroke="var(--teal)" stroke-width="2"/>`;
+    s.forEach((v,i)=>{
+      const x = pad + i*((w-2*pad)/Math.max(s.length-1,1));
+      const y = h-pad-((v/max)*(h-2*pad));
+      svg += `<circle cx="${x}" cy="${y}" r="3" fill="var(--gold)"/>`;
+      svg += `<text x="${x}" y="${y-6}" font-size="8" fill="var(--text-2)" text-anchor="middle" font-family="JetBrains Mono">${v}</text>`;
+    });
+  } else {
+    svg += `<text x="${w/2}" y="${h/2}" font-size="10" fill="var(--text-2)" text-anchor="middle">No data yet</text>`;
+  }
+  svg+='</svg>';
+  $('#chart-score').innerHTML = svg;
+}
+function renderRadarChart(){
+  const c = state.execution.criteria.filter(Boolean);
+  const latest = c.length ? c[c.length-1] : null;
+  const keys = ['security','performance','maintainability','style'];
+  const cx=95,cy=90,R=68;
+  let svg = `<svg width="190" height="180" viewBox="0 0 190 180">`;
+  for(let ring=1;ring<=3;ring++){
+    const r = R*ring/3;
+    let pts='';
+    keys.forEach((k,i)=>{
+      const ang = (Math.PI*2*i/keys.length) - Math.PI/2;
+      pts += (cx+r*Math.cos(ang))+','+(cy+r*Math.sin(ang))+' ';
+    });
+    svg += `<polygon points="${pts}" fill="none" stroke="var(--border)" stroke-width="1"/>`;
+  }
+  keys.forEach((k,i)=>{
+    const ang = (Math.PI*2*i/keys.length) - Math.PI/2;
+    const x=cx+R*Math.cos(ang), y=cy+R*Math.sin(ang);
+    svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--border)" stroke-width="1"/>`;
+    svg += `<text x="${cx+(R+14)*Math.cos(ang)}" y="${cy+(R+14)*Math.sin(ang)}" font-size="8.5" fill="var(--text-2)" text-anchor="middle" font-family="Barlow Condensed">${k}</text>`;
+  });
+  if(latest){
+    let pts='';
+    keys.forEach((k,i)=>{
+      const val = Math.max(0,Math.min(100, latest[k]||0));
+      const r = R*(val/100);
+      const ang = (Math.PI*2*i/keys.length) - Math.PI/2;
+      pts += (cx+r*Math.cos(ang))+','+(cy+r*Math.sin(ang))+' ';
+    });
+    svg += `<polygon points="${pts}" fill="rgba(45,212,191,.25)" stroke="var(--teal)" stroke-width="2"/>`;
+  } else {
+    svg += `<text x="${cx}" y="${cy}" font-size="9" fill="var(--text-2)" text-anchor="middle">No eval yet</text>`;
+  }
+  svg+='</svg>';
+  $('#chart-radar').innerHTML = svg;
+}
+function renderUtilChart(){
+  const counts = {};
+  state.agents.forEach(a=>counts[a.id]=0);
+  Object.keys(state.runs).forEach(id=>{ counts[id]=(counts[id]||0)+1; });
+  const max = Math.max(1,...Object.values(counts));
+  let svg = `<svg width="270" height="${state.agents.length*18+6}" viewBox="0 0 270 ${state.agents.length*18+6}">`;
+  state.agents.forEach((a,i)=>{
+    const w = (counts[a.id]/max)*180;
+    const y = i*18;
+    svg += `<text x="0" y="${y+11}" font-size="8.5" fill="var(--text-1)" font-family="Barlow Condensed">${esc(a.name)}</text>`;
+    svg += `<rect x="82" y="${y+2}" width="${w}" height="10" rx="3" fill="${AGENT_COLORS[a.type]||'var(--teal)'}" opacity="0.75"/>`;
+    svg += `<text x="${86+w}" y="${y+11}" font-size="8" fill="var(--text-2)" font-family="JetBrains Mono">${counts[a.id]}</text>`;
+  });
+  svg+='</svg>';
+  $('#chart-util').innerHTML = svg;
+}
+
+/* ============================= RENDER: AGENT LIST (sidebar) ============================= */
+function renderAgentList(){
+  const wrap = $('#agent-list'); wrap.innerHTML='';
+  state.agents.forEach(a=>{
+    const el = document.createElement('div');
+    el.className='agent-chip';
+    el.draggable=false;
+    el.innerHTML = `<span class="adot" style="background:${AGENT_COLORS[a.type]||'#888'}"></span><span class="an">${esc(a.name)}</span><span class="aico">${a.enabled?'●':'○'}</span>`;
+    el.onclick = ()=> openAgentModal(a.id);
+    wrap.appendChild(el);
+  });
+  $('#bb-agents').textContent = state.agents.length+' agents';
+  $('#bb-edges').textContent = state.edges.length+' connections';
+}
+
+/* ============================= NODE EDITOR ============================= */
+function renderNodes(){
+  const layer = $('#nodes-layer'); layer.innerHTML='';
+  state.agents.forEach(a=>{
+    const el = document.createElement('div');
+    el.className='node'+(a.enabled?'':' disabled');
+    el.id = 'node-'+a.id;
+    el.style.left = (a.x+400)+'px';
+    el.style.top = (a.y+500)+'px';
+    const initials = a.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    el.innerHTML = `
+      <div class="node-head">
+        <div class="node-ico" style="background:${AGENT_COLORS[a.type]||'#888'}">${initials}</div>
+        <div class="node-name">${esc(a.name)}</div>
+        <div class="node-menu-btn" data-menu="${a.id}">⋮</div>
+      </div>
+      <div class="node-role">${a.role==='core'?'core agent':'audit specialist'}</div>
+      <div class="node-status idle"><span class="sdot"></span><span class="slabel">idle</span></div>
+      <div class="port in" data-port="in" data-id="${a.id}"></div>
+      <div class="port out" data-port="out" data-id="${a.id}"></div>
+    `;
+    layer.appendChild(el);
+    el.addEventListener('mousedown', e=>startDragNode(e,a.id));
+    el.addEventListener('dblclick', ()=>openAgentModal(a.id));
+    el.addEventListener('contextmenu', e=>{ e.preventDefault(); showNodeContextMenu(e,a.id); });
+    el.querySelector('.node-menu-btn').addEventListener('click', e=>{ e.stopPropagation(); showNodeContextMenu(e,a.id); });
+    el.querySelector('.port.out').addEventListener('mousedown', e=>{ e.stopPropagation(); startConnect(e,a.id); });
+    el.querySelector('.port.in').addEventListener('mouseup', e=>{ e.stopPropagation(); finishConnect(a.id); });
+  });
+  renderEdges(); renderMinimap();
+}
+
+function startDragNode(e,id){
+  if(e.target.classList.contains('port')) return;
+  e.preventDefault();
+  const node = document.getElementById('node-'+id);
+  const rect = node.getBoundingClientRect();
+  const scrollRect = $('#canvas-scroll').getBoundingClientRect();
+  dragCtx = { id, offX: e.clientX-rect.left, offY: e.clientY-rect.top };
+  node.style.cursor='grabbing';
+  document.querySelectorAll('.node').forEach(n=>n.classList.remove('selected'));
+  node.classList.add('selected');
+  state.selectedNode = id;
+}
+document.addEventListener('mousemove', e=>{
+  if(dragCtx){
+    const scrollEl = $('#canvas-scroll');
+    const zoom = state.view.zoom;
+    const scrollRect = scrollEl.getBoundingClientRect();
+    let x = (e.clientX - scrollRect.left + scrollEl.scrollLeft)/zoom - dragCtx.offX/zoom - 400;
+    let y = (e.clientY - scrollRect.top + scrollEl.scrollTop)/zoom - dragCtx.offY/zoom - 500;
+    if($('#snap-grid').checked){ x = Math.round(x/20)*20; y = Math.round(y/20)*20; }
+    const a = agentById(dragCtx.id);
+    a.x = x; a.y = y;
+    const node = document.getElementById('node-'+dragCtx.id);
+    node.style.left = (x+400)+'px'; node.style.top = (y+500)+'px';
+    renderEdges(); renderMinimap();
+  }
+  if(connectCtx){
+    updateTempEdge(e);
+  }
+  if(panCtx){
+    const scrollEl = $('#canvas-scroll');
+    scrollEl.scrollLeft = panCtx.scrollLeft - (e.clientX-panCtx.x);
+    scrollEl.scrollTop = panCtx.scrollTop - (e.clientY-panCtx.y);
+  }
+});
+document.addEventListener('mouseup', e=>{
+  if(dragCtx){ document.getElementById('node-'+dragCtx.id).style.cursor='grab'; saveSnapshot(); dragCtx=null; autosave(); }
+  if(connectCtx){ removeTempEdge(); connectCtx=null; }
+  panCtx=null;
+});
+$('#canvas-scroll').addEventListener('mousedown', e=>{
+  if(e.target.id==='canvas-scroll' || e.target.id==='canvas'){
+    panCtx = { x:e.clientX, y:e.clientY, scrollLeft:$('#canvas-scroll').scrollLeft, scrollTop:$('#canvas-scroll').scrollTop };
+    document.querySelectorAll('.node').forEach(n=>n.classList.remove('selected'));
+  }
+});
+
+function startConnect(e,fromId){
+  connectCtx = { fromId };
+  const svg = $('#edges-svg');
+  let temp = document.getElementById('temp-edge');
+  if(!temp){ temp = document.createElementNS('http://www.w3.org/2000/svg','path'); temp.id='temp-edge'; temp.setAttribute('class','edge-path temp'); svg.appendChild(temp); }
+}
+function updateTempEdge(e){
+  if(!connectCtx) return;
+  const fromPort = document.querySelector(`.port.out[data-id="${connectCtx.fromId}"]`);
+  if(!fromPort) return;
+  const canvasRect = $('#canvas').getBoundingClientRect();
+  const zoom = state.view.zoom;
+  const p1 = fromPort.getBoundingClientRect();
+  const x1 = (p1.left+p1.width/2-canvasRect.left)/zoom, y1=(p1.top+p1.height/2-canvasRect.top)/zoom;
+  const x2 = (e.clientX-canvasRect.left)/zoom, y2=(e.clientY-canvasRect.top)/zoom;
+  const temp = document.getElementById('temp-edge');
+  if(temp) temp.setAttribute('d', bezier(x1,y1,x2,y2));
+}
+function removeTempEdge(){ const t=document.getElementById('temp-edge'); if(t) t.remove(); }
+function finishConnect(toId){
+  if(!connectCtx) return;
+  if(connectCtx.fromId!==toId && !state.edges.find(ed=>ed.from===connectCtx.fromId && ed.to===toId)){
+    state.edges.push({from:connectCtx.fromId, to:toId});
+    log('workflow', `Connected ${connectCtx.fromId} → ${toId}`);
+    autosave();
+  }
+  renderEdges();
+}
+function bezier(x1,y1,x2,y2){
+  const dx = Math.max(60, Math.abs(x2-x1)*0.5);
+  return `M ${x1} ${y1} C ${x1+dx} ${y1}, ${x2-dx} ${y2}, ${x2} ${y2}`;
+}
+function renderEdges(){
+  const g = $('#edges-g'); g.innerHTML='';
+  const canvas = $('#canvas');
+  state.edges.forEach((edge,idx)=>{
+    const fromA = agentById(edge.from), toA = agentById(edge.to);
+    if(!fromA||!toA) return;
+    const x1 = fromA.x+400+210, y1 = fromA.y+500+40;
+    const x2 = toA.x+400, y2 = toA.y+500+40;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('class','edge-path edge-flow');
+    path.setAttribute('d', bezier(x1,y1,x2,y2));
+    g.appendChild(path);
+    const hit = document.createElementNS('http://www.w3.org/2000/svg','path');
+    hit.setAttribute('class','edge-hit');
+    hit.setAttribute('d', bezier(x1,y1,x2,y2));
+    hit.addEventListener('contextmenu', ev=>{ ev.preventDefault(); showEdgeContextMenu(ev, idx); });
+    g.appendChild(hit);
+  });
+}
+function renderMinimap(){
+  const svg = $('#minimap-svg'); svg.innerHTML='';
+  svg.innerHTML += `<rect x="0" y="0" width="2600" height="1700" fill="rgba(120,150,220,0.05)"/>`;
+  state.agents.forEach(a=>{
+    svg.innerHTML += `<rect x="${a.x+400}" y="${a.y+500}" width="210" height="80" rx="6" fill="${AGENT_COLORS[a.type]||'#888'}" opacity="0.55"/>`;
+  });
+}
+
+/* Zoom controls */
+function applyZoom(){
+  $('#canvas').style.transform = `scale(${state.view.zoom})`;
+  $('#bb-zoom').textContent = 'Zoom '+Math.round(state.view.zoom*100)+'%';
+}
+$('#zoom-in').onclick = ()=>{ state.view.zoom=Math.min(2,state.view.zoom+0.1); applyZoom(); };
+$('#zoom-out').onclick = ()=>{ state.view.zoom=Math.max(0.4,state.view.zoom-0.1); applyZoom(); };
+$('#zoom-reset').onclick = ()=>{ state.view.zoom=1; applyZoom(); $('#canvas-scroll').scrollLeft=250; $('#canvas-scroll').scrollTop=350; };
+
+$('#btn-undo').onclick = ()=>{
+  if(!undoStack.length) return;
+  redoStack.push(JSON.stringify(state.agents.map(a=>({id:a.id,x:a.x,y:a.y}))));
+  const snap = JSON.parse(undoStack.pop());
+  snap.forEach(s=>{ const a=agentById(s.id); if(a){a.x=s.x;a.y=s.y;} });
+  renderNodes();
+};
+$('#btn-redo').onclick = ()=>{
+  if(!redoStack.length) return;
+  undoStack.push(JSON.stringify(state.agents.map(a=>({id:a.id,x:a.x,y:a.y}))));
+  const snap = JSON.parse(redoStack.pop());
+  snap.forEach(s=>{ const a=agentById(s.id); if(a){a.x=s.x;a.y=s.y;} });
+  renderNodes();
+};
+
+/* Context menus */
+function showNodeContextMenu(e,id){
+  const menu = $('#ctx-menu');
+  const a = agentById(id);
+  menu.innerHTML = `
+    <div class="ctx-item" data-act="open">✎ Open Agent</div>
+    <div class="ctx-item" data-act="rerun">↻ Re-run</div>
+    <div class="ctx-item" data-act="duplicate">⧉ Duplicate</div>
+    <div class="ctx-item" data-act="toggle">${a.enabled?'⏻ Disable':'⏻ Enable'}</div>
+    <div class="ctx-sep"></div>
+    <div class="ctx-item danger" data-act="delete">🗑 Delete</div>
+  `;
+  menu.style.left = e.clientX+'px'; menu.style.top=e.clientY+'px'; menu.classList.add('open');
+  menu.querySelectorAll('.ctx-item').forEach(item=>{
+    item.onclick = ()=>{
+      const act = item.dataset.act;
+      if(act==='open') openAgentModal(id);
+      if(act==='rerun') rerunAgent(id);
+      if(act==='duplicate') duplicateAgent(id);
+      if(act==='toggle'){ a.enabled=!a.enabled; renderNodes(); renderAgentList(); autosave(); }
+      if(act==='delete') deleteAgent(id);
+      menu.classList.remove('open');
+    };
+  });
+}
+function showEdgeContextMenu(e, idx){
+  const menu = $('#ctx-menu');
+  menu.innerHTML = `<div class="ctx-item danger" data-act="del">🗑 Delete Connection</div>`;
+  menu.style.left = e.clientX+'px'; menu.style.top=e.clientY+'px'; menu.classList.add('open');
+  menu.querySelector('.ctx-item').onclick = ()=>{ state.edges.splice(idx,1); renderEdges(); menu.classList.remove('open'); autosave(); };
+}
+document.addEventListener('click', e=>{ if(!e.target.closest('.ctx-menu')) $('#ctx-menu').classList.remove('open'); });
+
+function duplicateAgent(id){
+  const a = agentById(id);
+  const copy = JSON.parse(JSON.stringify(a));
+  copy.id = uid(a.type); copy.name = a.name+' (copy)'; copy.x += 40; copy.y += 40;
+  state.agents.push(copy);
+  renderNodes(); renderAgentList(); autosave();
+  toast('Duplicated '+a.name,'success');
+}
+function deleteAgent(id){
+  if(!confirm('Delete this agent node?')) return;
+  state.agents = state.agents.filter(a=>a.id!==id);
+  state.edges = state.edges.filter(ed=>ed.from!==id && ed.to!==id);
+  renderNodes(); renderAgentList(); autosave();
+}
+async function rerunAgent(id){
+  const prev = state.runs[id];
+  if(!prev){ toast('No previous input to re-run with — start the pipeline first.','error'); return; }
+  try{ await runAgentNode(id, prev.input); toast('Re-ran '+agentById(id).name,'success'); renderAgentModalContent(id); }
+  catch(e){ toast('Re-run failed: '+e.message,'error'); }
+}
+
+$('#btn-add-agent').onclick = ()=>{
+  const id = uid('custom');
+  const a = { id, name:'Custom Agent', role:'audit', type:'style', x:Math.random()*300, y:Math.random()*300, enabled:true, model:'claude-sonnet-4-6', temperature:0.4, systemPrompt:'You are a custom audit agent. Respond ONLY with valid JSON: {"findings":[],"summary":""}' };
+  state.agents.push(a);
+  renderNodes(); renderAgentList(); autosave();
+  openAgentModal(id);
+};
+
+/* ============================= AGENT MODAL ============================= */
+let activeModalAgent = null;
+function openAgentModal(id){
+  activeModalAgent = id;
+  const a = agentById(id);
+  $('#am-title').textContent = a.name;
+  $('#am-ico').textContent = a.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  $('#am-ico').style.background = AGENT_COLORS[a.type]||'#888';
+  $('#am-name').value = a.name;
+  $('#am-temp').value = a.temperature; $('#am-temp-val').textContent=a.temperature;
+  $('#am-prompt').value = a.systemPrompt;
+  $('#am-enabled').checked = a.enabled;
+  renderAgentModalContent(id);
+  $('#agent-modal-overlay').classList.add('open');
+  switchMTab('config');
+}
+function renderAgentModalContent(id){
+  const run = state.runs[id];
+  const badge = $('#am-status-badge');
+  if(run){
+    badge.textContent = run.status; badge.className='badge '+(run.status==='ok'?'ok':run.status==='error'?'err':'warn');
+    $('#am-runtime').textContent = run.runtime+'ms · '+new Date(run.ts).toLocaleString();
+    $('#am-input').textContent = run.input;
+    $('#am-output').textContent = run.output;
+    $('#am-reasoning').textContent = run.reasoning;
+    if(run.prevOutput){
+      $('#am-diff').innerHTML = renderDiff(run.prevOutput, run.output);
+    } else {
+      $('#am-diff').textContent = 'No previous run to diff against.';
+    }
+  } else {
+    badge.textContent='idle'; badge.className='badge warn';
+    $('#am-runtime').textContent='—'; $('#am-input').textContent='—'; $('#am-output').textContent='—'; $('#am-reasoning').textContent='—';
+    $('#am-diff').textContent='No previous run to diff against.';
+  }
+}
+function renderDiff(oldStr,newStr){
+  const oldLines = oldStr.split('\n'), newLines = newStr.split('\n');
+  let html='';
+  const max = Math.max(oldLines.length,newLines.length);
+  for(let i=0;i<max;i++){
+    if(oldLines[i]===newLines[i]){ html += `<span>${esc(newLines[i]||'')}</span>`; }
+    else {
+      if(oldLines[i]!==undefined) html += `<span class="diff-del">${esc(oldLines[i])}</span>`;
+      if(newLines[i]!==undefined) html += `<span class="diff-add">${esc(newLines[i])}</span>`;
+    }
+  }
+  return html;
+}
+$('#am-close').onclick = ()=> $('#agent-modal-overlay').classList.remove('open');
+$('#agent-modal-overlay').addEventListener('click', e=>{ if(e.target.id==='agent-modal-overlay') $('#agent-modal-overlay').classList.remove('open'); });
+$('#am-temp').oninput = e=> $('#am-temp-val').textContent = e.target.value;
+$('#am-save').onclick = ()=>{
+  const a = agentById(activeModalAgent);
+  a.name = $('#am-name').value; a.temperature = parseFloat($('#am-temp').value);
+  a.systemPrompt = $('#am-prompt').value; a.enabled = $('#am-enabled').checked;
+  renderNodes(); renderAgentList(); autosave();
+  log('workflow', `Prompt/config updated for ${a.name}`);
+  toast('Saved '+a.name,'success');
+};
+$('#am-rerun').onclick = ()=> rerunAgent(activeModalAgent);
+$('#am-copy').onclick = ()=>{
+  const run = state.runs[activeModalAgent];
+  if(run){ navigator.clipboard.writeText(run.output).then(()=>toast('Output copied','success')); }
+};
+$('#am-delete').onclick = ()=>{ $('#agent-modal-overlay').classList.remove('open'); deleteAgent(activeModalAgent); };
+$$('.mtab').forEach(t=> t.onclick = ()=> switchMTab(t.dataset.mtab));
+function switchMTab(name){
+  $$('.mtab').forEach(t=>t.classList.toggle('active', t.dataset.mtab===name));
+  $$('.mtab-pane').forEach(p=>p.classList.remove('active'));
+  $('#mtab-'+name).classList.add('active');
+}
+
+/* ============================= MEMORY ============================= */
+function addMemoryEntry(tag, text, pinned, locked, category){
+  state.memory.unshift({ id: uid('mem'), tag, text, pinned:!!pinned, locked:!!locked, category:category||'general', ts:Date.now() });
+  if(state.memory.length>300) state.memory.pop();
+  log('memory', `Memory updated: ${tag}`);
+  renderMemory();
+}
+function renderMemory(filter){
+  const wrap = $('#memory-list'); wrap.innerHTML='';
+  let items = state.memory;
+  if(filter) items = items.filter(m=> (m.tag+' '+m.text).toLowerCase().includes(filter.toLowerCase()));
+  items = [...items].sort((a,b)=> (b.pinned-a.pinned) || (b.ts-a.ts));
+  if(!items.length){ wrap.innerHTML = '<div class="empty-hint">No memory entries yet. They populate as agents run.</div>'; }
+  items.forEach(m=>{
+    const el = document.createElement('div');
+    el.className='mem-item'+(m.pinned?' pinned':'')+(m.locked?' locked':'');
+    el.innerHTML = `
+      <div class="mem-tags"><span class="mem-tag">${esc(m.category)}</span>${m.pinned?'<span class="mem-tag" style="color:var(--gold)">pinned</span>':''}${m.locked?'<span class="mem-tag">locked</span>':''}</div>
+      <div style="font-weight:600; font-size:11px; margin-bottom:3px;">${esc(m.tag)}</div>
+      <div style="color:var(--text-1); font-size:10.5px;">${esc(m.text.slice(0,220))}</div>
+      <div class="mem-actions">
+        <button data-a="pin">${m.pinned?'Unpin':'Pin'}</button>
+        <button data-a="lock">${m.locked?'Unlock':'Lock'}</button>
+        <button data-a="edit">Edit</button>
+        <button data-a="del">Delete</button>
+      </div>`;
+    el.querySelector('[data-a=pin]').onclick=()=>{ m.pinned=!m.pinned; renderMemory($('#mem-search').value); autosave(); };
+    el.querySelector('[data-a=lock]').onclick=()=>{ m.locked=!m.locked; renderMemory($('#mem-search').value); autosave(); };
+    el.querySelector('[data-a=edit]').onclick=()=>{ if(m.locked){ toast('Locked — unlock first','error'); return;} const nv=prompt('Edit memory text:', m.text); if(nv!==null){ m.text=nv; renderMemory($('#mem-search').value); autosave(); } };
+    el.querySelector('[data-a=del]').onclick=()=>{ if(m.locked){ toast('Locked — unlock first','error'); return;} state.memory=state.memory.filter(x=>x.id!==m.id); renderMemory($('#mem-search').value); autosave(); };
+    wrap.appendChild(el);
+  });
+  $('#bb-mem').textContent = 'Memory: '+state.memory.length+' items';
+}
+$('#mem-search').oninput = e=> renderMemory(e.target.value);
+$('#mem-add').onclick = ()=>{ const t=prompt('Memory text:'); if(t) addMemoryEntry('Manual note', t, false, false, 'manual'); };
+$('#mem-clear').onclick = ()=>{ if(confirm('Clear all unlocked memory?')){ state.memory=state.memory.filter(m=>m.locked); renderMemory(); autosave(); } };
+$('#mem-export').onclick = ()=>{ downloadFile('memory-export.json', JSON.stringify(state.memory,null,2)); };
+$('#mem-import').onclick = ()=>{
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='.json';
+  inp.onchange = ()=>{ const f=inp.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const data=JSON.parse(r.result); state.memory = state.memory.concat(data); renderMemory(); autosave(); toast('Memory imported','success'); }catch(e){ toast('Invalid file','error'); } }; r.readAsText(f); };
+  inp.click();
+};
+
+/* ============================= LOG ============================= */
+function renderLog(filter){
+  const wrap = $('#log-list'); wrap.innerHTML='';
+  let items = state.log;
+  if(filter) items = items.filter(l=> (l.type+' '+l.message).toLowerCase().includes(filter.toLowerCase()));
+  items.slice(0,200).forEach(l=>{
+    const el = document.createElement('div');
+    el.className='log-item type-'+l.type;
+    el.innerHTML = `<span class="lt">${l.time}</span>${esc(l.message)}`;
+    wrap.appendChild(el);
+  });
+}
+$('#log-search').oninput = e=> renderLog(e.target.value);
+
+/* ============================= CONTROLS ============================= */
+$('#btn-start').onclick = ()=> runPipeline();
+$('#btn-pause').onclick = ()=>{ controlFlags.pause=true; setStatus('paused','Paused'); log('workflow','Execution paused.'); };
+$('#btn-resume').onclick = ()=>{
+  controlFlags.pause=false;
+  if(controlFlags.awaitingApproval && controlFlags.approvalResolve){ controlFlags.approvalResolve(); controlFlags.approvalResolve=null; }
+  setStatus('running','Running'); log('workflow','Execution resumed.');
+};
+$('#btn-step').onclick = ()=>{
+  controlFlags.pause=true; controlFlags.stepMode=true;
+  if(controlFlags.stepResolve){ controlFlags.stepResolve(); }
+  else { toast('Step queued — will apply at next wait point','info'); }
+};
+$('#btn-stop').onclick = ()=>{ controlFlags.stop=true; controlFlags.pause=false; if(controlFlags.approvalResolve) controlFlags.approvalResolve(); setStatus('idle','Stopping...'); log('workflow','Stop requested.'); };
+$('#btn-retry').onclick = ()=>{
+  const id = state.selectedNode || state.execution.currentAgent;
+  if(!id){ toast('Select a node first','error'); return; }
+  state.execution.retryCount++;
+  rerunAgent(id);
+};
+
+$('#target-score').oninput = e=> $('#target-score-val').textContent = e.target.value;
+$('#max-rounds').oninput = e=> $('#max-rounds-val').textContent = e.target.value;
+$('#snap-grid').onchange = ()=>{};
+
+/* ============================= TABS ============================= */
+$$('.tab').forEach(t=> t.onclick = ()=>{
+  $$('.tab').forEach(x=>x.classList.remove('active'));
+  $$('.tab-content').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active'); $('#tab-'+t.dataset.tab).classList.add('active');
+});
+
+/* ============================= THEME ============================= */
+$('#btn-theme').onclick = ()=>{
+  const html = document.body;
+  const cur = html.getAttribute('data-theme');
+  html.setAttribute('data-theme', cur==='dark'?'light':'dark');
+  toast('Theme: '+(cur==='dark'?'light':'dark'),'info');
+};
+
+/* ============================= SAVE / EXPORT / IMPORT ============================= */
+function downloadFile(name, content){
+  const blob = new Blob([content], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=name; a.click();
+  URL.revokeObjectURL(url);
+}
+$('#btn-save').onclick = ()=>{ autosave(); toast('Session saved','success'); };
+$('#btn-export').onclick = ()=>{
+  const data = { agents:state.agents, edges:state.edges, memory:state.memory, runs:state.runs, execution:state.execution, sessionName:state.sessionName };
+  downloadFile((state.sessionName||'session')+'.json', JSON.stringify(data,null,2));
+};
+$('#btn-import').onclick = ()=> $('#file-import').click();
+$('#file-import').onchange = ()=>{
+  const f = $('#file-import').files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const data = JSON.parse(r.result);
+      state.agents = data.agents||defaultAgents(); state.edges = data.edges||defaultEdges();
+      state.memory = data.memory||[]; state.runs = data.runs||{};
+      renderAgentList(); renderNodes(); renderEdges(); renderMemory(); renderMinimap();
+      toast('Session imported','success');
+    }catch(e){ toast('Invalid session file','error'); }
+  };
+  r.readAsText(f);
+};
+
+/* ============================= SESSIONS MODAL ============================= */
+$('#btn-sessions').onclick = ()=>{
+  renderSessionsList();
+  $('#sessions-modal-overlay').classList.add('open');
+};
+$('#sessions-close').onclick = ()=> $('#sessions-modal-overlay').classList.remove('open');
+function renderSessionsList(){
+  const wrap = $('#sessions-list'); wrap.innerHTML='';
+  const list = listSessions();
+  if(!list.length){ wrap.innerHTML='<div class="empty-hint">No saved sessions yet. Click Save in the topbar.</div>'; return; }
+  list.forEach(name=>{
+    const el = document.createElement('div');
+    el.className='agent-chip'; el.style.cursor='pointer';
+    el.innerHTML = `<span class="an">${esc(name)}</span><span class="mini-btn" data-a="load">Load</span>`;
+    el.querySelector('[data-a=load]').onclick = ()=>{ loadSession(name); $('#sessions-modal-overlay').classList.remove('open'); };
+    wrap.appendChild(el);
+  });
+}
+$('#sess-new').onclick = ()=>{
+  const name = prompt('New session name:', 'Session '+(listSessions().length+1));
+  if(!name) return;
+  state.sessionName = name; state.agents=defaultAgents(); state.edges=defaultEdges(); state.memory=[]; state.runs={};
+  renderAgentList(); renderNodes(); renderEdges(); renderMemory(); autosave(); renderSessionsList();
+  toast('New session created: '+name,'success');
+};
+$('#sess-duplicate').onclick = ()=>{
+  const name = prompt('Duplicate as:', state.sessionName+' copy');
+  if(!name) return;
+  state.sessionName = name; autosave(); renderSessionsList();
+  toast('Duplicated as '+name,'success');
+};
+
+/* ============================= REPORT ============================= */
+function generateReport(){
+  const exec = state.execution;
+  const finalScore = exec.scores.length ? exec.scores[exec.scores.length-1] : '—';
+  const agentRows = state.agents.map(a=>{
+    const r = state.runs[a.id];
+    return `<li><b>${esc(a.name)}</b> — ${r? (r.status+', '+r.runtime+'ms') : 'not run'}</li>`;
+  }).join('');
+  const improverRun = state.runs['improver'];
+  const scoreTimeline = exec.scores.map((s,i)=>`Round ${i+1}: ${s}`).join(' → ') || 'No rounds executed';
+  const html = `
+    <h4>Execution Summary</h4>
+    <p>Session <b>${esc(state.sessionName)}</b> ran ${exec.round} round(s), made ${exec.calls} API calls (${exec.fails} failed), used ${exec.tokenUsage.toLocaleString()} tokens at an estimated cost of $${exec.cost.toFixed(4)}. Final status: <b>${esc(exec.status)}</b>.</p>
+    <h4>Performance Metrics</h4>
+    <ul>
+      <li>Final overall score: <b>${finalScore}</b></li>
+      <li>Score timeline: ${esc(scoreTimeline)}</li>
+      <li>Average latency: ${exec.latencies.length?Math.round(exec.latencies.reduce((a,b)=>a+b,0)/exec.latencies.length):0}ms</li>
+      <li>Stop reason: ${esc(exec.stopReason||'Not stopped')}</li>
+    </ul>
+    <h4>Agent Comparison</h4>
+    <ul>${agentRows}</ul>
+    <h4>Workflow Diagram</h4>
+    <p>${state.edges.length} connections across ${state.agents.length} agents: ${state.edges.map(e=>esc(e.from+' → '+e.to)).join(', ')}</p>
+    <h4>Improvement Timeline</h4>
+    <p>${esc(scoreTimeline)}</p>
+    <h4>Architecture Overview</h4>
+    <p>Planner defines an audit plan → four specialist auditors (Architect, Security, Performance, Style) run in parallel → Executor consolidates findings → Evaluator/Critic/Improver loop iterates until a stopping condition fires.</p>
+    <h4>Stop Reason</h4>
+    <p>${esc(exec.stopReason||'Pipeline has not completed a stop condition check yet.')}</p>
+    <h4>Future Extensions</h4>
+    <ul><li>Add a Test-Writer agent to generate regression tests for fixed issues</li><li>Add a Dependency Auditor for supply-chain risk</li><li>Persist run history across sessions for trend analysis</li></ul>
+    <h4>Suggested Next Agents</h4>
+    <ul><li>Accessibility Auditor</li><li>Documentation Generator</li><li>Test Coverage Analyst</li></ul>
+    <h4>Advanced Prompt Ideas</h4>
+    <ul><li>"Rank findings by estimated fix effort vs impact"</li><li>"Generate a migration plan for breaking changes"</li></ul>
+  `;
+  $('#report-body').innerHTML = html;
+  window.__lastReportHTML = html;
+}
+$('#btn-report').onclick = ()=>{ if(!window.__lastReportHTML) generateReport(); $('#report-modal-overlay').classList.add('open'); };
+$('#report-close').onclick = ()=> $('#report-modal-overlay').classList.remove('open');
+$('#report-print').onclick = ()=> window.print();
+$('#report-md').onclick = ()=>{
+  const text = $('#report-body').innerText;
+  downloadFile('execution-report.md', '# Execution Report — '+state.sessionName+'\n\n'+text);
+};
+
+/* ============================= INIT ============================= */
+function init(){
+  renderAgentList();
+  renderNodes();
+  applyZoom();
+  renderMemory();
+  renderLog();
+  renderDashboard();
+  $('#canvas-scroll').scrollLeft=250; $('#canvas-scroll').scrollTop=350;
+  setInterval(()=>{ $('#bb-clock').textContent = new Date().toLocaleTimeString(); }, 1000);
+  log('workflow','Studio initialized with default 9-agent code-audit pipeline.');
+  const saved = localStorage.getItem('aas_session_'+state.sessionName);
+  if(saved){
+    try{ const data = JSON.parse(saved); state.agents=data.agents; state.edges=data.edges; state.memory=data.memory||[]; renderAgentList(); renderNodes(); renderMemory(); }catch(e){}
+  }
+}
+init();
+
+})();
+</script>
+</body>
+</html>
