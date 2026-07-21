@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waypoint — Product Discovery & Sprint Planning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:#080b12; --bg2:#0d1220; --elev:#121829; --elev2:#171f34;
+  --surface:rgba(255,255,255,0.045); --surface-hi:rgba(255,255,255,0.075);
+  --border:rgba(255,255,255,0.09); --border-hi:rgba(255,255,255,0.16);
+  --teal:#2dd4bf; --teal-dim:#1a8f82; --violet:#8b7cf6; --violet-dim:#6a5ccb;
+  --gold:#e8b95c; --danger:#f2685f; --ok:#4ade80;
+  --text:#e9edf5; --text-dim:#95a0b5; --text-faint:#5c6478;
+  --disp:'Space Grotesk',sans-serif; --cond:'Barlow Condensed',sans-serif; --mono:'JetBrains Mono',monospace;
+  --r-sm:8px; --r-md:14px; --r-lg:22px;
+  --shadow:0 20px 60px -20px rgba(0,0,0,0.6);
+}
+html[data-theme="light"]{
+  --bg:#f2f3f7; --bg2:#e9ebf2; --elev:#ffffff; --elev2:#f5f6fa;
+  --surface:rgba(10,14,25,0.035); --surface-hi:rgba(10,14,25,0.065);
+  --border:rgba(10,14,25,0.09); --border-hi:rgba(10,14,25,0.18);
+  --teal:#0e9488; --teal-dim:#0b7a70; --violet:#6853d6; --violet-dim:#5642b0;
+  --gold:#a97a1f; --danger:#c8362c; --ok:#1a9a53;
+  --text:#161b28; --text-dim:#565f75; --text-faint:#8b93a6;
+  --shadow:0 20px 50px -24px rgba(20,25,45,0.25);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  background:radial-gradient(ellipse 120% 80% at 20% -10%, var(--bg2), var(--bg) 55%);
+  color:var(--text); font-family:var(--disp); overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--teal); color:#04140f;}
+::-webkit-scrollbar{width:9px; height:9px;}
+::-webkit-scrollbar-thumb{background:var(--border-hi); border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+a{color:inherit;}
+button{font-family:inherit; cursor:pointer;}
+input,textarea,select{font-family:inherit; color:inherit;}
+.hidden{display:none !important;}
+.eyebrow{font-family:var(--cond); text-transform:uppercase; letter-spacing:0.14em; font-size:12px; color:var(--text-dim); font-weight:600;}
+.mono{font-family:var(--mono);}
+.glass{
+  background:var(--surface); backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  border:1px solid var(--border); border-radius:var(--r-md);
+}
+.btn{
+  display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:10px;
+  border:1px solid var(--border-hi); background:var(--surface); color:var(--text);
+  font-size:14px; font-weight:600; transition:all .18s ease; white-space:nowrap;
+}
+.btn:hover{background:var(--surface-hi); transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn.primary{background:linear-gradient(135deg, var(--teal), var(--violet)); border:none; color:#06110e; box-shadow:0 8px 24px -8px rgba(45,212,191,0.45);}
+.btn.primary:hover{filter:brightness(1.08);}
+.btn.ghost{background:transparent; border-color:var(--border);}
+.btn.danger{border-color:var(--danger); color:var(--danger);}
+.btn:disabled{opacity:0.45; cursor:not-allowed; transform:none;}
+.btn.sm{padding:6px 12px; font-size:12.5px;}
+
+/* ============ LANDING ============ */
+#landing{min-height:100vh; display:flex; flex-direction:column; position:relative;}
+.landing-nav{display:flex; justify-content:space-between; align-items:center; padding:26px 48px; position:relative; z-index:5;}
+.brand{display:flex; align-items:center; gap:10px; font-weight:700; font-size:19px; letter-spacing:-0.01em;}
+.brand-mark{width:30px; height:30px; border-radius:9px; background:conic-gradient(from 220deg, var(--teal), var(--violet), var(--gold), var(--teal)); position:relative;}
+.brand-mark::after{content:''; position:absolute; inset:5px; border-radius:6px; background:var(--bg);}
+.hero{flex:1; display:flex; align-items:center; padding:20px 48px 60px; position:relative; z-index:2;}
+.hero-grid{display:grid; grid-template-columns:1.15fr 0.85fr; gap:60px; align-items:center; max-width:1240px; margin:0 auto; width:100%;}
+.hero h1{font-size:clamp(38px,5vw,64px); line-height:1.04; letter-spacing:-0.02em; font-weight:700;}
+.hero h1 .grad{background:linear-gradient(100deg, var(--teal), var(--violet) 60%, var(--gold)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+.hero p.lead{margin-top:22px; font-size:17px; color:var(--text-dim); max-width:520px; line-height:1.6;}
+.hero-cta{margin-top:34px; display:flex; gap:14px; align-items:center; flex-wrap:wrap;}
+.hero-stats{display:flex; gap:28px; margin-top:40px;}
+.stat b{display:block; font-family:var(--mono); font-size:22px; color:var(--teal);}
+.stat span{font-family:var(--cond); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint);}
+.orbit-hero{position:relative; aspect-ratio:1; max-width:440px; margin:0 auto;}
+.orbit-hero svg{width:100%; height:100%;}
+.hero-bg-glow{position:absolute; width:640px; height:640px; border-radius:50%; background:radial-gradient(circle, rgba(139,124,246,0.16), transparent 70%); top:-160px; right:-160px; z-index:1; pointer-events:none;}
+.landing-features{padding:80px 48px 100px; max-width:1240px; margin:0 auto; width:100%;}
+.lf-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:30px;}
+.lf-card{padding:22px; border-radius:16px;}
+.lf-card .ic{width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; font-size:17px;}
+.lf-card h3{font-size:16px; margin-bottom:6px;}
+.lf-card p{font-size:13px; color:var(--text-dim); line-height:1.5;}
+@media (max-width:900px){.hero-grid{grid-template-columns:1fr;} .lf-grid{grid-template-columns:repeat(2,1fr);} .landing-nav,.hero,.landing-features{padding-left:24px; padding-right:24px;}}
+
+/* ============ APP SHELL ============ */
+#app{display:none; min-height:100vh;}
+#app.active{display:flex;}
+.sidebar{
+  width:236px; flex-shrink:0; display:flex; flex-direction:column; padding:18px 14px;
+  border-right:1px solid var(--border); background:var(--bg2); position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.sb-brand{display:flex; align-items:center; gap:9px; padding:8px 10px 20px; font-weight:700; font-size:16px;}
+.nav-group{margin-bottom:18px;}
+.nav-label{font-family:var(--cond); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-faint); padding:6px 10px; font-weight:600;}
+.nav-item{
+  display:flex; align-items:center; gap:11px; padding:9px 11px; border-radius:9px; font-size:14px;
+  color:var(--text-dim); font-weight:500; transition:all .15s ease; position:relative; margin-bottom:2px;
+}
+.nav-item .ic{width:17px; text-align:center; font-size:14px;}
+.nav-item:hover{background:var(--surface); color:var(--text);}
+.nav-item.active{background:var(--surface-hi); color:var(--text); box-shadow:inset 2px 0 0 var(--teal);}
+.nav-item .badge{margin-left:auto; font-family:var(--mono); font-size:10px; background:var(--surface-hi); padding:1px 6px; border-radius:20px; color:var(--text-dim);}
+.sb-footer{margin-top:auto; padding-top:14px; border-top:1px solid var(--border); display:flex; gap:8px;}
+.sb-footer .btn{flex:1; justify-content:center;}
+
+.main{flex:1; min-width:0; display:flex; flex-direction:column; height:100vh; overflow:hidden;}
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; padding:14px 26px;
+  border-bottom:1px solid var(--border); flex-shrink:0; gap:16px;
+}
+.topbar-title{display:flex; flex-direction:column;}
+.topbar-title h2{font-size:17px; font-weight:600;}
+.topbar-title span{font-size:12px; color:var(--text-faint); font-family:var(--cond); letter-spacing:0.04em;}
+.topbar-actions{display:flex; align-items:center; gap:10px;}
+.kbd{font-family:var(--mono); font-size:11px; background:var(--surface); border:1px solid var(--border); padding:2px 6px; border-radius:5px; color:var(--text-dim);}
+.icon-btn{width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; background:var(--surface); border:1px solid var(--border); font-size:15px;}
+.icon-btn:hover{background:var(--surface-hi);}
+
+.view{flex:1; overflow-y:auto; padding:26px 30px 60px;}
+.view-grid{display:grid; grid-template-columns:2fr 1fr; gap:20px;}
+@media(max-width:1200px){.view-grid{grid-template-columns:1fr;}}
+.card{padding:20px 22px; border-radius:var(--r-md); margin-bottom:18px;}
+.card-h{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+.card-h h3{font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px;}
+.pill{font-family:var(--mono); font-size:10.5px; padding:2px 9px; border-radius:20px; border:1px solid var(--border-hi); color:var(--text-dim);}
+.pill.on{color:var(--teal); border-color:var(--teal-dim); background:rgba(45,212,191,0.08);}
+.pill.warn{color:var(--gold); border-color:var(--gold);}
+
+/* Dashboard summary tiles */
+.tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:18px;}
+.tile{padding:16px 18px; border-radius:14px;}
+.tile .eyebrow{margin-bottom:8px;}
+.tile b{font-family:var(--mono); font-size:24px;}
+@media(max-width:900px){.tiles{grid-template-columns:repeat(2,1fr);}}
+
+.empty{padding:40px 20px; text-align:center; color:var(--text-faint);}
+.empty .ic{font-size:30px; margin-bottom:10px;}
+.empty h4{color:var(--text-dim); font-size:15px; margin-bottom:4px;}
+.empty p{font-size:13px; max-width:340px; margin:0 auto;}
+
+/* Interview / chat */
+.chat-wrap{display:flex; flex-direction:column; height:100%;}
+.chat-log{flex:1; overflow-y:auto; padding:4px 4px 10px; display:flex; flex-direction:column; gap:14px;}
+.msg{display:flex; gap:10px; max-width:92%;}
+.msg .av{width:26px; height:26px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; margin-top:2px;}
+.msg.ai .av{background:linear-gradient(135deg,var(--teal),var(--violet)); color:#06110e;}
+.msg.user{align-self:flex-end; flex-direction:row-reverse;}
+.msg.user .av{background:var(--surface-hi); border:1px solid var(--border);}
+.msg .bubble{padding:11px 14px; border-radius:13px; font-size:14px; line-height:1.55; background:var(--surface); border:1px solid var(--border);}
+.msg.user .bubble{background:linear-gradient(135deg, rgba(139,124,246,0.18), rgba(45,212,191,0.1)); border-color:var(--border-hi);}
+.opt-grid{display:flex; flex-direction:column; gap:8px; margin-top:10px;}
+.opt-btn{
+  text-align:left; padding:11px 14px; border-radius:10px; border:1px solid var(--border-hi);
+  background:var(--surface); font-size:13.5px; display:flex; gap:10px; align-items:flex-start; transition:all .15s;
+}
+.opt-btn:hover{background:var(--surface-hi); border-color:var(--teal-dim); transform:translateX(2px);}
+.opt-btn .k{font-family:var(--mono); color:var(--teal); flex-shrink:0;}
+.chat-input-row{display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border);}
+.chat-input-row input{flex:1; padding:11px 14px; border-radius:10px; border:1px solid var(--border); background:var(--surface); font-size:14px;}
+.chat-input-row input:focus{outline:none; border-color:var(--teal-dim);}
+.typing{display:flex; gap:4px; padding:6px 2px;}
+.typing span{width:6px; height:6px; border-radius:50%; background:var(--text-faint); animation:blink 1.2s infinite ease-in-out;}
+.typing span:nth-child(2){animation-delay:.2s;} .typing span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.25; transform:scale(.85);} 40%{opacity:1; transform:scale(1);}}
+
+.error-banner{
+  display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:10px;
+  background:rgba(242,104,95,0.1); border:1px solid rgba(242,104,95,0.35); color:var(--danger); font-size:13px; margin-top:10px;
+}
+.error-banner button{margin-left:auto;}
+
+/* Canvas / project detail */
+.field{margin-bottom:14px;}
+.field label{display:block; font-family:var(--cond); font-size:11.5px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-faint); margin-bottom:5px; font-weight:600;}
+.field textarea, .field input{
+  width:100%; padding:9px 11px; border-radius:9px; border:1px solid var(--border); background:var(--surface); font-size:13.5px; line-height:1.5; resize:vertical;
+}
+.field textarea:focus, .field input:focus{outline:none; border-color:var(--teal-dim);}
+.chips{display:flex; flex-wrap:wrap; gap:7px;}
+.chip{padding:6px 11px; border-radius:20px; background:var(--surface); border:1px solid var(--border-hi); font-size:12.5px; display:flex; align-items:center; gap:6px;}
+.chip button{color:var(--text-faint); font-size:12px;}
+.chip button:hover{color:var(--danger);}
+.add-chip-row{display:flex; gap:6px; margin-top:8px;}
+.add-chip-row input{flex:1; padding:7px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); font-size:12.5px;}
+
+/* Feature list / matrix */
+.feat-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border);}
+.feat-row:last-child{border-bottom:none;}
+.feat-row .dot{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+.feat-row .txt{flex:1; font-size:13.5px;}
+.prio-P0{background:var(--danger);} .prio-P1{background:var(--gold);} .prio-P2{background:var(--teal);}
+
+/* timeline */
+.timeline{display:flex; flex-direction:column; gap:0;}
+.tl-item{display:flex; gap:14px; padding:12px 0;}
+.tl-item .tl-marker{width:32px; display:flex; flex-direction:column; align-items:center; flex-shrink:0;}
+.tl-item .tl-num{width:28px; height:28px; border-radius:8px; background:var(--surface-hi); border:1px solid var(--border-hi); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; font-weight:600;}
+.tl-item .tl-line{flex:1; width:1px; background:var(--border-hi); margin-top:4px;}
+.tl-item.done .tl-num{background:linear-gradient(135deg,var(--teal),var(--violet)); color:#06110e; border:none;}
+.tl-content{flex:1; padding-bottom:4px;}
+.tl-content h4{font-size:14px; margin-bottom:3px;}
+.tl-content p{font-size:12.5px; color:var(--text-dim); line-height:1.5;}
+
+/* documents */
+.doc-tabs{display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:0;}
+.doc-tab{padding:9px 16px; font-size:13.5px; font-weight:600; color:var(--text-dim); border-bottom:2px solid transparent; position:relative; top:1px;}
+.doc-tab.active{color:var(--text); border-color:var(--teal);}
+.doc-body{white-space:pre-wrap; font-size:13.5px; line-height:1.7; font-family:var(--disp);}
+.doc-body h1,.doc-body h2,.doc-body h3{font-family:var(--disp); margin:14px 0 6px;}
+.doc-actions{display:flex; gap:8px; margin-bottom:14px;}
+.gen-status{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-dim); margin-bottom:12px;}
+.spinner{width:13px; height:13px; border-radius:50%; border:2px solid var(--border-hi); border-top-color:var(--teal); animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* activity */
+.act-item{display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px;}
+.act-item:last-child{border-bottom:none;}
+.act-item .ic{width:26px; height:26px; border-radius:7px; background:var(--surface-hi); display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;}
+.act-item .t{color:var(--text-faint); font-family:var(--mono); font-size:11px; margin-left:auto; white-space:nowrap;}
+
+/* settings */
+.setting-row{display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--border);}
+.setting-row:last-child{border-bottom:none;}
+.setting-row .desc{font-size:12.5px; color:var(--text-dim); margin-top:3px; max-width:420px;}
+.toggle{width:42px; height:24px; border-radius:20px; background:var(--surface-hi); border:1px solid var(--border-hi); position:relative; transition:all .2s;}
+.toggle::after{content:''; position:absolute; width:18px; height:18px; border-radius:50%; background:var(--text-dim); top:2px; left:2px; transition:all .2s;}
+.toggle.on{background:linear-gradient(135deg,var(--teal),var(--violet)); border-color:transparent;}
+.toggle.on::after{left:20px; background:#fff;}
+
+/* command palette */
+#cmdk-overlay{position:fixed; inset:0; background:rgba(5,7,12,0.6); backdrop-filter:blur(4px); z-index:100; display:flex; align-items:flex-start; justify-content:center; padding-top:14vh;}
+#cmdk{width:560px; max-width:90vw; border-radius:16px; background:var(--elev); border:1px solid var(--border-hi); box-shadow:var(--shadow); overflow:hidden;}
+#cmdk input{width:100%; padding:16px 18px; background:transparent; border:none; border-bottom:1px solid var(--border); font-size:15px;}
+#cmdk input:focus{outline:none;}
+#cmdk-list{max-height:340px; overflow-y:auto; padding:6px;}
+.cmdk-item{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:9px; font-size:13.5px;}
+.cmdk-item:hover, .cmdk-item.sel{background:var(--surface-hi);}
+.cmdk-item .ic{width:16px; text-align:center; color:var(--text-dim);}
+
+/* toast */
+#toast-wrap{position:fixed; bottom:20px; right:20px; z-index:200; display:flex; flex-direction:column; gap:8px; align-items:flex-end;}
+.toast{padding:11px 16px; border-radius:10px; background:var(--elev); border:1px solid var(--border-hi); box-shadow:var(--shadow); font-size:13px; display:flex; align-items:center; gap:8px; animation:toastIn .25s ease;}
+@keyframes toastIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+/* loading overlay for view switch */
+.skeleton{height:14px; border-radius:6px; background:linear-gradient(90deg, var(--surface), var(--surface-hi), var(--surface)); background-size:200% 100%; animation:shimmer 1.4s infinite;}
+@keyframes shimmer{0%{background-position:200% 0;} 100%{background-position:-200% 0;}}
+
+@media(max-width:900px){
+  .sidebar{position:fixed; z-index:50; transform:translateX(-100%); transition:transform .2s;}
+  .sidebar.open{transform:translateX(0);}
+  .view-grid{grid-template-columns:1fr;}
+  .tiles{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= LANDING ================= -->
+<div id="landing">
+  <div class="hero-bg-glow"></div>
+  <nav class="landing-nav">
+    <div class="brand"><div class="brand-mark"></div>Waypoint</div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn ghost sm" id="landing-resume-btn" style="display:none">Resume session</button>
+      <button class="btn primary" id="landing-start-btn">Start discovery →</button>
+    </div>
+  </nav>
+  <div class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow" style="margin-bottom:16px;">AI Product Discovery · Sprint Planning</div>
+        <h1>Find the <span class="grad">right project</span>,<br>plan the <span class="grad">right sprint</span>.</h1>
+        <p class="lead">Waypoint interviews you, challenges weak ideas, and turns your answers into a live PRD, a day-by-day 10-day build plan, and a pitch deck — updating in real time as you talk.</p>
+        <div class="hero-cta">
+          <button class="btn primary" id="hero-start-btn">Begin the interview →</button>
+          <button class="btn ghost" id="hero-sample-btn">See how it works</button>
+        </div>
+        <div class="hero-stats">
+          <div class="stat"><b>10</b><span>Day sprint plan</span></div>
+          <div class="stat"><b>3</b><span>Live documents</span></div>
+          <div class="stat"><b>1:1</b><span>Adaptive interview</span></div>
+        </div>
+      </div>
+      <div class="orbit-hero"><svg id="hero-orbit-svg" viewBox="0 0 400 400"></svg></div>
+    </div>
+  </div>
+  <div class="landing-features">
+    <div class="eyebrow">What Waypoint does</div>
+    <div class="lf-grid">
+      <div class="glass lf-card"><div class="ic" style="background:rgba(45,212,191,0.12); color:var(--teal);">◆</div><h3>Adaptive interview</h3><p>One question at a time, mostly multiple-choice, each answer reshaping the next question and the live project canvas.</p></div>
+      <div class="glass lf-card"><div class="ic" style="background:rgba(139,124,246,0.12); color:var(--violet);">▦</div><h3>Live scoring</h3><p>Confidence, complexity, and risk update after every answer — no waiting until the end to see if an idea holds up.</p></div>
+      <div class="glass lf-card"><div class="ic" style="background:rgba(232,185,92,0.12); color:var(--gold);">▤</div><h3>Real documents</h3><p>PRD, a day-2-through-10 implementation blueprint, and a pitch deck — generated progressively, not dumped at the end.</p></div>
+      <div class="glass lf-card"><div class="ic" style="background:rgba(45,212,191,0.12); color:var(--teal);">⟲</div><h3>Sessions that persist</h3><p>Autosave, manual save, version history, and export/import — pick up exactly where you left off.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand"><div class="brand-mark" style="width:24px;height:24px;"></div>Waypoint</div>
+    <div class="nav-group">
+      <div class="nav-label">Workspace</div>
+      <div class="nav-item" data-view="dashboard"><span class="ic">◈</span>Dashboard</div>
+      <div class="nav-item" data-view="interview"><span class="ic">✦</span>Discovery Chat<span class="badge" id="nav-interview-badge"></span></div>
+      <div class="nav-item" data-view="canvas"><span class="ic">▦</span>Project Canvas</div>
+      <div class="nav-item" data-view="timeline"><span class="ic">◷</span>Sprint Timeline</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Output</div>
+      <div class="nav-item" data-view="documents"><span class="ic">▤</span>Documents</div>
+      <div class="nav-item" data-view="activity"><span class="ic">≋</span>Activity</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">System</div>
+      <div class="nav-item" data-view="sessions"><span class="ic">⌂</span>Sessions</div>
+      <div class="nav-item" data-view="settings"><span class="ic">⚙</span>Settings</div>
+    </div>
+    <div class="sb-footer">
+      <button class="btn sm ghost" id="theme-toggle-btn">◐ Theme</button>
+      <button class="btn sm ghost" id="cmdk-open-btn">⌘K</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2 id="topbar-title">Dashboard</h2>
+        <span id="topbar-sub">No active project yet</span>
+      </div>
+      <div class="topbar-actions">
+        <span class="kbd">⌘K</span>
+        <button class="icon-btn" id="save-btn" title="Save session">⤓</button>
+        <button class="icon-btn" id="mobile-nav-btn" title="Menu" style="display:none">☰</button>
+      </div>
+    </div>
+    <div class="view" id="view-root"></div>
+  </div>
+</div>
+
+<div id="cmdk-overlay" class="hidden">
+  <div id="cmdk">
+    <input type="text" id="cmdk-input" placeholder="Type a command… (navigate, save, export, reset)">
+    <div id="cmdk-list"></div>
+  </div>
+</div>
+
+<div id="toast-wrap"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   CONFIG
+============================================================ */
+const CONFIG = {
+  model: "claude-sonnet-4-6",
+  endpoint: "https://api.anthropic.com/v1/messages",
+  storageKey: "waypoint_session_v1",
+  sessionsKey: "waypoint_sessions_v1",
+  maxTokens: 1000,
+  totalDays: 10
+};
+
+/* ============================================================
+   STATE
+============================================================ */
+function freshState(){
+  return {
+    id: "proj_" + Date.now().toString(36),
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    theme: "dark",
+    view: "dashboard",
+    interview: {
+      started: false,
+      finished: false,
+      turn: 0,
+      maxTurns: 9,
+      currentQuestion: null, // {question, options:[{key,label}], type:'mcq'|'text'}
+      history: [], // {role:'ai'|'user', text}
+      answersSummary: [], // plain strings
+      pending: false,
+      error: null
+    },
+    project: {
+      title: "",
+      problem: "",
+      users: "",
+      solution: "",
+      features: [], // {name, priority: P0|P1|P2}
+      successMetrics: [],
+      risks: [],
+      assumptions: [],
+      timeline: [], // 10 items {day,title,objective}
+      complexity: null, // 1-10
+      confidence: null, // 0-100
+      recommended: false
+    },
+    documents: {
+      prd: { content: "", status: "idle", updatedAt: null },
+      blueprint: { content: "", status: "idle", updatedAt: null, daysDone: 0 },
+      pitch: { content: "", status: "idle", updatedAt: null }
+    },
+    activity: [], // {icon, text, time}
+    settings: { reduceMotion: false }
+  };
+}
+let state = freshState();
+
+function touch(){ state.updatedAt = Date.now(); scheduleAutosave(); }
+
+function logActivity(icon, text){
+  state.activity.unshift({ icon, text, time: Date.now() });
+  if(state.activity.length > 200) state.activity.pop();
+}
+
+/* ============================================================
+   PERSISTENCE
+============================================================ */
+let autosaveTimer = null;
+function scheduleAutosave(){
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(()=>{ saveSession(true); }, 900);
+}
+function saveSession(silent){
+  try{
+    localStorage.setItem(CONFIG.storageKey, JSON.stringify(state));
+    // update recent sessions index
+    let list = [];
+    try{ list = JSON.parse(localStorage.getItem(CONFIG.sessionsKey) || "[]"); }catch(e){ list = []; }
+    list = list.filter(s => s.id !== state.id);
+    list.unshift({ id: state.id, title: state.project.title || "Untitled project", updatedAt: state.updatedAt, snapshot: JSON.stringify(state) });
+    if(list.length > 12) list = list.slice(0,12);
+    localStorage.setItem(CONFIG.sessionsKey, JSON.stringify(list));
+    if(!silent){ toast("Session saved", "✓"); logActivity("⤓","Manually saved session"); renderActivityIfActive(); }
+  }catch(e){ console.error("Save failed", e); if(!silent) toast("Save failed — storage may be full", "⚠"); }
+}
+function loadSessionFromStorage(){
+  try{
+    const raw = localStorage.getItem(CONFIG.storageKey);
+    if(!raw) return false;
+    const parsed = JSON.parse(raw);
+    state = Object.assign(freshState(), parsed);
+    return true;
+  }catch(e){ return false; }
+}
+function hasSavedSession(){
+  try{ return !!localStorage.getItem(CONFIG.storageKey); }catch(e){ return false; }
+}
+function getRecentSessions(){
+  try{ return JSON.parse(localStorage.getItem(CONFIG.sessionsKey) || "[]"); }catch(e){ return []; }
+}
+function deleteSession(id){
+  let list = getRecentSessions().filter(s=>s.id!==id);
+  localStorage.setItem(CONFIG.sessionsKey, JSON.stringify(list));
+  renderView();
+}
+function loadSessionById(id){
+  const list = getRecentSessions();
+  const found = list.find(s=>s.id===id);
+  if(!found) return;
+  try{
+    state = Object.assign(freshState(), JSON.parse(found.snapshot));
+    applyTheme();
+    renderApp();
+    toast("Session loaded", "✓");
+  }catch(e){ toast("Could not load session", "⚠"); }
+}
+function exportSessionJSON(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  downloadBlob(blob, (state.project.title || "waypoint-project").replace(/\s+/g,"-").toLowerCase() + ".json");
+  logActivity("⤓","Exported session JSON"); touch();
+}
+function importSessionJSON(file){
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const parsed = JSON.parse(e.target.result);
+      state = Object.assign(freshState(), parsed);
+      applyTheme(); renderApp(); saveSession(true);
+      toast("Session imported", "✓");
+    }catch(err){ toast("Invalid session file", "⚠"); }
+  };
+  reader.readAsText(file);
+}
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 200);
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+function toast(msg, icon){
+  const wrap = document.getElementById("toast-wrap");
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.innerHTML = `<span>${icon||"•"}</span><span>${escapeHtml(msg)}</span>`;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity="0"; el.style.transition="opacity .3s"; setTimeout(()=>el.remove(), 300); }, 2600);
+}
+
+/* ============================================================
+   CLAUDE API LAYER
+   - text/markdown protocol only (no strict JSON), per spec
+   - handles 429 backoff + retry
+   - handles max_tokens truncation via continuation loop
+============================================================ */
+async function callClaudeRaw(messages, system, attempt){
+  attempt = attempt || 0;
+  const body = {
+    model: CONFIG.model,
+    max_tokens: CONFIG.maxTokens,
+    system: system,
+    messages: messages
+  };
+  let res;
+  try{
+    res = await fetch(CONFIG.endpoint, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(body)
+    });
+  }catch(netErr){
+    throw { kind:"network", message:"Network error — check your connection.", detail: netErr };
+  }
+  if(res.status === 429){
+    if(attempt < 3){
+      const wait = 1200 * Math.pow(2, attempt);
+      await new Promise(r=>setTimeout(r, wait));
+      return callClaudeRaw(messages, system, attempt+1);
+    }
+    throw { kind:"rate_limit", message:"Rate limited after retries. Please wait a moment and retry." };
+  }
+  if(!res.ok){
+    let detail = "";
+    try{ detail = JSON.stringify(await res.json()); }catch(e){}
+    throw { kind:"http", message:`API error (${res.status}). ${detail}` };
+  }
+  let data;
+  try{ data = await res.json(); }catch(e){ throw { kind:"parse", message:"Could not parse API response." }; }
+  const textBlocks = (data.content||[]).filter(b=>b.type==="text").map(b=>b.text);
+  const text = textBlocks.join("\n");
+  return { text, stopReason: data.stop_reason, raw: data };
+}
+
+// Handles continuation when stop_reason === "max_tokens" so long docs aren't truncated
+async function callClaudeFull(messages, system, maxContinuations){
+  maxContinuations = maxContinuations===undefined ? 6 : maxContinuations;
+  let full = "";
+  let convo = messages.slice();
+  let continuations = 0;
+  while(true){
+    const r = await callClaudeRaw(convo, system);
+    full += r.text;
+    if(r.stopReason === "max_tokens" && continuations < maxContinuations){
+      continuations++;
+      convo = convo.concat([
+        { role:"assistant", content: r.text },
+        { role:"user", content: "Continue exactly where you left off. Do not repeat any earlier content, do not add a preamble." }
+      ]);
+      continue;
+    }
+    break;
+  }
+  return full;
+}
+
+/* ============================================================
+   TEXT PROTOCOL PARSERS (plain text / markdown, robust regex)
+============================================================ */
+function parseQuestionBlock(text){
+  // Expected loose format:
+  // QUESTION: ...
+  // TYPE: mcq|text
+  // OPTIONS:
+  // A) ...
+  // B) ...
+  // INSIGHT: ...
+  // READY: yes|no
+  const q = {};
+  const qm = text.match(/QUESTION:\s*([\s\S]*?)(?:\nTYPE:|\nOPTIONS:|\nINSIGHT:|\nREADY:|$)/i);
+  q.question = qm ? qm[1].trim() : text.trim().split("\n")[0];
+  const tm = text.match(/TYPE:\s*(mcq|text)/i);
+  q.type = tm ? tm[1].toLowerCase() : (/OPTIONS:/i.test(text) ? "mcq" : "text");
+  const options = [];
+  const optSection = text.match(/OPTIONS:\s*([\s\S]*?)(?:\nINSIGHT:|\nREADY:|$)/i);
+  if(optSection){
+    const lines = optSection[1].split("\n");
+    lines.forEach(line=>{
+      const m = line.match(/^\s*([A-F])\)\s*(.+)/);
+      if(m) options.push({ key: m[1], label: m[2].trim() });
+    });
+  }
+  q.options = options;
+  const im = text.match(/INSIGHT:\s*([\s\S]*?)(?:\nREADY:|$)/i);
+  q.insight = im ? im[1].trim() : "";
+  const rm = text.match(/READY:\s*(yes|no)/i);
+  q.ready = rm ? rm[1].toLowerCase()==="yes" : false;
+  return q;
+}
+
+function parseRecommendationBlock(text){
+  function grab(label){
+    const re = new RegExp(label + ":\\s*([\\s\\S]*?)(?:\\n[A-Z_]+:|$)", "i");
+    const m = text.match(re);
+    return m ? m[1].trim() : "";
+  }
+  function grabList(label){
+    const block = grab(label);
+    if(!block) return [];
+    return block.split("\n").map(l=>l.replace(/^[-•*]\s*/,"").trim()).filter(Boolean);
+  }
+  const rec = {
+    title: grab("TITLE"),
+    problem: grab("PROBLEM"),
+    users: grab("USERS"),
+    solution: grab("SOLUTION"),
+    features: [],
+    successMetrics: grabList("SUCCESS_METRICS"),
+    risks: grabList("RISKS"),
+    assumptions: grabList("ASSUMPTIONS"),
+    complexity: parseInt(grab("COMPLEXITY")) || null,
+    confidence: parseInt(grab("CONFIDENCE")) || null
+  };
+  const featBlock = grab("FEATURES");
+  if(featBlock){
+    featBlock.split("\n").forEach(line=>{
+      const m = line.match(/^[-•*]?\s*\[(P0|P1|P2)\]\s*(.+)/i);
+      if(m) rec.features.push({ priority: m[1].toUpperCase(), name: m[2].trim() });
+      else{
+        const clean = line.replace(/^[-•*]\s*/,"").trim();
+        if(clean) rec.features.push({ priority:"P1", name: clean });
+      }
+    });
+  }
+  return rec;
+}
+
+function parseTimelineBlock(text){
+  // DAY 1: Title — objective text (per line), days 1-10
+  const days = [];
+  const re = /DAY\s*(\d+)\s*:\s*([^\n—-]+)[—-]?\s*(.*)/gi;
+  let m;
+  while((m = re.exec(text)) !== null){
+    days.push({ day: parseInt(m[1]), title: m[2].trim(), objective: (m[3]||"").trim() });
+  }
+  return days;
+}
+
+/* ============================================================
+   INTERVIEW ENGINE
+============================================================ */
+const INTERVIEW_SYSTEM = `You are Waypoint, an expert startup mentor and technical product advisor conducting a live, adaptive product-discovery interview.
+Your job: through one question at a time, uncover the user's interests, skills, experience level, available time, constraints, target users, a real problem worth solving, and business potential — then converge on ONE concrete software project completable in a 10-day sprint.
+Rules:
+- Ask exactly ONE question per turn.
+- Strongly prefer multiple-choice (3-5 options). Use free text only when a choice list would be meaningless (e.g. asking for a project name).
+- Each question must build on all prior answers. Challenge weak or overly broad ideas directly and suggest sharper alternatives when relevant.
+- Never output JSON. Use this exact plain-text format and nothing else, no preamble, no markdown fences:
+QUESTION: <the question text>
+TYPE: mcq
+OPTIONS:
+A) <option>
+B) <option>
+C) <option>
+D) <option>
+INSIGHT: <one short sentence — what this answer will tell us / how it narrows scope>
+READY: no
+When TYPE is text instead of mcq, omit the OPTIONS section.
+Set READY: yes only on the turn where you have enough signal to stop asking and move to a final recommendation (usually after 6-9 turns), and in that case still ask one last confirming question.`;
+
+function buildInterviewMessages(){
+  const msgs = [];
+  msgs.push({ role:"user", content:"Begin the product discovery interview. Ask your first question now." });
+  state.interview.history.forEach(h=>{
+    if(h.role==="ai") msgs.push({ role:"assistant", content: h.raw || h.text });
+    else msgs.push({ role:"user", content: h.text });
+  });
+  return msgs;
+}
+
+async function startInterview(){
+  if(state.interview.started) return;
+  state.interview.started = true;
+  touch(); renderView();
+  await requestNextQuestion();
+}
+
+async function requestNextQuestion(){
+  state.interview.pending = true; state.interview.error = null; renderInterviewChat();
+  try{
+    const messages = buildInterviewMessages();
+    const raw = await callClaudeFull(messages, INTERVIEW_SYSTEM, 2);
+    const q = parseQuestionBlock(raw);
+    state.interview.currentQuestion = q;
+    state.interview.history.push({ role:"ai", text:q.question, raw });
+    state.interview.pending = false;
+    logActivity("✦", "AI asked: " + truncate(q.question, 60));
+    touch();
+    renderInterviewChat();
+    renderDashboardIfActive();
+  }catch(err){
+    state.interview.pending = false;
+    state.interview.error = friendlyError(err);
+    renderInterviewChat();
+  }
+}
+
+async function submitAnswer(answerText){
+  if(!answerText || !answerText.trim()) return;
+  state.interview.history.push({ role:"user", text: answerText.trim() });
+  state.interview.answersSummary.push(answerText.trim());
+  state.interview.turn++;
+  logActivity("◉", "You answered: " + truncate(answerText.trim(), 60));
+  touch(); renderInterviewChat();
+
+  const wasReady = state.interview.currentQuestion && state.interview.currentQuestion.ready;
+  if(wasReady || state.interview.turn >= state.interview.maxTurns){
+    await finalizeRecommendation();
+  }else{
+    await requestNextQuestion();
+  }
+}
+
+const RECOMMEND_SYSTEM = `You are Waypoint, a senior product strategist. Based on the full interview transcript provided, converge on the strongest possible single software project the user can realistically build in a 10-day sprint.
+Protect the user from scope creep: cut anything that can't be built in 10 days.
+Output ONLY plain text in exactly this format, no JSON, no markdown fences, no preamble:
+TITLE: <project name>
+PROBLEM: <problem statement, 1-2 sentences>
+USERS: <target user persona, 1-2 sentences>
+SOLUTION: <one paragraph describing the solution>
+FEATURES:
+[P0] <must-have feature>
+[P0] <must-have feature>
+[P1] <should-have feature>
+[P1] <should-have feature>
+[P2] <nice-to-have feature>
+SUCCESS_METRICS:
+- <metric>
+- <metric>
+RISKS:
+- <risk>
+- <risk>
+ASSUMPTIONS:
+- <assumption>
+- <assumption>
+COMPLEXITY: <integer 1-10, 10 hardest>
+CONFIDENCE: <integer 0-100, how confident this project is right and completable in 10 days>`;
+
+async function finalizeRecommendation(){
+  state.interview.pending = true; renderInterviewChat();
+  try{
+    const transcript = state.interview.history.map(h => (h.role==="ai"?"AI Q: ":"USER: ") + h.text).join("\n");
+    const raw = await callClaudeFull([{ role:"user", content: "Full interview transcript:\n\n" + transcript + "\n\nProvide the final project recommendation now." }], RECOMMEND_SYSTEM, 3);
+    const rec = parseRecommendationBlock(raw);
+    Object.assign(state.project, {
+      title: rec.title || state.project.title,
+      problem: rec.problem, users: rec.users, solution: rec.solution,
+      features: rec.features.length ? rec.features.map(f=>({name:f.name, priority:f.priority})) : state.project.features,
+      successMetrics: rec.successMetrics, risks: rec.risks, assumptions: rec.assumptions,
+      complexity: rec.complexity, confidence: rec.confidence, recommended: true
+    });
+    state.interview.finished = true; state.interview.pending = false;
+    logActivity("★", "Project recommendation finalized: " + (rec.title||"Untitled"));
+    touch();
+    renderInterviewChat(); renderDashboardIfActive();
+    toast("Project recommendation ready", "★");
+    generateTimeline();
+  }catch(err){
+    state.interview.pending = false;
+    state.interview.error = friendlyError(err);
+    renderInterviewChat();
+  }
+}
+
+const TIMELINE_SYSTEM = `You are Waypoint. Given a project brief, output a 10-day sprint timeline (Day 1 through Day 10) as plain text, one line per day, no JSON, no preamble, exactly in this format:
+DAY 1: <short title> — <one sentence objective>
+DAY 2: <short title> — <one sentence objective>
+...through...
+DAY 10: <short title> — <one sentence objective>`;
+
+async function generateTimeline(){
+  try{
+    const brief = projectBriefText();
+    const raw = await callClaudeFull([{ role:"user", content: brief + "\n\nGenerate the 10-day timeline now." }], TIMELINE_SYSTEM, 2);
+    const days = parseTimelineBlock(raw);
+    if(days.length){
+      state.project.timeline = days;
+      logActivity("◷","Sprint timeline generated");
+      touch(); renderTimelineIfActive(); renderDashboardIfActive();
+    }
+  }catch(err){ /* non-fatal, dashboard shows empty state with retry */ }
+}
+
+function projectBriefText(){
+  const p = state.project;
+  return `PROJECT: ${p.title}\nPROBLEM: ${p.problem}\nUSERS: ${p.users}\nSOLUTION: ${p.solution}\nFEATURES:\n${p.features.map(f=>"["+f.priority+"] "+f.name).join("\n")}\nRISKS:\n${p.risks.join("\n")}\nASSUMPTIONS:\n${p.assumptions.join("\n")}`;
+}
+
+function friendlyError(err){
+  if(err && err.kind==="rate_limit") return "Rate limited by the API. Wait a few seconds and try again.";
+  if(err && err.kind==="network") return "Network error. Check your connection and retry.";
+  if(err && err.kind==="http") return err.message;
+  return (err && err.message) ? err.message : "Something went wrong. Please retry.";
+}
+
+function truncate(s,n){ return s.length>n ? s.slice(0,n)+"…" : s; }
+function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ============================================================
+   DOCUMENT GENERATION (progressive, chunked to respect max_tokens)
+============================================================ */
+const PRD_SYSTEM = `You are Waypoint. Write a professional Product Requirements Document in clean markdown (no JSON, no code fences) for the given project brief. Include sections: Overview, Problem Statement, Target Users, Goals & Success Metrics, Scope (In/Out), Features (grouped by priority), Risks & Assumptions, Non-functional Requirements, Open Questions. Be specific to the project, not generic.`;
+
+async function generatePRD(){
+  if(!state.project.recommended){ toast("Finish the discovery interview first", "⚠"); return; }
+  state.documents.prd.status = "generating"; renderDocumentsIfActive();
+  try{
+    const raw = await callClaudeFull([{ role:"user", content: projectBriefText() + "\n\nWrite the full PRD now." }], PRD_SYSTEM, 6);
+    state.documents.prd.content = raw.trim();
+    state.documents.prd.status = "done"; state.documents.prd.updatedAt = Date.now();
+    logActivity("▤","PRD generated"); touch(); renderDocumentsIfActive();
+  }catch(err){
+    state.documents.prd.status = "error";
+    toast(friendlyError(err), "⚠"); renderDocumentsIfActive();
+  }
+}
+
+const BLUEPRINT_DAY_SYSTEM = `You are Waypoint, writing one day of a 10-day implementation blueprint for a specific software project. Output clean markdown only (no JSON, no code fences unless showing real code) for exactly the requested day, covering: Objective, Learning Goals, Features, Step-by-Step Plan, Files, APIs, Testing, Debugging Tips, Checklist, Expected Outcome, Handoff Notes. Be concrete and project-specific — assume the reader is another AI assistant picking up the project fresh with only this text.`;
+
+async function generateBlueprint(){
+  if(!state.project.recommended){ toast("Finish the discovery interview first", "⚠"); return; }
+  state.documents.blueprint.status = "generating"; state.documents.blueprint.daysDone = 0; state.documents.blueprint.content = ""; renderDocumentsIfActive();
+  const brief = projectBriefText();
+  const timelineText = state.project.timeline.map(d=>`DAY ${d.day}: ${d.title} — ${d.objective}`).join("\n");
+  try{
+    for(let day=2; day<=CONFIG.totalDays; day++){
+      const dayPlan = state.project.timeline.find(d=>d.day===day);
+      const prompt = `${brief}\n\nFull sprint timeline:\n${timelineText}\n\nWrite the Day ${day} blueprint section now. Header it "## Day ${day}: ${dayPlan? dayPlan.title : ""}".`;
+      const raw = await callClaudeFull([{ role:"user", content: prompt }], BLUEPRINT_DAY_SYSTEM, 4);
+      state.documents.blueprint.content += (state.documents.blueprint.content ? "\n\n" : "") + raw.trim();
+      state.documents.blueprint.daysDone = day - 1;
+      touch(); renderDocumentsIfActive();
+    }
+    state.documents.blueprint.status = "done"; state.documents.blueprint.updatedAt = Date.now();
+    logActivity("▤","Implementation blueprint generated (days 2–10)"); touch(); renderDocumentsIfActive();
+  }catch(err){
+    state.documents.blueprint.status = "error";
+    toast(friendlyError(err), "⚠"); renderDocumentsIfActive();
+  }
+}
+
+const PITCH_SYSTEM = `You are Waypoint. Write presentation-ready pitch deck content in clean markdown (no JSON) for the given project. Structure it as slides using "## Slide N: <title>" headers, covering: Problem, Target Users, Solution, Key Features, Technical Approach, Future Scope, Vision. Keep each slide's content tight — bullet points, not paragraphs.`;
+
+async function generatePitch(){
+  if(!state.project.recommended){ toast("Finish the discovery interview first", "⚠"); return; }
+  state.documents.pitch.status = "generating"; renderDocumentsIfActive();
+  try{
+    const raw = await callClaudeFull([{ role:"user", content: projectBriefText() + "\n\nWrite the full pitch deck now." }], PITCH_SYSTEM, 4);
+    state.documents.pitch.content = raw.trim();
+    state.documents.pitch.status = "done"; state.documents.pitch.updatedAt = Date.now();
+    logActivity("▤","Pitch deck generated"); touch(); renderDocumentsIfActive();
+  }catch(err){
+    state.documents.pitch.status = "error";
+    toast(friendlyError(err), "⚠"); renderDocumentsIfActive();
+  }
+}
+
+function exportDoc(kind){
+  const doc = state.documents[kind];
+  if(!doc || !doc.content){ toast("Nothing to export yet", "⚠"); return; }
+  const blob = new Blob([doc.content], {type:"text/markdown"});
+  downloadBlob(blob, `${(state.project.title||"waypoint")}-${kind}.md`.replace(/\s+/g,"-").toLowerCase());
+  logActivity("⤓", "Exported " + kind.toUpperCase()); touch();
+}
+
+/* ============================================================
+   PROJECT CANVAS EDIT HELPERS
+============================================================ */
+function updateProjectField(field, value){
+  state.project[field] = value; touch();
+  renderDashboardIfActive();
+}
+function addListItem(field, value){
+  if(!value || !value.trim()) return;
+  state.project[field].push(value.trim()); touch(); renderCanvasIfActive(); renderDashboardIfActive();
+}
+function removeListItem(field, idx){
+  state.project[field].splice(idx,1); touch(); renderCanvasIfActive(); renderDashboardIfActive();
+}
+function addFeature(name, priority){
+  if(!name || !name.trim()) return;
+  state.project.features.push({ name: name.trim(), priority: priority||"P1" }); touch(); renderCanvasIfActive(); renderDashboardIfActive();
+}
+function removeFeature(idx){
+  state.project.features.splice(idx,1); touch(); renderCanvasIfActive(); renderDashboardIfActive();
+}
+
+/* ============================================================
+   SVG CHARTS
+============================================================ */
+function svgConfidenceRing(size, value, label){
+  const v = value===null||value===undefined ? 0 : value;
+  const r = size/2 - 10;
+  const c = size/2;
+  const circumference = 2*Math.PI*r;
+  const offset = circumference * (1 - v/100);
+  const color = v>=70 ? "var(--teal)" : v>=40 ? "var(--gold)" : "var(--danger)";
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--border)" stroke-width="9"/>
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round"
+      stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" transform="rotate(-90 ${c} ${c})" style="transition:stroke-dashoffset 1s ease"/>
+    <text x="${c}" y="${c-2}" text-anchor="middle" font-family="JetBrains Mono" font-size="${size*0.16}" fill="var(--text)" font-weight="600">${value===null?"—":value}</text>
+    <text x="${c}" y="${c+16}" text-anchor="middle" font-family="Barlow Condensed" font-size="10" fill="var(--text-faint)" letter-spacing="1">${label}</text>
+  </svg>`;
+}
+
+function svgComplexityBar(value){
+  const v = value || 0;
+  const segs = 10; let bars = "";
+  for(let i=0;i<segs;i++){
+    const active = i < v;
+    const color = active ? (v>=8?"var(--danger)": v>=5?"var(--gold)":"var(--teal)") : "var(--border)";
+    bars += `<rect x="${i*22}" y="0" width="16" height="20" rx="4" fill="${color}"/>`;
+  }
+  return `<svg viewBox="0 0 ${segs*22} 20" width="100%" height="20">${bars}</svg>`;
+}
+
+function svgRiskMatrix(risks){
+  if(!risks || !risks.length) return "";
+  const w=280,h=180, pad=30;
+  let dots = "";
+  risks.forEach((r,i)=>{
+    const x = pad + ((i*53)%(w-pad*2)) ;
+    const y = pad + Math.floor(i/4)*45;
+    dots += `<circle cx="${x}" cy="${y}" r="7" fill="var(--danger)" opacity="0.75"/>`;
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}">
+    <line x1="${pad}" y1="${pad}" x2="${pad}" y2="${h-pad}" stroke="var(--border-hi)"/>
+    <line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="var(--border-hi)"/>
+    <text x="${pad}" y="${h-pad+16}" font-family="Barlow Condensed" font-size="10" fill="var(--text-faint)">LIKELIHOOD →</text>
+    <text x="4" y="${pad-6}" font-family="Barlow Condensed" font-size="10" fill="var(--text-faint)">IMPACT ↑</text>
+    ${dots}
+  </svg>`;
+}
+
+// Signature element: Sprint Orbit — 10 nodes in a ring representing the sprint days
+function svgSprintOrbit(days, confidence){
+  const size = 300, c = size/2, r = 108;
+  const total = 10;
+  let nodes = "";
+  for(let i=0;i<total;i++){
+    const angle = (Math.PI*2*i/total) - Math.PI/2;
+    const x = c + r*Math.cos(angle), y = c + r*Math.sin(angle);
+    const dayData = days.find(d=>d.day===i+1);
+    const done = !!dayData;
+    const fill = done ? "url(#orbGrad)" : "var(--elev2)";
+    const stroke = done ? "none" : "var(--border-hi)";
+    nodes += `<g>
+      <circle cx="${x}" cy="${y}" r="16" fill="${fill}" stroke="${stroke}" stroke-width="1.4"/>
+      <text x="${x}" y="${y+4}" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="${done?'#06110e':'var(--text-faint)'}" font-weight="600">${i+1}</text>
+    </g>`;
+  }
+  const confVal = confidence===null||confidence===undefined ? "—" : confidence+"%";
+  return `<svg viewBox="0 0 ${size} ${size}" width="100%" height="${size}">
+    <defs><linearGradient id="orbGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2dd4bf"/><stop offset="100%" stop-color="#8b7cf6"/>
+    </linearGradient></defs>
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--border)" stroke-dasharray="2 6"/>
+    ${nodes}
+    <text x="${c}" y="${c-6}" text-anchor="middle" font-family="Space Grotesk" font-size="26" font-weight="700" fill="var(--text)">${confVal}</text>
+    <text x="${c}" y="${c+14}" text-anchor="middle" font-family="Barlow Condensed" font-size="11" letter-spacing="1.5" fill="var(--text-faint)">CONFIDENCE</text>
+  </svg>`;
+}
+
+function renderHeroOrbit(){
+  const svg = document.getElementById("hero-orbit-svg");
+  if(!svg) return;
+  const size=400, c=200, r=150;
+  let nodes = "", lines="";
+  const pts = [];
+  for(let i=0;i<8;i++){
+    const angle = (Math.PI*2*i/8) - Math.PI/2;
+    pts.push([c+r*Math.cos(angle), c+r*Math.sin(angle)]);
+  }
+  pts.forEach((p,i)=>{
+    const next = pts[(i+1)%pts.length];
+    lines += `<line x1="${p[0]}" y1="${p[1]}" x2="${next[0]}" y2="${next[1]}" stroke="var(--border-hi)" stroke-width="1"/>`;
+  });
+  pts.forEach((p,i)=>{
+    const r2 = 8 + (i%3)*3;
+    const grad = i%2===0 ? "#2dd4bf" : "#8b7cf6";
+    nodes += `<circle cx="${p[0]}" cy="${p[1]}" r="${r2}" fill="${grad}" opacity="0.85"><animate attributeName="opacity" values="0.5;1;0.5" dur="${3+i%3}s" repeatCount="indefinite"/></circle>`;
+  });
+  svg.innerHTML = `<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--border)" stroke-dasharray="2 8"/>${lines}${nodes}
+    <circle cx="${c}" cy="${c}" r="46" fill="var(--elev)" stroke="var(--border-hi)"/>
+    <text x="${c}" y="${c+6}" text-anchor="middle" font-family="Space Grotesk" font-size="15" font-weight="700" fill="var(--text)">Day 1→10</text>`;
+}
+
+/* ============================================================
+   RENDER: VIEW ROUTER
+============================================================ */
+const VIEWS = ["dashboard","interview","canvas","timeline","documents","activity","sessions","settings"];
+const VIEW_META = {
+  dashboard: {title:"Dashboard", sub:"Live project overview"},
+  interview: {title:"Discovery Chat", sub:"Adaptive product interview"},
+  canvas: {title:"Project Canvas", sub:"Edit scope, goals & features"},
+  timeline: {title:"Sprint Timeline", sub:"10-day build plan"},
+  documents: {title:"Documents", sub:"PRD · Blueprint · Pitch"},
+  activity: {title:"Activity", sub:"Everything that's happened"},
+  sessions: {title:"Sessions", sub:"Save, resume, import & export"},
+  settings: {title:"Settings", sub:"Preferences & data"}
+};
+
+function setView(v){
+  state.view = v; touch();
+  document.querySelectorAll(".nav-item").forEach(el=>el.classList.toggle("active", el.dataset.view===v));
+  document.getElementById("topbar-title").textContent = VIEW_META[v].title;
+  document.getElementById("topbar-sub").textContent = VIEW_META[v].sub;
+  renderView();
+  document.getElementById("sidebar").classList.remove("open");
+}
+
+function renderView(){
+  const root = document.getElementById("view-root");
+  switch(state.view){
+    case "dashboard": root.innerHTML = tplDashboard(); afterDashboardRender(); break;
+    case "interview": root.innerHTML = tplInterview(); afterInterviewRender(); break;
+    case "canvas": root.innerHTML = tplCanvas(); afterCanvasRender(); break;
+    case "timeline": root.innerHTML = tplTimeline(); break;
+    case "documents": root.innerHTML = tplDocuments(); afterDocumentsRender(); break;
+    case "activity": root.innerHTML = tplActivity(); break;
+    case "sessions": root.innerHTML = tplSessions(); afterSessionsRender(); break;
+    case "settings": root.innerHTML = tplSettings(); afterSettingsRender(); break;
+  }
+  updateNavBadges();
+}
+function renderDashboardIfActive(){ if(state.view==="dashboard") renderView(); }
+function renderCanvasIfActive(){ if(state.view==="canvas") renderView(); }
+function renderTimelineIfActive(){ if(state.view==="timeline") renderView(); }
+function renderDocumentsIfActive(){ if(state.view==="documents") renderView(); }
+function renderActivityIfActive(){ if(state.view==="activity") renderView(); }
+
+function updateNavBadges(){
+  const badge = document.getElementById("nav-interview-badge");
+  if(!state.interview.started) badge.textContent = "";
+  else if(state.interview.finished) badge.textContent = "done";
+  else badge.textContent = state.interview.turn + "/" + state.interview.maxTurns;
+}
+
+/* ---------- DASHBOARD ---------- */
+function tplDashboard(){
+  const p = state.project;
+  if(!p.recommended){
+    return `<div class="card glass empty">
+      <div class="ic">◈</div>
+      <h4>No project yet</h4>
+      <p>Start the discovery interview — Waypoint will ask a few adaptive questions, then generate a full project brief right here.</p>
+      <div style="margin-top:16px;"><button class="btn primary" onclick="WP.setView('interview')">Start discovery chat →</button></div>
+    </div>`;
+  }
+  const risks = p.risks||[];
+  return `
+  <div class="tiles">
+    <div class="tile glass"><div class="eyebrow">Confidence</div><b style="color:var(--teal)">${p.confidence??"—"}%</b></div>
+    <div class="tile glass"><div class="eyebrow">Complexity</div><b>${p.complexity??"—"}/10</b></div>
+    <div class="tile glass"><div class="eyebrow">Features</div><b>${p.features.length}</b></div>
+    <div class="tile glass"><div class="eyebrow">Sprint days planned</div><b>${p.timeline.length}/10</b></div>
+  </div>
+  <div class="view-grid">
+    <div>
+      <div class="card glass">
+        <div class="card-h"><h3>◆ ${escapeHtml(p.title||"Untitled Project")}</h3><span class="pill on">Recommended</span></div>
+        <p style="font-size:13.5px; color:var(--text-dim); line-height:1.6;">${escapeHtml(p.solution||"")}</p>
+      </div>
+      <div class="card glass">
+        <div class="card-h"><h3>▦ Feature matrix</h3><span class="pill">${p.features.length} total</span></div>
+        ${p.features.length ? p.features.map(f=>`<div class="feat-row"><div class="dot prio-${f.priority}"></div><div class="txt">${escapeHtml(f.name)}</div><span class="pill">${f.priority}</span></div>`).join("") : `<div class="empty" style="padding:16px;"><p>No features yet.</p></div>`}
+      </div>
+      <div class="card glass">
+        <div class="card-h"><h3>⚠ Risk matrix</h3><span class="pill">${risks.length} identified</span></div>
+        ${risks.length ? svgRiskMatrix(risks) + risks.map((r,i)=>`<div style="font-size:12.5px; color:var(--text-dim); padding:4px 0;">${i+1}. ${escapeHtml(r)}</div>`).join("") : `<div class="empty" style="padding:16px;"><p>No risks logged yet.</p></div>`}
+      </div>
+    </div>
+    <div>
+      <div class="card glass" style="text-align:center;">
+        <div class="card-h" style="justify-content:center;"><h3>Sprint Orbit</h3></div>
+        ${svgSprintOrbit(p.timeline, p.confidence)}
+        ${!p.timeline.length ? `<button class="btn sm ghost" style="margin-top:10px;" onclick="WP.generateTimeline()">Generate timeline →</button>` : ""}
+      </div>
+      <div class="card glass">
+        <div class="card-h"><h3>Complexity</h3></div>
+        ${svgComplexityBar(p.complexity)}
+      </div>
+      <div class="card glass">
+        <div class="card-h"><h3>Success metrics</h3></div>
+        ${p.successMetrics.length ? p.successMetrics.map(m=>`<div style="font-size:13px; padding:5px 0; color:var(--text-dim);">✓ ${escapeHtml(m)}</div>`).join("") : `<div class="empty" style="padding:10px;"><p>None yet.</p></div>`}
+      </div>
+    </div>
+  </div>`;
+}
+function afterDashboardRender(){}
+
+/* ---------- INTERVIEW ---------- */
+function tplInterview(){
+  return `<div class="card glass" style="height:calc(100vh - 170px); display:flex; flex-direction:column;">
+    <div class="chat-wrap">
+      <div class="chat-log" id="chat-log"></div>
+      <div id="chat-input-area"></div>
+    </div>
+  </div>`;
+}
+function afterInterviewRender(){
+  renderInterviewChat();
+  if(!state.interview.started){
+    // auto-start on first visit
+    setTimeout(()=>{ if(!state.interview.started) startInterview(); }, 200);
+  }
+}
+function renderInterviewChat(){
+  const log = document.getElementById("chat-log");
+  if(!log) return;
+  let html = "";
+  if(!state.interview.history.length){
+    html += `<div class="empty"><div class="ic">✦</div><h4>Discovery starting…</h4><p>Waypoint is preparing your first question.</p></div>`;
+  }
+  state.interview.history.forEach(h=>{
+    if(h.role==="ai"){
+      html += `<div class="msg ai"><div class="av">✦</div><div class="bubble">${escapeHtml(h.text)}</div></div>`;
+    }else{
+      html += `<div class="msg user"><div class="av">◉</div><div class="bubble">${escapeHtml(h.text)}</div></div>`;
+    }
+  });
+  if(state.interview.pending){
+    html += `<div class="msg ai"><div class="av">✦</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>`;
+  }
+  if(state.interview.error){
+    html += `<div class="error-banner">⚠ ${escapeHtml(state.interview.error)} <button class="btn sm danger" onclick="WP.retryInterview()">Retry</button></div>`;
+  }
+  log.innerHTML = html;
+  log.scrollTop = log.scrollHeight;
+
+  const inputArea = document.getElementById("chat-input-area");
+  if(!inputArea) return;
+  if(state.interview.finished){
+    inputArea.innerHTML = `<div class="error-banner" style="background:rgba(45,212,191,0.08); border-color:var(--teal-dim); color:var(--teal);">★ Discovery complete — see the Dashboard and Documents for your full brief.
+      <button class="btn sm primary" onclick="WP.setView('dashboard')">View dashboard</button></div>`;
+    return;
+  }
+  if(state.interview.pending || !state.interview.currentQuestion){ inputArea.innerHTML=""; return; }
+  const q = state.interview.currentQuestion;
+  if(q.type==="mcq" && q.options.length){
+    inputArea.innerHTML = `<div class="opt-grid">
+      ${q.options.map(o=>`<button class="opt-btn" onclick="WP.answerMCQ('${o.key}')"><span class="k">${o.key}</span><span>${escapeHtml(o.label)}</span></button>`).join("")}
+    </div>
+    <div class="chat-input-row"><input type="text" id="free-answer" placeholder="Or type your own answer…"><button class="btn primary" onclick="WP.answerFree()">Send</button></div>`;
+  }else{
+    inputArea.innerHTML = `<div class="chat-input-row"><input type="text" id="free-answer" placeholder="Type your answer…" autofocus><button class="btn primary" onclick="WP.answerFree()">Send</button></div>`;
+  }
+  const inp = document.getElementById("free-answer");
+  if(inp) inp.addEventListener("keydown", e=>{ if(e.key==="Enter") answerFree(); });
+}
+function answerMCQ(key){
+  const q = state.interview.currentQuestion;
+  const opt = q.options.find(o=>o.key===key);
+  submitAnswer(opt ? `${key}) ${opt.label}` : key);
+}
+function answerFree(){
+  const inp = document.getElementById("free-answer");
+  if(!inp) return;
+  const val = inp.value;
+  inp.value = "";
+  submitAnswer(val);
+}
+function retryInterview(){
+  state.interview.error = null;
+  if(!state.interview.history.length || state.interview.history[state.interview.history.length-1].role==="user"){
+    requestNextQuestion();
+  }else{
+    requestNextQuestion();
+  }
+}
+
+/* ---------- CANVAS ---------- */
+function tplCanvas(){
+  const p = state.project;
+  if(!p.recommended){
+    return `<div class="card glass empty"><div class="ic">▦</div><h4>Nothing to edit yet</h4><p>Finish the discovery interview to generate a project brief you can refine here.</p><div style="margin-top:16px;"><button class="btn primary" onclick="WP.setView('interview')">Go to discovery chat →</button></div></div>`;
+  }
+  return `
+  <div class="view-grid">
+    <div>
+      <div class="card glass">
+        <div class="card-h"><h3>Overview</h3></div>
+        <div class="field"><label>Title</label><input id="cv-title" value="${escapeHtml(p.title)}"></div>
+        <div class="field"><label>Problem statement</label><textarea id="cv-problem" rows="3">${escapeHtml(p.problem)}</textarea></div>
+        <div class="field"><label>Target users</label><textarea id="cv-users" rows="2">${escapeHtml(p.users)}</textarea></div>
+        <div class="field"><label>Solution</label><textarea id="cv-solution" rows="4">${escapeHtml(p.solution)}</textarea></div>
+        <button class="btn sm primary" onclick="WP.saveCanvasFields()">Save changes</button>
+      </div>
+      <div class="card glass">
+        <div class="card-h"><h3>Features</h3></div>
+        ${p.features.map((f,i)=>`<div class="feat-row"><div class="dot prio-${f.priority}"></div><div class="txt">${escapeHtml(f.name)}</div>
+          <select class="mono" style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:3px 6px; font-size:11px;" onchange="WP.setFeaturePriority(${i}, this.value)">
+            <option ${f.priority==='P0'?'selected':''}>P0</option><option ${f.priority==='P1'?'selected':''}>P1</option><option ${f.priority==='P2'?'selected':''}>P2</option>
+          </select>
+          <button class="icon-btn" style="width:26px;height:26px;" onclick="WP.removeFeature(${i})">✕</button></div>`).join("")}
+        <div class="add-chip-row"><input id="new-feat" placeholder="Add a feature…"><button class="btn sm" onclick="WP.addFeatureFromInput()">Add</button></div>
+      </div>
+    </div>
+    <div>
+      ${listCard("Success metrics","successMetrics","new-metric")}
+      ${listCard("Risks","risks","new-risk")}
+      ${listCard("Assumptions","assumptions","new-assumption")}
+    </div>
+  </div>`;
+}
+function listCard(title, field, inputId){
+  const items = state.project[field];
+  return `<div class="card glass">
+    <div class="card-h"><h3>${title}</h3><span class="pill">${items.length}</span></div>
+    <div class="chips">${items.map((it,i)=>`<div class="chip">${escapeHtml(it)}<button onclick="WP.removeListItem('${field}',${i})">✕</button></div>`).join("")}</div>
+    <div class="add-chip-row"><input id="${inputId}" placeholder="Add…"><button class="btn sm" onclick="WP.addListFromInput('${field}','${inputId}')">Add</button></div>
+  </div>`;
+}
+function afterCanvasRender(){}
+function saveCanvasFields(){
+  const p = state.project;
+  p.title = document.getElementById("cv-title").value;
+  p.problem = document.getElementById("cv-problem").value;
+  p.users = document.getElementById("cv-users").value;
+  p.solution = document.getElementById("cv-solution").value;
+  touch(); logActivity("✎","Edited project overview"); toast("Canvas saved","✓");
+  renderDashboardIfActive();
+}
+function addFeatureFromInput(){ const el = document.getElementById("new-feat"); addFeature(el.value,"P1"); el.value=""; }
+function addListFromInput(field, inputId){ const el = document.getElementById(inputId); addListItem(field, el.value); el.value=""; }
+function setFeaturePriority(idx, val){ state.project.features[idx].priority = val; touch(); renderDashboardIfActive(); }
+
+/* ---------- TIMELINE ---------- */
+function tplTimeline(){
+  const p = state.project;
+  if(!p.recommended){
+    return `<div class="card glass empty"><div class="ic">◷</div><h4>No timeline yet</h4><p>Complete discovery to generate your 10-day sprint plan.</p></div>`;
+  }
+  if(!p.timeline.length){
+    return `<div class="card glass empty"><div class="ic">◷</div><h4>Timeline not generated yet</h4><p>Generate a day-by-day plan based on your project brief.</p><div style="margin-top:14px;"><button class="btn primary" onclick="WP.generateTimeline()">Generate timeline →</button></div></div>`;
+  }
+  return `<div class="card glass">
+    <div class="card-h"><h3>◷ 10-day sprint</h3><button class="btn sm ghost" onclick="WP.generateTimeline()">Regenerate</button></div>
+    <div class="timeline">
+      ${p.timeline.map((d,i)=>`<div class="tl-item done">
+        <div class="tl-marker"><div class="tl-num">${d.day}</div>${i<p.timeline.length-1?'<div class="tl-line"></div>':''}</div>
+        <div class="tl-content"><h4>${escapeHtml(d.title)}</h4><p>${escapeHtml(d.objective)}</p></div>
+      </div>`).join("")}
+    </div>
+  </div>`;
+}
+
+/* ---------- DOCUMENTS ---------- */
+let activeDocTab = "prd";
+function tplDocuments(){
+  const p = state.project;
+  if(!p.recommended){
+    return `<div class="card glass empty"><div class="ic">▤</div><h4>No documents yet</h4><p>Finish discovery to unlock PRD, blueprint, and pitch deck generation.</p></div>`;
+  }
+  const doc = state.documents[activeDocTab];
+  return `<div class="doc-tabs">
+    <div class="doc-tab ${activeDocTab==='prd'?'active':''}" onclick="WP.setDocTab('prd')">PRD</div>
+    <div class="doc-tab ${activeDocTab==='blueprint'?'active':''}" onclick="WP.setDocTab('blueprint')">Blueprint (Days 2–10)</div>
+    <div class="doc-tab ${activeDocTab==='pitch'?'active':''}" onclick="WP.setDocTab('pitch')">Pitch deck</div>
+  </div>
+  <div class="card glass">
+    <div class="doc-actions">
+      <button class="btn sm primary" id="doc-gen-btn">Generate</button>
+      <button class="btn sm ghost" onclick="WP.exportDoc('${activeDocTab}')">Export .md</button>
+    </div>
+    <div id="doc-status"></div>
+    <div class="doc-body" id="doc-body">${doc.content ? escapeHtml(doc.content) : `<span style="color:var(--text-faint)">Not generated yet.</span>`}</div>
+  </div>`;
+}
+function afterDocumentsRender(){
+  const btn = document.getElementById("doc-gen-btn");
+  if(!btn) return;
+  const doc = state.documents[activeDocTab];
+  btn.disabled = doc.status === "generating";
+  btn.textContent = doc.status==="generating" ? "Generating…" : (doc.content ? "Regenerate" : "Generate");
+  btn.onclick = () => {
+    if(activeDocTab==="prd") generatePRD();
+    else if(activeDocTab==="blueprint") generateBlueprint();
+    else generatePitch();
+  };
+  const status = document.getElementById("doc-status");
+  if(doc.status==="generating"){
+    let extra = activeDocTab==="blueprint" ? ` — day ${state.documents.blueprint.daysDone+1} of 9` : "";
+    status.innerHTML = `<div class="gen-status"><div class="spinner"></div>Generating live from Claude${extra}…</div>`;
+  }else if(doc.status==="error"){
+    status.innerHTML = `<div class="error-banner">⚠ Generation failed. <button class="btn sm danger" onclick="WP.retryDoc()">Retry</button></div>`;
+  }else{
+    status.innerHTML = doc.updatedAt ? `<div class="gen-status">✓ Last generated ${new Date(doc.updatedAt).toLocaleString()}</div>` : "";
+  }
+}
+function setDocTab(tab){ activeDocTab = tab; renderView(); }
+function retryDoc(){
+  if(activeDocTab==="prd") generatePRD();
+  else if(activeDocTab==="blueprint") generateBlueprint();
+  else generatePitch();
+}
+
+/* ---------- ACTIVITY ---------- */
+function tplActivity(){
+  if(!state.activity.length){
+    return `<div class="card glass empty"><div class="ic">≋</div><h4>No activity yet</h4><p>Everything you and Waypoint do will be logged here.</p></div>`;
+  }
+  return `<div class="card glass">
+    <div class="card-h"><h3>≋ Activity feed</h3><input type="text" id="activity-search" placeholder="Search…" style="padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); font-size:12.5px;" oninput="WP.filterActivity(this.value)"></div>
+    <div id="activity-list">${activityListHtml(state.activity)}</div>
+  </div>`;
+}
+function activityListHtml(items){
+  return items.map(a=>`<div class="act-item"><div class="ic">${a.icon}</div><div>${escapeHtml(a.text)}</div><div class="t">${new Date(a.time).toLocaleTimeString()}</div></div>`).join("");
+}
+function filterActivity(q){
+  const list = document.getElementById("activity-list");
+  const filtered = state.activity.filter(a=>a.text.toLowerCase().includes(q.toLowerCase()));
+  list.innerHTML = activityListHtml(filtered);
+}
+
+/* ---------- SESSIONS ---------- */
+function tplSessions(){
+  const sessions = getRecentSessions();
+  return `<div class="card glass">
+    <div class="card-h"><h3>Current session</h3></div>
+    <p style="font-size:13px; color:var(--text-dim); margin-bottom:12px;">Autosaves as you work. Manual save also snapshots into your recent sessions list.</p>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn sm primary" onclick="WP.saveSession(false)">Save now</button>
+      <button class="btn sm ghost" onclick="WP.exportSessionJSON()">Export JSON</button>
+      <label class="btn sm ghost" style="cursor:pointer;">Import JSON<input type="file" accept="application/json" style="display:none" onchange="WP.handleImportInput(event)"></label>
+      <button class="btn sm danger" onclick="WP.confirmReset()">Reset project</button>
+    </div>
+  </div>
+  <div class="card glass">
+    <div class="card-h"><h3>Recent sessions</h3><span class="pill">${sessions.length}</span></div>
+    ${sessions.length ? sessions.map(s=>`<div class="feat-row"><div class="txt"><b>${escapeHtml(s.title)}</b><br><span style="color:var(--text-faint); font-size:11.5px;">${new Date(s.updatedAt).toLocaleString()}</span></div>
+      <button class="btn sm ghost" onclick="WP.loadSessionById('${s.id}')">Load</button>
+      <button class="btn sm danger" onclick="WP.deleteSession('${s.id}')">Delete</button></div>`).join("") : `<div class="empty" style="padding:16px;"><p>No saved sessions yet.</p></div>`}
+  </div>`;
+}
+function afterSessionsRender(){}
+function handleImportInput(evt){ const f = evt.target.files[0]; if(f) importSessionJSON(f); }
+function confirmReset(){
+  if(confirm("This clears the current project, interview, and documents. Continue?")){
+    state = freshState();
+    localStorage.removeItem(CONFIG.storageKey);
+    applyTheme(); renderApp(); toast("Project reset", "✓");
+  }
+}
+
+/* ---------- SETTINGS ---------- */
+function tplSettings(){
+  return `<div class="card glass">
+    <div class="setting-row"><div><div>Theme</div><div class="desc">Switch between dark and light appearance.</div></div>
+      <div class="toggle ${state.theme==='light'?'on':''}" id="settings-theme-toggle" onclick="WP.toggleTheme()"></div></div>
+    <div class="setting-row"><div><div>Reduce motion</div><div class="desc">Disables ambient animation on the landing page and orbit charts.</div></div>
+      <div class="toggle ${state.settings.reduceMotion?'on':''}" id="settings-motion-toggle" onclick="WP.toggleMotion()"></div></div>
+    <div class="setting-row"><div><div>Model</div><div class="desc">API model used for all live generation in this app.</div></div>
+      <span class="pill mono">${CONFIG.model}</span></div>
+    <div class="setting-row"><div><div>Clear all local data</div><div class="desc">Removes the current project and all saved sessions from this browser.</div></div>
+      <button class="btn sm danger" onclick="WP.clearAllData()">Clear everything</button></div>
+  </div>`;
+}
+function afterSettingsRender(){}
+function toggleMotion(){ state.settings.reduceMotion = !state.settings.reduceMotion; touch(); renderView(); }
+function clearAllData(){
+  if(confirm("This removes ALL Waypoint data from this browser, including saved sessions. Continue?")){
+    localStorage.removeItem(CONFIG.storageKey);
+    localStorage.removeItem(CONFIG.sessionsKey);
+    state = freshState();
+    applyTheme(); renderApp(); toast("All data cleared", "✓");
+  }
+}
+
+/* ============================================================
+   THEME
+============================================================ */
+function applyTheme(){ document.documentElement.setAttribute("data-theme", state.theme); }
+function toggleTheme(){ state.theme = state.theme==="dark" ? "light" : "dark"; applyTheme(); touch(); renderView(); }
+
+/* ============================================================
+   COMMAND PALETTE
+============================================================ */
+function buildCommands(){
+  const cmds = [
+    {ic:"◈", label:"Go to Dashboard", run:()=>setView("dashboard")},
+    {ic:"✦", label:"Go to Discovery Chat", run:()=>setView("interview")},
+    {ic:"▦", label:"Go to Project Canvas", run:()=>setView("canvas")},
+    {ic:"◷", label:"Go to Sprint Timeline", run:()=>setView("timeline")},
+    {ic:"▤", label:"Go to Documents", run:()=>setView("documents")},
+    {ic:"≋", label:"Go to Activity", run:()=>setView("activity")},
+    {ic:"⌂", label:"Go to Sessions", run:()=>setView("sessions")},
+    {ic:"⚙", label:"Go to Settings", run:()=>setView("settings")},
+    {ic:"◐", label:"Toggle dark / light theme", run:toggleTheme},
+    {ic:"⤓", label:"Save session now", run:()=>saveSession(false)},
+    {ic:"⇩", label:"Export session as JSON", run:exportSessionJSON},
+  ];
+  if(state.project.recommended){
+    cmds.push({ic:"▤", label:"Generate PRD", run:generatePRD});
+    cmds.push({ic:"▤", label:"Generate implementation blueprint", run:generateBlueprint});
+    cmds.push({ic:"▤", label:"Generate pitch deck", run:generatePitch});
+    cmds.push({ic:"◷", label:"Generate/regenerate timeline", run:generateTimeline});
+  }
+  cmds.push({ic:"⨯", label:"Reset current project", run:confirmReset});
+  return cmds;
+}
+let cmdkSel = 0;
+function openCmdk(){
+  document.getElementById("cmdk-overlay").classList.remove("hidden");
+  const input = document.getElementById("cmdk-input");
+  input.value = ""; input.focus();
+  cmdkSel = 0;
+  renderCmdkList("");
+}
+function closeCmdk(){ document.getElementById("cmdk-overlay").classList.add("hidden"); }
+function renderCmdkList(query){
+  const all = buildCommands();
+  const filtered = all.filter(c=>c.label.toLowerCase().includes(query.toLowerCase()));
+  const list = document.getElementById("cmdk-list");
+  list.innerHTML = filtered.map((c,i)=>`<div class="cmdk-item ${i===cmdkSel?'sel':''}" data-idx="${i}"><span class="ic">${c.ic}</span>${c.label}</div>`).join("") || `<div class="cmdk-item">No matching commands</div>`;
+  list.querySelectorAll(".cmdk-item").forEach(el=>{
+    el.addEventListener("click", ()=>{ const idx = parseInt(el.dataset.idx); if(filtered[idx]){ filtered[idx].run(); closeCmdk(); } });
+  });
+  window.__cmdkFiltered = filtered;
+}
+
+/* ============================================================
+   BOOTSTRAP / EVENTS
+============================================================ */
+function renderApp(){
+  document.getElementById("topbar-title").textContent = VIEW_META[state.view].title;
+  document.getElementById("topbar-sub").textContent = VIEW_META[state.view].sub;
+  document.querySelectorAll(".nav-item").forEach(el=>el.classList.toggle("active", el.dataset.view===state.view));
+  renderView();
+}
+function enterApp(){
+  document.getElementById("landing").style.display = "none";
+  document.getElementById("app").classList.add("active");
+  renderApp();
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  renderHeroOrbit();
+  if(hasSavedSession()){
+    document.getElementById("landing-resume-btn").style.display = "inline-flex";
+  }
+  document.getElementById("landing-start-btn").addEventListener("click", ()=>{ if(!loadSessionFromStorage()){} enterApp(); });
+  document.getElementById("landing-resume-btn").addEventListener("click", ()=>{ loadSessionFromStorage(); applyTheme(); enterApp(); });
+  document.getElementById("hero-start-btn").addEventListener("click", enterApp);
+  document.getElementById("hero-sample-btn").addEventListener("click", ()=>{ document.querySelector(".landing-features").scrollIntoView({behavior:"smooth"}); });
+
+  document.querySelectorAll(".nav-item").forEach(el=>{
+    el.addEventListener("click", ()=> setView(el.dataset.view));
+  });
+  document.getElementById("theme-toggle-btn").addEventListener("click", toggleTheme);
+  document.getElementById("save-btn").addEventListener("click", ()=>saveSession(false));
+  document.getElementById("cmdk-open-btn").addEventListener("click", openCmdk);
+
+  document.getElementById("cmdk-input").addEventListener("input", e=>{ cmdkSel=0; renderCmdkList(e.target.value); });
+  document.getElementById("cmdk-overlay").addEventListener("click", e=>{ if(e.target.id==="cmdk-overlay") closeCmdk(); });
+  document.getElementById("cmdk-input").addEventListener("keydown", e=>{
+    const filtered = window.__cmdkFiltered || [];
+    if(e.key==="ArrowDown"){ e.preventDefault(); cmdkSel=Math.min(cmdkSel+1, filtered.length-1); renderCmdkList(e.target.value); }
+    else if(e.key==="ArrowUp"){ e.preventDefault(); cmdkSel=Math.max(cmdkSel-1,0); renderCmdkList(e.target.value); }
+    else if(e.key==="Enter"){ if(filtered[cmdkSel]){ filtered[cmdkSel].run(); closeCmdk(); } }
+    else if(e.key==="Escape"){ closeCmdk(); }
+  });
+  document.addEventListener("keydown", e=>{
+    if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==="k"){ e.preventDefault(); openCmdk(); }
+    else if(e.key==="Escape"){ closeCmdk(); }
+  });
+
+  applyTheme();
+});
+
+/* Expose namespace for inline handlers */
+window.WP = {
+  setView, answerMCQ, answerFree, retryInterview, startInterview,
+  saveCanvasFields, addFeatureFromInput, addListFromInput, removeListItem, removeFeature, setFeaturePriority,
+  generateTimeline, generatePRD, generateBlueprint, generatePitch, exportDoc, setDocTab, retryDoc,
+  saveSession, exportSessionJSON, handleImportInput, confirmReset, loadSessionById, deleteSession,
+  toggleTheme, toggleMotion, clearAllData, filterActivity
+};
+})();
+</script>
+</body>
+</html>
