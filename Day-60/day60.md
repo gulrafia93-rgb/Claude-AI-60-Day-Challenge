@@ -53,7 +53,7 @@ The final milestone was a **10-Day Capstone Sprint**, where I designed, develope
 
 | Home | Quiz | Dashboard |
 |------|------|-----------|
-| ![Home](./screenshots/home.png) | ![Quiz](./screenshots/quiz.png).png)| ![Dashboard](./screenshots/dashboard.png) |
+| ![Home](./ScreenShot/day-60.jpeg) | ![Quiz](./ScreenShot/quiz.jpeg)| ![Dashboard](./ScreenShot/dashboard.jpeg) |
 
 ---
 
